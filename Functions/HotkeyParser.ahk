@@ -3,7 +3,7 @@ HParse()
 © Avi Aryan
 - www.avi-win-tips.blogspot.com
 
-First Release
+First Revision - 28/4/13
 =================================================================
 Extract Autohotkey hotkeys from user-friendly shortcuts reliably.
 =================================================================
@@ -33,8 +33,10 @@ EXAMPLES - Pre-Runs
 • HParse("PagUp + Ctrl", true, false)		;returns  <blank>  	as ManageOrder is false and hotkey is invalid
 • HParse("Pageup + Paegdown")		;returns  PgUp & PgDn	
 • Hparse("Ctrl + Alt + Ctrl + K")		;returns  <blank> 	as two Ctrls are wrong
-• HParse("Mbuttn + LControl", true)		;returns  Mbutton & LCtrl
+• HParse("Mbuttn + LControl", true)		;returns  Mbutton & LControl
 • HParse("Control + Alt")		;returns  ^Alt and NOT ^!
+• HParse("Ctrl + F1 + Nmpd1")		;returns <blank>	As the hotkey is invalid
+• HParse("Prbitscreen + f1")		;returns	PrintScreen & F1
 
 ###################################################################
 PARAMETERS - HParse()
@@ -197,8 +199,9 @@ return, matchitem
 }
 
 ListGen(what){
-IfEqual,what,Regx
 ; Better Edit this if you know what you are doing. Editing without understanding how HParse() works can cause improper results.
+; The below are arranged on basis of their popularity for max. speed of the func().
+IfEqual,what,Regx
 Rvar = 
 (
 L*c*t
@@ -226,6 +229,24 @@ up
 d*n
 l*f
 r*t
+F*1
+F*2
+F*3
+F*4
+F*5
+F*6
+F*7
+F*8
+F*9
+F*10
+F*11
+F*12
+N*p*D*t
+N*p*D*v
+N*p*M
+N*p*A
+N*p*S
+N*p*E
 l*b*t
 r*b*t
 m*b*t
@@ -236,6 +257,30 @@ p*s
 c*t*b
 pa*s
 b*r*k
+x*b*1
+x*b*2
+N*p*0
+N*p*1
+N*p*2
+N*p*3
+N*p*4
+N*p*5
+N*p*6
+N*p*7
+N*p*8
+N*p*9
+F*13
+F*14
+F*15
+F*16
+F*17
+F*18
+F*19
+F*20
+F*21
+F*22
+F*23
+F*24
 )
 ;====================================================
 ;# Original return values below (in respect with their above positions, dont EDIT)
@@ -267,6 +312,24 @@ Up
 Down
 Left
 Right
+F1
+F2
+F3
+F4
+F5
+F6
+F7
+F8
+F9
+F10
+F11
+F12
+NumpadDot
+NumpadDiv
+NumpadMult
+NumpadAdd
+NumpadSub
+NumpadEnter
 LButton
 RButton
 MButton
@@ -277,6 +340,30 @@ PrintScreen
 CtrlBreak
 Pause
 Break
+XButton1
+XButton2
+Numpad0
+Numpad1
+Numpad2
+Numpad3
+Numpad4
+Numpad5
+Numpad6
+Numpad7
+Numpad8
+Numpad9
+F13
+F14
+F15
+F16
+F17
+F18
+F19
+F20
+F21
+F22
+F23
+F24
 )
 ;<<<<<<<<<<<<<<<<END>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 return, Rvar
