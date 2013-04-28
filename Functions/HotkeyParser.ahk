@@ -1,7 +1,7 @@
 ﻿/*
 HParse()
 © Avi Aryan
-- www.avi-win-tips.blogspot.com
+Page -http://avi-win-tips.blogspot.com/2013/04/hparse.html
 
 First Revision - 28/4/13
 =================================================================
