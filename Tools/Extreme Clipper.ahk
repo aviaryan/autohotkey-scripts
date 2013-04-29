@@ -1,17 +1,20 @@
 /*
 ProgramName = Extreme Clipper
-ProgramVersion = 1
+ProgramVersion = 2
 Author = Avi Aryan
 Special Thanks = Sean
 ****************************************************
 .......................
 INSTRUCTIONS
 ***************************************************
-1. Tap PrintScreen to capture whole Screen.
-2. To Capture selected area of Screen,Hold PrintScreen, then hold Left Mouse button and then select the are you want to capture.
-   Release both of them to capture.
+1. Tap PrimaryHotkey to capture whole Screen.
+
+2. To Capture selected area of Screen,tap PrimaryHotkey, then (quickly) hold SecondaryHotkey and select the area (by moving the mouse) you want to capture.
+   Release the SecondaryHotkey to finsh.
+   
 3. By Default, Run After Finish is enabled which opens the Captures directory after you take the Screenshot.
-4. By Default, Resize Prompt is enables which enables you to resize your clipped picture on the go!!.
+
+4. By Default, Resize Prompt is enables which enables you to resize your clipped picture on the go!!. Hit Done to preoceed further, Cancel to abort capture operation.
 
 5. When in game, better turn resizeprompt and runafterfinish off for no interruption.
 ......................
@@ -22,7 +25,7 @@ Enjoy!!
 */
 
 ProgramName = Extreme Clipper
-ProgramVersion = 1
+ProgramVersion = 2
 Author = Avi Aryan
 
 ;-----------------------CONFIGURE--------------------------------------------------------------------
@@ -30,10 +33,12 @@ extension = jpg                     ;from BMP/JPG/PNG/GIF/TIF
 qualityofpic := 100                  ;quality of picture, only for jpg format
 runafterfinish := true               ;runs Captures directory after finish...from True / False
 resizeprompt := true				;opens a gui interface to resize clipped picture.
+PrimaryHotkey = PrintScreen
+SecondaryHotkey = LButton
 
 ;-----------------------End--------------------------------------------------------------------------
 #NoEnv
-#SingleInstance ignore
+#SingleInstance force
 SetBatchLines, -1
 CoordMode, Mouse, Screen
 CustomColor = EEAA99
@@ -63,9 +68,12 @@ Gui, 2:Add, Edit, x402 y170 w110 h30 vpercx gpercxch,
 Gui, 2:Font, S12 CRed, Verdana
 Gui, 2:Add, Button, x412 y260 w100 h30 , Cancel
 Gui, 2:Add, Button, x40 y260 w100 h30 , Done
+
+Hotkey,%PrimaryHotkey%,capture,On
+return
 ;*=====================================================================================================================
 
-PrintScreen::
+capture:
 gosub, varclean
 
 IfNotExist, Captures
@@ -79,14 +87,14 @@ break
 }
 }
 
-Hotkey,Lbutton,justtofool,On
-KeyWait,LButton, D T1
+Hotkey,%SecondaryHotkey%,justtofool,On
+KeyWait,%SecondaryHotkey%, D T1
 if errorlevel = 0
 {
 MouseGetPos,initialx,initialy
 SetTimer,guimover,100
-KeyWait,Lbutton
-Hotkey,Lbutton,justtofool,Off
+KeyWait,%SecondaryHotkey%
+Hotkey,%SecondaryHotkey%,justtofool,Off
 sleep, 120																		;Should use 100, but just to be safe..!
 SetTimer,guimover,off
 gui, hide
@@ -105,12 +113,12 @@ if (!(isdown))
 }
 if (resizeprompt)
 	gosub, resizer
-
-CaptureScreen(initialx, initialy, finalx, finaly, newwt, newht, False, fileName, qualityofpic)
+if (proceed)
+	CaptureScreen(initialx, initialy, finalx, finaly, newwt, newht, False, fileName, qualityofpic)
 }
 else
 {
-	Hotkey,Lbutton,justtofool,Off
+	Hotkey,%SecondaryHotkey%,justtofool,Off
 	SysGet, initialx, 76
 	SysGet, initialy, 77
 	SysGet, finalx, 78
@@ -118,16 +126,19 @@ else
 
 if (resizeprompt)
 	gosub, resizer
-	
-CaptureScreen(initialx, initialy, finalx, finaly, newwt, newht, False, fileName, qualityofpic)
+if (proceed)	
+	CaptureScreen(initialx, initialy, finalx, finaly, newwt, newht, False, fileName, qualityofpic)
 }
 
 If (runafterfinish)
+{
+if (proceed)
 {
 IfWinNotExist,Captures ahk_class CabinetWClass
 	run, %a_scriptdir%/Captures
 else
 	WinActivate, Captures ahk_class CabinetWClass
+}
 }
 return
 
@@ -185,11 +196,13 @@ GuiControl, 2:,newht,%newht%
 return
 
 2ButtonDone:
+proceed := true
 gui, 2:submit,hide
 return
 
 2guiclose:
 2buttoncancel:
+proceed := false
 newht = 
 newwt = 
 gui, 2:hide
@@ -203,6 +216,7 @@ StringLeft,newwt,newwt,%pos%
 return
 
 varclean:
+proceed := true
 newht = 
 newwt = 
 return
