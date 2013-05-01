@@ -1,0 +1,15 @@
+Avis Autohotkey Repository
+Copyright (C) 2013 Avi Aryan
+
+This repository includes Avi's autohotkey scripts and creations which can also
+be seen at (http://avi-win-tips.blogspot.com/p/my-autohotkey.html)
+
+All the scripts and functions included herein are re-distributable and re-usable 
+provided they are [not edited] and given a note of acknowledgment in your work.
+
+Redistribution terms can be seen at (http://www.apache.org/licenses/LICENSE-2.0).
+Seeing them is a must before including, distributing and (editing + distributing) my scripts.
+
+Contact ==================
+
+www.avi.aryan123@gmail.com

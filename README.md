@@ -4,11 +4,19 @@ Avi's Autohotkey Scripts and Functions Repository
 [Index of my works](http://avi-win-tips.blogspot.com/p/my-autohotkey.html)  
 [E-Mail](mailto:avi.aryan123@gmail.com)  
 
-`Copyright © 2000 Avi Aryan`    
-`This work is free. You can redistribute it and/or modify it under the`  
-`terms of the Do What The Fuck You Want To Public License,`  
-`Version 2, as published by Sam Hocevar.`  
-`See http://www.wtfpl.net/ for more details.`  
+`Copyright 2013 Avi Aryan`  
+  
+`Licensed under the Apache License, Version 2.0 (the "License");`  
+`you may not use this file except in compliance with the License.`  
+`You may obtain a copy of the License at`  
+  
+`http://www.apache.org/licenses/LICENSE-2.0`  
+  
+`Unless required by applicable law or agreed to in writing, software`  
+`distributed under the License is distributed on an "AS IS" BASIS,`  
+`WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.`  
+`See the License for the specific language governing permissions and`  
+`limitations under the License.`  
   
   
 #### INDEX ####
@@ -17,3 +25,6 @@ Avi's Autohotkey Scripts and Functions Repository
 * **Sublime Text Autocomplete Adder** - Add Auto-comlpetions in Sublime Text with a GUI and Duplicates Filter.
 * **Autohotkey Updater** - Check the registered or selected version of Autohotkey for updates
 * **Extreme Screen Clipper** - Capture Screenshots, resize, crop and save them as an image file instantly.
+  
+
+See [Notice.txt](NOTICE.txt) for more information.  

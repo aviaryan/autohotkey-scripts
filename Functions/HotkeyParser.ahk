@@ -3,7 +3,7 @@ HParse()
 © Avi Aryan
 Page -http://avi-win-tips.blogspot.com/2013/04/hparse.html
 
-First Revision - 28/4/13
+Second Revision - 1/5/13
 =================================================================
 Extract Autohotkey hotkeys from user-friendly shortcuts reliably.
 =================================================================
@@ -17,7 +17,9 @@ Extract Autohotkey hotkeys from user-friendly shortcuts reliably.
 •Standard User Shortcuts are by default meant to be separated by either the plus '+' or the dash '-' . eg -- Control + Alt + S , Control - S will work.
 •User shortcut(s) such as  (X + Control)  will be converted to  (^x) and not (x^) via the [ManageOrder] Param which is enabled by default
 •Shortcuts endings in modifiers are auto-detected and returned accordingly. eg -> (Control + Alt)  gives  ^Alt and not ^!
-•No RegEx, so faster than it should be.
+•No RegEx, so FASTER than it should be.
+•Keys are arranged a/c popularity for maximum speed of the function.
+•Supports all Autohotkey keys including Joystick Keys.
 
 ==========================================
 EXAMPLES - Pre-Runs
@@ -37,6 +39,9 @@ EXAMPLES - Pre-Runs
 • HParse("Control + Alt")		;returns  ^Alt and NOT ^!
 • HParse("Ctrl + F1 + Nmpd1")		;returns <blank>	As the hotkey is invalid
 • HParse("Prbitscreen + f1")		;returns	PrintScreen & F1
+• HParse("Prbitscreen + yyy")		;returns	PrintScreen		As RemoveInvalid is enabled by default.
+• HParse("f1+ browser_srch")		;returns	F1 & Browser_Search
+• HParse("Ctrl + joy1")			;returns	Ctrl & Joy1
 
 ###################################################################
 PARAMETERS - HParse()
@@ -105,6 +110,8 @@ Combo := Combo . Rightest
 ;Remove last non
 IfLess,non_hotkey,2
 {
+	IfNotInString,Combo,Joy
+	{
 	StringReplace,Combo,Combo,%A_Space%&%A_Space%,,All
 	temp := Combo
 	loop,parse,temp
@@ -133,6 +140,18 @@ IfLess,non_hotkey,2
 	}
 	}
 	}
+	;End of Joy
+	}
+	else	;Managing Joy
+	{
+	StringReplace,Combo,Combo,^,Ctrl
+	StringReplace,Combo,Combo,!,Alt
+	StringReplace,Combo,Combo,+,Shift
+	StringReplace,Combo,Combo,#,LWin
+	StringGetPos,pos,Combo,&,L2
+	if (pos != -1)
+		Combo = 
+	}
 }
 else
 {
@@ -147,11 +166,11 @@ return, Combo
 
 
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-LiteRegexM(matchitem)
+LiteRegexM(matchitem, primary=1)
 {
 
-regX := ListGen("RegX")
-keys := Listgen("Keys")
+regX := ListGen("RegX", primary)
+keys := Listgen("Keys", primary)
 matchit := matchitem
 
 loop,parse,Regx,`r`n,
@@ -168,7 +187,7 @@ if (A_index == 1)
 		break
 	}
 
-IfInString,matchitem,%A_loopfield%
+if (comparewith(matchitem, A_loopfield))
 	matchitem := Vanish(matchitem, A_LoopField)
 else{
 		exitfrombreak := true
@@ -188,7 +207,8 @@ StringGetPos,pos1,keys,`n,% "L" . (linenumber - 1)
 StringGetPos,pos2,keys,`n,% "L" . (linenumber)
 return, Substr(keys, (pos1 + 2), (pos2 - pos1 - 1))
 }
-
+else
+	return,% LiteRegexM(matchit, 2)
 }
 ; Extra Functions -----------------------------------------------------------------------------------------------------------------
 
@@ -198,9 +218,26 @@ StringTrimLeft,matchitem,matchitem,(pos + 1)
 return, matchitem
 }
 
-ListGen(what){
-; Better Edit this if you know what you are doing. Editing without understanding how HParse() works can cause improper results.
-; The below are arranged on basis of their popularity for max. speed of the func().
+comparewith(first, second)
+{
+if first is Integer
+	IfEqual,first,%second%
+		return, true
+	else
+		return, false
+
+IfInString,first,%second%
+	return, true
+else
+	return, false
+}
+
+;######################   DANGER    ################################
+;SIMPLY DONT EDIT BELOW THIS . MORE OFTEN THAN NOT, YOU WILL MESS IT.
+;###################################################################
+ListGen(what,primary=1){
+if (primary == 1)
+{
 IfEqual,what,Regx
 Rvar = 
 (
@@ -241,46 +278,25 @@ F*9
 F*10
 F*11
 F*12
-N*p*D*t
+N*p*Do
 N*p*D*v
-N*p*M
-N*p*A
-N*p*S
-N*p*E
+N*p*M*t
+N*p*d*Ad
+N*p*S*t
+N*p*E*r
 l*b*t
 r*b*t
 m*b*t
 s*l*k
 c*l
-n*l
+n*l*k
 p*s
 c*t*b
 pa*s
 b*r*k
 x*b*1
 x*b*2
-N*p*0
-N*p*1
-N*p*2
-N*p*3
-N*p*4
-N*p*5
-N*p*6
-N*p*7
-N*p*8
-N*p*9
-F*13
-F*14
-F*15
-F*16
-F*17
-F*18
-F*19
-F*20
-F*21
-F*22
-F*23
-F*24
+z*z*z*z*callmelazybuthtisisaworkaround
 )
 ;====================================================
 ;# Original return values below (in respect with their above positions, dont EDIT)
@@ -342,6 +358,103 @@ Pause
 Break
 XButton1
 XButton2
+A_lazys_workaround
+)
+}
+else
+{
+;here starts the second preference list.
+IfEqual,what,Regx
+Rvar=
+(
+N*p*0
+N*p*1
+N*p*2
+N*p*3
+N*p*4
+N*p*5
+N*p*6
+N*p*7
+N*p*8
+N*p*9
+F*13
+F*14
+F*15
+F*16
+F*17
+F*18
+F*19
+F*20
+F*21
+F*22
+F*23
+F*24
+N*p*I*s
+N*p*E*d
+N*p*D*N
+N*p*P*D
+N*p*L*f
+N*p*C*r
+N*p*R*t
+N*p*H*m
+N*p*Up
+N*p*P*U
+N*p*D*l
+J*y*1
+J*y*2
+J*y*3
+J*y*4
+J*y*5
+J*y*6
+J*y*7
+J*y*8
+J*y*9
+J*y*10
+J*y*11
+J*y*12
+J*y*13
+J*y*14
+J*y*15
+J*y*16
+J*y*17
+J*y*18
+J*y*19
+J*y*20
+J*y*21
+J*y*22
+J*y*23
+J*y*24
+J*y*25
+J*y*26
+J*y*27
+J*y*28
+J*y*29
+J*y*30
+J*y*31
+J*y*32
+B*_B*k
+B*_F*r
+B*_R*e*h
+B*_S*p
+B*_S*c
+B*_F*t
+B*_H*m
+V*_M*e
+V*_D*n
+V*_U
+M*_N*x
+M*_P
+M*_S*p
+M*_P*_P
+L*_M*l
+L*_M*a
+L*_A*1
+L*_A*2
+
+)
+IfEqual,what,keys
+Rvar=
+(
 Numpad0
 Numpad1
 Numpad2
@@ -364,7 +477,70 @@ F21
 F22
 F23
 F24
+NumpadIns
+NumpadEnd
+NumpadDown
+NumpadPgDn
+NumpadLeft
+NumpadClear
+NumpadRight
+NumpadHome
+NumpadUp
+NumpadPgUp
+NumpadDel
+Joy1
+Joy2
+Joy3
+Joy4
+Joy5
+Joy6
+Joy7
+Joy8
+Joy9
+Joy10
+Joy11
+Joy12
+Joy13
+Joy14
+Joy15
+Joy16
+Joy17
+Joy18
+Joy19
+Joy20
+Joy21
+Joy22
+Joy23
+Joy24
+Joy25
+Joy26
+Joy27
+Joy28
+Joy29
+Joy30
+Joy31
+Joy32
+Browser_Back
+Browser_Forward
+Browser_Refresh
+Browser_Stop
+Browser_Search
+Browser_Favorites
+Browser_Home
+Volume_Mute
+Volume_Down
+Volume_Up
+Media_Next
+Media_Prev
+Media_Stop
+Media_Play_Pause
+Launch_Mail
+Launch_Media
+Launch_App1
+Launch_App2
+
 )
+}
 ;<<<<<<<<<<<<<<<<END>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 return, Rvar
 }
