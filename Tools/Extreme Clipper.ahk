@@ -1,40 +1,73 @@
 /*
-ProgramName = Extreme Clipper
-ProgramVersion = 2
+ProgramName = Anywhere Clipper
+ProgramVersion = 3
 Author = Avi Aryan
 Special Thanks = Sean
 ****************************************************
+IMPORTANT
+####################################################################################
+The complete package with the Clipper.dll can be downloaded from my site . 
+http://avi-win-tips.blogspot.in/2013/05/extremeclipper.html
+####################################################################################
 .......................
 INSTRUCTIONS
 ***************************************************
-1. Tap PrimaryHotkey to capture whole Screen.
-
-2. To Capture selected area of Screen,tap PrimaryHotkey, then (quickly) hold SecondaryHotkey and select the area (by moving the mouse) you want to capture.
-   Release the SecondaryHotkey to finsh.
-   
+1. Tap PrintScreen to capture whole Screen.
+2. To Capture selected area of Screen,tapPrintScreen (PrimaryKey), then hold Left Mouse button (Secondary Key) and then select the area you want to capture.
+   Release to capture.
 3. By Default, Run After Finish is enabled which opens the Captures directory after you take the Screenshot.
-
-4. By Default, Resize Prompt is enables which enables you to resize your clipped picture on the go!!. Hit Done to preoceed further, Cancel to abort capture operation.
-
-5. When in game, better turn resizeprompt and runafterfinish off for no interruption.
+4. By Default, Resize Prompt is enables which enables you to resize your clipped picture on the go!!.
 ......................
 
 Happy Clipping!
 Enjoy!!
 
 */
-
+SetWorkingDir, %a_scriptdir%
 ProgramName = Extreme Clipper
-ProgramVersion = 2
+ProgramVersion = 3
 Author = Avi Aryan
 
+IfNotExist, %A_ScriptDir%/Settings.ini
+{
+iniwrite,jpg,Settings.ini,Main,Extension_To_Save_in
+iniwrite,100,Settings.ini,Main,Quality_of_clips
+iniwrite,1,Settings.ini,Main,Open_Capture_Directory_After_Finish
+iniwrite,1,Settings.ini,Main,Resize_Clip_After_Capturing
+iniwrite,PrintScreen,Settings.ini,Keys,PrimaryKey
+IniWrite,LeftMousebutton,Settings.ini,Keys,SecondaryKey
+}
 ;-----------------------CONFIGURE--------------------------------------------------------------------
-extension = jpg                     ;from BMP/JPG/PNG/GIF/TIF
-qualityofpic := 100                  ;quality of picture, only for jpg format
-runafterfinish := true               ;runs Captures directory after finish...from True / False
-resizeprompt := true				;opens a gui interface to resize clipped picture.
-PrimaryHotkey = PrintScreen
-SecondaryHotkey = LButton
+IniRead,extension,Settings.ini,Main,Extension_To_Save_in
+IniRead,qualityofpic,Settings.ini,Main,Quality_of_clips
+IniRead,runafterfinish,Settings.ini,Main,Open_Capture_Directory_After_Finish
+IniRead,resizeprompt,Settings.ini,Main,Resize_Clip_After_Capturing
+IniRead,PrimaryHotkey,Settings.ini,Keys,PrimaryKey
+IniRead,SecondaryHotkey,Settings.ini,Keys,SecondaryKey
+
+Menu, Tray, Nostandard
+Menu, Tray, Add, %ProgramName%, blog
+Menu, Tray, Add, %Author%, me
+Menu, Tray, Add
+Menu, Tray, Add, Help, help
+Menu, Tray, Add
+Menu, Tray, Add, Quit, quit
+Menu, Tray, Default, %ProgramName%
+
+IfEqual,resizeprompt,0
+	resizeprompt := 
+else
+	resizeprompt := True
+
+IfEqual,runafterfinish,0
+	runafterfinish := 
+else
+	runafterfinish := True
+
+PrimaryHotkey := (HParse(PrimaryHotkey) == "") ? ("PrintScreen") : (Hparse(PrimaryHotkey))
+SecondaryHotkey := (HParse(SecondaryHotkey) == "") ? ("LButton") : (Hparse(SecondaryHotkey))
+RunWait, regsvr32.exe /s "%A_scriptdir%/clipper.dll"
+OnExit, quit
 
 ;-----------------------End--------------------------------------------------------------------------
 #NoEnv
@@ -75,6 +108,7 @@ return
 
 capture:
 gosub, varclean
+Hotkey,%SecondaryHotkey%,justtofool,On
 
 IfNotExist, Captures
 	FileCreateDir, Captures
@@ -87,7 +121,6 @@ break
 }
 }
 
-Hotkey,%SecondaryHotkey%,justtofool,On
 KeyWait,%SecondaryHotkey%, D T1
 if errorlevel = 0
 {
@@ -111,10 +144,14 @@ if (!(isdown))
 	finaly := initialy
 	initialy := intmdy
 }
+
+CaptureScreen(initialx, initialy, finalx, finaly, (finalx - initialx), (finaly - initialy), False, fileName, qualityofpic)
 if (resizeprompt)
 	gosub, resizer
-if (proceed)
-	CaptureScreen(initialx, initialy, finalx, finaly, newwt, newht, False, fileName, qualityofpic)
+if !(proceed)
+	FileDelete, %filename%
+else
+	DoResize(filename, newwt, newht)
 }
 else
 {
@@ -124,10 +161,13 @@ else
 	SysGet, finalx, 78
 	SysGet, finaly, 79
 
+CaptureScreen(initialx, initialy, finalx, finaly, (finalx - initialx), (finaly - initialy), False, fileName, qualityofpic)
 if (resizeprompt)
 	gosub, resizer
-if (proceed)	
-	CaptureScreen(initialx, initialy, finalx, finaly, newwt, newht, False, fileName, qualityofpic)
+if !(proceed)
+	FileDelete, %filename%
+else
+	DoResize(filename, newwt, newht)
 }
 
 If (runafterfinish)
@@ -140,6 +180,7 @@ else
 	WinActivate, Captures ahk_class CabinetWClass
 }
 }
+EmptyMem()
 return
 
 /*
@@ -223,6 +264,39 @@ return
 
 justtofool:
 return
+
+;**************************************COMPILED*****************************************
+blog:
+run, http://www.avi-win-tips.blogspot.com
+return
+me:
+run, https://github.com/Avi-Aryan
+return
+help:
+run, %A_ScriptDir%/Help Files/FAQ and Usage.html
+return
+quit:
+RunWait, regsvr32.exe /u /s "%A_scriptdir%/clipper.dll"
+ExitApp
+return
+
+DoResize(filename, width, height){
+try{
+gfx := ComObjCreate("GflAx.GflAx")
+gfx.LoadBitmap(filename)
+gfx.Resize(width + 0, height + 0)
+gfx.savebitmap(filename)
+ObjRelease(gfx)
+Emptymem()
+}
+catch{
+MsgBox, 16, WARNING, Looks like Clipper.dll isn't present in Extreme Clipper's directory or the program hasn't got enough administrative rights. `nTry re-downloading the package or running the program as Administrator
+}
+}
+
+EmptyMem(){
+dllcall("psapi.dll\EmptyWorkingSet", "UInt", -1)
+}
 ;========================================FUNCTION=======================================
 /*
  % -------------------------------------------------------------------------------------
@@ -404,3 +478,4 @@ Ansi4Unicode(pString)
 	DllCall("WideCharToMultiByte", "Uint", 0, "Uint", 0, "Uint", pString, "int", -1, "str", sString, "int", nSize, "Uint", 0, "Uint", 0)
 	Return	sString
 }
+#Include, HotkeyParser.ahk

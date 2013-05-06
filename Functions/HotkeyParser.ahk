@@ -164,7 +164,6 @@ else
 return, Combo
 }
 
-
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 LiteRegexM(matchitem, primary=1)
 {
@@ -262,6 +261,9 @@ H*m
 E*d
 P*u
 p*d
+l*b*t
+r*b*t
+m*b*t
 up
 d*n
 l*f
@@ -284,9 +286,6 @@ N*p*M*t
 N*p*d*Ad
 N*p*S*t
 N*p*E*r
-l*b*t
-r*b*t
-m*b*t
 s*l*k
 c*l
 n*l*k
@@ -324,6 +323,9 @@ Home
 End
 PgUp
 PgDn
+LButton
+RButton
+MButton
 Up
 Down
 Left
@@ -346,9 +348,6 @@ NumpadMult
 NumpadAdd
 NumpadSub
 NumpadEnter
-LButton
-RButton
-MButton
 ScrollLock
 CapsLock
 NumLock
