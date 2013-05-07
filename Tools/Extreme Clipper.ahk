@@ -6,8 +6,8 @@ Special Thanks = Sean
 ****************************************************
 IMPORTANT
 ####################################################################################
-The complete package with the Clipper.dll can be downloaded from my site . 
-http://avi-win-tips.blogspot.in/2013/05/extremeclipper.html
+The Clipper.dll ( renamed as Gflax.dll ) can be downloaded from the link. 
+https://dl.dropboxusercontent.com/u/116215806/Products/BlogTemp/GflaxDLL.7z
 ####################################################################################
 .......................
 INSTRUCTIONS
