@@ -3,24 +3,10 @@ HParse()
 © Avi Aryan
 Page -http://avi-win-tips.blogspot.com/2013/04/hparse.html
 
-Second Revision - 1/5/13
+Third Revision - 11/5/13
 =================================================================
 Extract Autohotkey hotkeys from user-friendly shortcuts reliably.
 =================================================================
-
-•The function handles spelling errors from users and tries to return the correct ahk hotkey for the corresponding shortcut as far as possible.
-•It can manage totally invalid user shortcuts sent to it simply by eliminating the invalid part of the shortcut
-•You can enable/disable [RemoveInvaild]  param if you want. Enabling (default) manages invalid parts by removing them, Disabling makes the return value blank when
- an invalid part in shortcut is occured. This blank return can be checked and used further to perform required measures.
-•If possible the returned hotkey is tried to be kept in the standard without "ampersand" (&) format. If not possible it is returned in the correct (&) format. See the
- EXAMPLES below for more details.
-•Standard User Shortcuts are by default meant to be separated by either the plus '+' or the dash '-' . eg -- Control + Alt + S , Control - S will work.
-•User shortcut(s) such as  (X + Control)  will be converted to  (^x) and not (x^) via the [ManageOrder] Param which is enabled by default
-•Shortcuts endings in modifiers are auto-detected and returned accordingly. eg -> (Control + Alt)  gives  ^Alt and not ^!
-•No RegEx, so FASTER than it should be.
-•Keys are arranged a/c popularity for maximum speed of the function.
-•Supports all Autohotkey keys including Joystick Keys.
-
 ==========================================
 EXAMPLES - Pre-Runs
 ==========================================
@@ -29,6 +15,7 @@ EXAMPLES - Pre-Runs
 • Hparse("Cotrol + ass + S")		;returns ^s
 • Hparse("Cntrol + ass + S", false)		;returns <blank>   	As 'ass' is out of scope and RemoveInvaild := false
 • Hparse("Contrl + At + S")		;returns ^!s
+• Hparse("^!s")			;returns	^!s		as the function-feed is already in Autohotkey format.
 • Hparse("LeftContrl + X")		;returns Lcontrol & X
 • Hparse("Contrl + Pageup + S")		;returns <blank>  As the hotkey is invalid
 • HParse("PagUp + Ctrl", true)		;returns  ^PgUp  	as  ManageOrder is true (by default)
@@ -42,6 +29,7 @@ EXAMPLES - Pre-Runs
 • HParse("Prbitscreen + yyy")		;returns	PrintScreen		As RemoveInvalid is enabled by default.
 • HParse("f1+ browser_srch")		;returns	F1 & Browser_Search
 • HParse("Ctrl + joy1")			;returns	Ctrl & Joy1
+• Hparse("pagup & paegdown")		;returns	PgUp & PgDn
 
 ###################################################################
 PARAMETERS - HParse()
@@ -60,8 +48,11 @@ HParse(Hotkey, RemoveInvalid, ManageOrder)
 
 HParse(Hotkey,RemoveInvaild = true,ManageOrder = true)
 {
+StringLeft,firstkey,Hotkey,1
+if firstkey in ^,!,+,#
+	return,% Hotkey
 
-loop,parse,Hotkey,+-,%a_space%
+loop,parse,Hotkey,+-&,%a_space%
 {
 if (Strlen(A_LoopField) != 1)
 {
