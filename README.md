@@ -21,10 +21,12 @@ Avi's Autohotkey Scripts and Functions Repository
   
 #### INDEX ####
   
+* **LaunchQ** - Fast, Simple, Productive Application Launcher
+* **Extreme Screen Clipper** - Capture Screenshots, resize, crop and save them as an image file instantly
 * **Hparse()** - Convert User shortcuts such as (Ctrl + PageDown) to Autohotkey shortcuts (here Ctrl & PgDn)
-* **Sublime Text Autocomplete Adder** - Add Auto-comlpetions in Sublime Text with a GUI and Duplicates Filter.
+* **Miscellanous Functions** - A library of my random useful functions
+* **Sublime Text Autocomplete Adder** - Add Auto-comlpetions in Sublime Text with a GUI and Duplicates Filter
 * **Autohotkey Updater** - Check the registered or selected version of Autohotkey for updates
-* **Extreme Screen Clipper** - Capture Screenshots, resize, crop and save them as an image file instantly.
   
 
 See [Notice.txt](NOTICE.txt) for more information.  
