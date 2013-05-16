@@ -1,7 +1,7 @@
 ﻿/* 
 ##########################################################
 LAUNCHQ - MINIMALIST APPLICATION LAUNCHER
-v1.0 
+v1.5 
 ##########################################################
 
 Copyright 2013 Avi Aryan  
@@ -25,7 +25,7 @@ limitations under the License.
 SetWorkingDir %A_ScriptDir%
 SetBatchLines, -1
 Page = http://www.avi-win-tips.blogspot.com/2013/05/launchq.html
-version = 1.0
+version = 1.5
 
 ;-------------+
 ;INITIALIZE   |
@@ -35,7 +35,7 @@ version = 1.0
 IfNotExist,Q-settings/settings.ini
 {
 FileCreateDir,Q-settings
-FileAppend,13`n%version%`n!space,q-settings/settings.ini
+FileAppend,13`n%version%`n+Z,q-settings/settings.ini
 
 FileDelete,q-settings/paths.lq
 FileDelete,q-settings/names.lq
@@ -242,10 +242,12 @@ if (fx < 0 or fx > 350 or fy < 0 or fy > 500)
 	}
 }
 else{
+	;Out of window click event
 	BlockInput, MouseMoveOff
 	Send, {Lbutton Down}
 	KeyWait, Lbutton
 	Send, {Lbutton Up}
+	DisableGUI()
 }
 }
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -275,11 +277,7 @@ GuiControl,2:Disable,proceed
 return
 ;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 launch:
-Gui,1:Hide
-SetTimer,Mousecheck,Off
-Hotkey,$LButton,leftmouse,Off
-ToolTip
-;;
+DisableGUI()
 Stringtrimleft,linetolaunch,A_guicontrol,4
 FileReadLine,path,q-settings/paths.lq,% (linetolaunch + ontop - 1)
 loop,parse,path,|
@@ -345,14 +343,16 @@ SetTimer,Mousecheck,100
 Hotkey,$Lbutton,LeftMouse,On
 }
 else
-{
-Gui, Hide
+	DisableGUI()
+return
+;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+DisableGUI(){
+Gui, 1:Hide
 Tooltip
 SetTimer,Mousecheck,Off
 Hotkey,$Lbutton,LeftMouse,Off
 EmptyMem()
 }
-return
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 2GuiDropFiles:
@@ -370,7 +370,7 @@ SetTimer,mousecheck,Off
 InputBox,allfile,URL,Write here the URL of the web-link,,300,200,,,,,http://www.avi-win-tips.blogspot.com
 IfNotEqual,allfile
 {
-IfNotInString,allfile,http://
+If !(Instr(allfile, "http://") or InStr(allfile, "https://") or InStr(allfile, "ftp://"))
 	allfile := "http://" . allfile
 GuiControl,2:,shorts,%allfile%
 Gui, 2:Show, w480 h191, Choose a Name
@@ -486,7 +486,7 @@ run,% OutDir . "\" . OutNameNoExt . ".exe" . " """ . site . """"
 else
   run,% "iexplore.exe" . " """ . site . """"	;internet explorer
 }
-;
+
 ;###############################################################
 ;TRAY AND GUI OFF SUBS
 ;###############################################################
@@ -500,10 +500,7 @@ else
 return
 
 about:
-Gui, 1:Hide
-ToolTip
-SetTimer,Mousecheck,Off
-Hotkey,$Lbutton,LeftMouse,Off
+DisableGUI()
 GuiControl,3:,hotkey,%curhot%
 Gui, 3:Show, w595 h143, LaunchQ by Avi
 return
@@ -511,7 +508,7 @@ help:
 BrowserRun("http://www.avi-win-tips.blogspot.com/2013/05/lqguide.html")
 return
 blog:
-BrowserRun("http://www.avi-win-tips.blogspot.com")
+BrowserRun("http://avi-win-tips.blogspot.in/p/my-autohotkey.html")
 return
 page:
 BrowserRun(page)
