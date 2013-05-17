@@ -15,7 +15,7 @@ MAIN FUNCTIONS
 
 * Divide(Dividend, Divisor) --- Divide two massive numbers . Supports everything
 
-* Greater(number1, number2) --- compare two massive Integers.
+* Greater(number1, number2) --- compare two massive numbers . Should support everything
   true if number1 > number2
   false if number2 > number1
   blank if number1 = number2
@@ -38,7 +38,7 @@ MISC
 
 * Toggle(boolean) --- Toggles a boolean value
 */
-;MsgBox,% Evaluate("2390239023923092309230239032923092309230239923023023", "-238923823982392389238923823982392389238239239")
+;MsgBox,% Evaluate("238928923823923823237238293823923923", "-239239802392309230239023923023902390239230923032923")
 ;return
 
 Evaluate(number1, number2){
