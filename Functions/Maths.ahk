@@ -42,6 +42,7 @@ MISC
 * Toggle(boolean) --- Toggles a boolean value
 */
 
+;Msgbox,% (135 / 123456789012345)
 ;MsgBox,% Divide("9999999999999999999999999999999999999999999999999", "5555555555555555555555555555555555555555555555555") ;- 1.8
 ;MsgBox,% Multiply("111111111111111111111111111111111111111111.111","55555555555555555555555555555555555555555555.555")
 ;MsgBox,% Prefect("00.002000")
@@ -324,14 +325,22 @@ if (Instr(number1, "-"))
 StringReplace,number1,number1,-
 StringReplace,number2,number2,-
 ;Checking if possible with AHK Only
+oldformat := A_FormatFloat
+SetFormat, FloatFast, 0.16
 ;Case 1 n2 >= n1
 if Greater(number2, number1, true)
-	if (number1 / number2 != "0.000000")	;As per v1.1.09
-		return,% ( (positive) ? ("") : ("-") ) . Prefect(number1 / number2)
+	if (number1 / number2 != "0.0000000000000000"){	;v1.1.09
+		toreturn := Prefect(number1 / number2)
+		SetFormat, FloatFast, %oldformat%
+		return,% ( (positive) ? ("") : ("-") ) . toreturn
+	}
 ;Case 2 n1 > n2
 if Greater(number1, number2)
-	if !(Strlen(number1 / number2) > 25)	;As per tests, the greatest correct length seemed to be 26 (in non-dec denominator). We dont want 26.
-		return,% ( (positive) ? ("") : ("-") ) . Prefect(number1 / number2)
+	if !(Strlen(number1 / number2) > 35){	;As per tests, the greatest correct length seemed to be 36 (in non-dec denominator). We dont want 36.
+		toreturn := Prefect(number1 / number2)
+		SetFormat, FloatFast, %oldformat%
+		return,% ( (positive) ? ("") : ("-") ) . toreturn
+	}
 ;
 ;If anything reaches here, it's because number2 > |999999| or so.
 if (Strlen(number2) > 6)	;do this only if required
