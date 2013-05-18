@@ -1,6 +1,6 @@
 ﻿/*
 MATHS LIBRARY
-(C) Avi Aryan
+by Avi Aryan
 v 0.4 beta
 ------------------------------------------------------------------------------
 http://www.avi-win-tips.blogspot.com
@@ -47,7 +47,7 @@ MISC
 ;Msgbox,% Evaluate("1111111111111111111111111111111111111","55555555555555555555555555.7878")
 ;return
 
-Evaluate(number1, number2, prefect=true){
+Evaluate(number1, number2, prefect=true){	;Dont set Prefect false, Just forget about it.
 ;Processing
 IfInString,number2,--
 	count := 2
