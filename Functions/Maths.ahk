@@ -1,7 +1,7 @@
 ﻿/*
 MATHS LIBRARY
 (C) Avi Aryan
-v 0.1 beta
+v 0.4 beta
 ------------------------------------------------------------------------------
 http://www.avi-win-tips.blogspot.com
 ------------------------------------------------------------------------------
@@ -20,6 +20,8 @@ MAIN FUNCTIONS
   false if number2 > number1
   blank if number1 = number2
   
+* Prefect(number) --- convert a number to most suitable form. like ( 002 to 2 ) and ( 000.5600 to 0.56 )
+
 -----  BETTER PASS NUMBERS AS STRINGS FOR THE ABOVE FUNCTIONS ------------------
 -----  SEE THE COMMENTED MSGBOX CODE BELOW TO UNRSTND WHAT I MEAN --------------
 
@@ -38,10 +40,14 @@ MISC
 
 * Toggle(boolean) --- Toggles a boolean value
 */
-;MsgBox,% Evaluate("238928923823923823237238293823923923", "-239239802392309230239023923023902390239230923032923")
+
+;MsgBox,% Multiply("111111111111111111111111111111111111111111.111","55555555555555555555555555555555555555555555.555")
+;MsgBox,% Prefect("00.002000")
+;Msgbox,% nthroot(3.375, 3)
+;Msgbox,% Evaluate("1111111111111111111111111111111111111","55555555555555555555555555.7878")
 ;return
 
-Evaluate(number1, number2){
+Evaluate(number1, number2, prefect=true){
 ;Processing
 IfInString,number2,--
 	count := 2
@@ -51,11 +57,15 @@ else
 	count := 0
 IfInString,number1,-
 	count+=1
+;
+n1 := number1
+n2 := number2
+StringReplace,number1,number1,-,,All
+StringReplace,number2,number2,-,,All
 ;Decimals
-IfInString,number1,.
-	dec1 := StrLen(number1) - InStr(number1, ".")
-IfInString,number2,.
-	dec2 := StrLen(number2) - Instr(number2, ".")
+dec1 := (Instr(number1,".")) ? ( StrLen(number1) - InStr(number1, ".") ) : (0)
+dec2 := (Instr(number2,".")) ? ( StrLen(number2) - InStr(number2, ".") ) : (0)
+
 if (dec1 > dec2){
 	dec := dec1
 	loop,% (dec1 - dec2)
@@ -68,15 +78,10 @@ else if (dec2 > dec1){
 }
 else
 	dec := dec1
-
 StringReplace,number1,number1,.
 StringReplace,number2,number2,.
-;
-n1 := number1
-n2 := number2
-StringReplace,number1,number1,-,,All
-StringReplace,number2,number2,-,,All
-
+;Processing
+;Add zeros
 if (Strlen(number1) >= StrLen(number2)){
 	loop,% (Strlen(number1) - strlen(number2))
 		number2 := "0" . number2
@@ -86,8 +91,7 @@ else
 		number1 := "0" . number1
 
 n := strlen(number1)
-;Processing
-
+;
 if count not in 1,3		;Add
 {
 loop,
@@ -115,7 +119,8 @@ sum := digit . sum
 if (Instr(n2,"-") and Instr(n1, "-"))
 	sum := "-" . sum
 }
-else	;Subtract
+;SUBTRACT ******************
+elsE
 {
 ;Compare numbers for suitable order
 numbercompare := Greater(number1, number2)
@@ -124,7 +129,6 @@ if !(numbercompare){
 	number2 := number1
 	number1 := mid
 }
-
 loop,
 {	
 if (borrow)
@@ -148,7 +152,7 @@ else
 sum := digit . sum
 }
 ;End of loop ;Giving Sign
-sum := LTrim(sum, "0")
+;sum := LTrim(sum, "0")
 ;
 If InStr(n2,"--"){
 	if (numbercompare)
@@ -168,7 +172,11 @@ if ((Ltrim(sum, "0") = "") or (sum == "-"))
 If (dec)
 	if (sum)
 		sum := SubStr(sum,1,StrLen(sum) - dec) . "." . SubStr(sum,1 - dec)
-return, sum
+;Prefect
+if (prefect)
+	return, Prefect(sum)
+else
+	return, sum
 }
 
 ;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -204,7 +212,7 @@ else{
 }
 
 if mantsa between 0 and 0.3009
-	param := 0.99
+	param := 0.9995	;Making suitable with param increment factor (Below)
 else if mantsa between 0.3009 and 0.4770
 	param := 1.99
 else if mantsa between 0.4770 and 0.6019
@@ -289,15 +297,12 @@ else
 loop,% (A_index - 1)	;add suitable zeroes to end
 	zeros .= "0"
 row .= zeros
-product := Evaluate(product, row)
+product := Evaluate(product, row, false)
 }
 ;Give Dots
 if (dec){
 	product := SubStr(product,1,StrLen(product) - dec) . "." . SubStr(product,1 - dec)
-	if Instr(product, "0.")
-		product := "0" . LTrim(product, "0")
-	else If InStr(product, ".")
-		product := Ltrim(product, "0")
+	product := Prefect(product)
 }
 ;Give sign
 if !(positive)
@@ -317,7 +322,9 @@ if (Instr(number1, "-"))
 StringReplace,number1,number1,-
 StringReplace,number2,number2,-
 ;If anything reaches here, it's because number2 > |999999| or so.
-number2 := Substr(number2, 1,Strlen(number2) - Instr(number2, "."))	;remove decs
+if (Strlen(number2) > 6)	;do this only if required
+	number2 := Substr(number2, 1, Strlen(number2) - (Strlen(number2) - Instr(number2, ".") + 1))	;remove decs
+
 Intmd := Multiply(number1, 1 / SubStr(number2, 1, 6))
 if (Strlen(number2) > 6){
 	
@@ -333,10 +340,7 @@ if (Strlen(number2) > 6){
 	Intmd := Substr(Imtmd, 1, StrLen(Intmd) - numofzeros) . "." . SubStr(Intmd, StrLen(Intmd) - numofzeros + 1)
 	}
 }
-if Instr(Intmd,"0.")
-	Intmd := "0" . Ltrim(Intmd, "0")
-else if Instr(Intmd, ".")
-	Intmd := Ltrim(Intmd, "0")
+Intmd := Prefect(Intmd)
 
 if !(positive)
 	Intmd := "-" Intmd
@@ -376,6 +380,39 @@ loop,
 }
 
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Prefect(number){
+number .= ""	;convert to string if needed
+if Instr(number, "-"){
+	StringReplace,number,number,-
+	negative := true
+}
+	
+if Instr(number, "."){
+loop,
+	if Instr(number, "0") = 1	;managing left hand side
+		StringTrimLeft,number,number,1
+	else
+		break
+
+if (Substr(number,1,1) == ".")	;if num like	.6767
+	number := "0" number
+
+number := Rtrim(number, "0")
+if (Substr(number, 0) == ".")	;like 456.
+	StringTrimRight,number,number,1
+
+return,% (negative) ? ("-" . number) : (number)
+} ; Non-decimal below
+else
+{
+if (number != 0)
+	return,% (negative) ? ("-" . Ltrim(number, "0")) : (Ltrim(number, "0"))
+else
+	return, 0
+}
+}
+
+;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 LogB(number, base){
 IfNotInString,base,-
@@ -384,8 +421,16 @@ IfNotInString,base,-
 }
 
 nthRoot(number, n){
+if Instr(number, "-")
+{
+	StringReplace,number,number,-
+	if (Mod(n, 2) == 0)		;check for even
+		return
+	sign := "-"
+}
+
 logy := (1 / n) * log(number)	;y = x^1/n
-return, antilog(logy)
+return,% sign . Prefect(antilog(logy))
 }
 
 ;################# NON - MATH FUNCTIONS ###################################
