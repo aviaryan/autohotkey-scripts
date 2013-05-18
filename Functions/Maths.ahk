@@ -251,14 +251,14 @@ If (negative == "")
 {
 loop,% (chrstc)
 	intofactor := intofactor * 10
-return,% (param * intofactor)
+return,% Prefect(param * intofactor)
 }
 ;Negative
 else
 {
 loop,% (negative)
 	intofactor := intofactor * 10
-return,% (param / intofactor)
+return,% Prefect(param / intofactor)
 }
 }
 ;return only if param not equal to ""
@@ -432,7 +432,7 @@ else
 LogB(number, base){
 IfNotInString,base,-
 	IfNotInString,number,-
-		return, % (log(number) / log(base))
+		return,% Prefect(log(number) / log(base))
 }
 
 nthRoot(number, n){
