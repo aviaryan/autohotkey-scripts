@@ -1,7 +1,7 @@
 ﻿/*
 MATHS LIBRARY
 by Avi Aryan
-v 0.6 beta
+v 0.7
 ------------------------------------------------------------------------------
 http://www.avi-win-tips.blogspot.com
 ------------------------------------------------------------------------------
@@ -42,8 +42,7 @@ MISC
 * Toggle(boolean) --- Toggles a boolean value
 */
 
-;Msgbox,% (135 / 123456789012345)
-;MsgBox,% Divide("9999999999999999999999999999999999999999999999999", "5555555555555555555555555555555555555555555555555") ;- 1.8
+;MsgBox,% Divide("19239230923023902323092392039023923023.230920390239007236275465367343434", "8989998989898909090909009909090909090908656454520")
 ;MsgBox,% Multiply("111111111111111111111111111111111111111111.111","55555555555555555555555555555555555555555555.555")
 ;MsgBox,% Prefect("00.002000")
 ;Msgbox,% nthroot(3.375, 3)
@@ -329,40 +328,39 @@ oldformat := A_FormatFloat
 SetFormat, FloatFast, 0.16
 ;Case 1 n2 >= n1
 if Greater(number2, number1, true)
-	if (number1 / number2 != "0.0000000000000000"){	;v1.1.09
+	if (number1 / number2 != "0.0000000000000000"){		;v1.1.09
 		toreturn := Prefect(number1 / number2)
 		SetFormat, FloatFast, %oldformat%
 		return,% ( (positive) ? ("") : ("-") ) . toreturn
 	}
 ;Case 2 n1 > n2
 if Greater(number1, number2)
-	if !(Strlen(number1 / number2) > 35){	;As per tests, the greatest correct length seemed to be 36 (in non-dec denominator). We dont want 36.
+	if !(Strlen(number1 / number2) > 17){	;As per tests, the greatest correct length seemed to be 17 (including "0.") (in non-dec denominator). We dont want 18.
 		toreturn := Prefect(number1 / number2)
 		SetFormat, FloatFast, %oldformat%
 		return,% ( (positive) ? ("") : ("-") ) . toreturn
 	}
 ;
-;If anything reaches here, it's because number2 > |999999| or so.
-if (Strlen(number2) > 6)	;do this only if required
+if (Strlen(number2) > 15)	;do this only if required
 	number2 := Substr(number2, 1, Strlen(number2) - (Strlen(number2) - Instr(number2, ".") + 1))	;remove decs
 
-Intmd := Multiply(number1, 1 / SubStr(number2, 1, 6))
-if (Strlen(number2) > 6){
+Intmd := Multiply(number1, 1 / SubStr(number2, 1, 15))	;Send to process directly
+if (Strlen(number2) > 15){
 	
 	if Instr(Intmd, "."){
-	numofzeros := Strlen(number2) - 6
+	numofzeros := Strlen(number2) - 15
 	Intmd := "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" . Intmd
 	dotpoint := Instr(Intmd, ".")
 	StringReplace,Intmd,Intmd,.
 	Intmd := SubStr(Intmd, 1, dotpoint - numofzeros - 1) . "." . SubStr(Intmd, dotpoint - numofzeros)
 	}else{
-	numofzeros := Strlen(number2) - 6
+	numofzeros := Strlen(number2) - 15
 	Intmd := "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" . Intmd
 	Intmd := Substr(Imtmd, 1, StrLen(Intmd) - numofzeros) . "." . SubStr(Intmd, StrLen(Intmd) - numofzeros + 1)
 	}
 }
 Intmd := Prefect(Intmd)
-
+SetFormat, FloatFast, %oldformat%
 if !(positive)
 	Intmd := "-" Intmd
 return, Intmd
@@ -465,5 +463,5 @@ return,% (bool) ? (false) : (true)
 ReverseAKAFlip(string){
 loop,% Strlen(string)
 	flip .= Substr(string, 1 - A_index, 1)
-return,% flip
+return, flip
 }

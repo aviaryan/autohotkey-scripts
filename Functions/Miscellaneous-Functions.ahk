@@ -60,16 +60,16 @@ IfEqual,var,Progman
 	v := A_Desktop
 else
 {
-winGetText,Fullpath,A
-loop,parse,Fullpath,`r`n
-{
-IfInString,A_LoopField,:\
-{
-StringGetPos,pos,A_Loopfield,:\,L
-Stringtrimleft,v,A_loopfield,(pos - 1)
-break
-}
-}
+	winGetText,Fullpath,A
+	loop,parse,Fullpath,`r`n
+	{
+		IfInString,A_LoopField,:\
+		{
+		StringGetPos,pos,A_Loopfield,:\,L
+		Stringtrimleft,v,A_loopfield,(pos - 1)
+		break
+		}
+	}
 }
 return, v
 }
