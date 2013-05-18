@@ -1,7 +1,7 @@
 ﻿/*
 MATHS LIBRARY
 by Avi Aryan
-v 0.4 beta
+v 0.6 beta
 ------------------------------------------------------------------------------
 http://www.avi-win-tips.blogspot.com
 ------------------------------------------------------------------------------
@@ -15,10 +15,11 @@ MAIN FUNCTIONS
 
 * Divide(Dividend, Divisor) --- Divide two massive numbers . Supports everything
 
-* Greater(number1, number2) --- compare two massive numbers . Should support everything
+* Greater(number1, number2, trueforequal=false) --- compare two massive numbers . Should support everything
   true if number1 > number2
   false if number2 > number1
-  blank if number1 = number2
+  blank if number1 = number2 (trueforequal = Default)
+  true if number1 = number2 (trueforequal = true)
   
 * Prefect(number) --- convert a number to most suitable form. like ( 002 to 2 ) and ( 000.5600 to 0.56 )
 
@@ -41,6 +42,7 @@ MISC
 * Toggle(boolean) --- Toggles a boolean value
 */
 
+;MsgBox,% Divide("9999999999999999999999999999999999999999999999999", "5555555555555555555555555555555555555555555555555") ;- 1.8
 ;MsgBox,% Multiply("111111111111111111111111111111111111111111.111","55555555555555555555555555555555555555555555.555")
 ;MsgBox,% Prefect("00.002000")
 ;Msgbox,% nthroot(3.375, 3)
@@ -321,6 +323,16 @@ if (Instr(number1, "-"))
 	positive := Toggle(positive)
 StringReplace,number1,number1,-
 StringReplace,number2,number2,-
+;Checking if possible with AHK Only
+;Case 1 n2 >= n1
+if Greater(number2, number1, true)
+	if (number1 / number2 != "0.000000")	;As per v1.1.09
+		return,% ( (positive) ? ("") : ("-") ) . Prefect(number1 / number2)
+;Case 2 n1 > n2
+if Greater(number1, number2)
+	if !(Strlen(number1 / number2) > 25)	;As per tests, the greatest correct length seemed to be 26 (in non-dec denominator). We dont want 26.
+		return,% ( (positive) ? ("") : ("-") ) . Prefect(number1 / number2)
+;
 ;If anything reaches here, it's because number2 > |999999| or so.
 if (Strlen(number2) > 6)	;do this only if required
 	number2 := Substr(number2, 1, Strlen(number2) - (Strlen(number2) - Instr(number2, ".") + 1))	;remove decs
@@ -348,7 +360,7 @@ return, Intmd
 }
 
 ;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Greater(number1, number2){
+Greater(number1, number2, trueforequal=false){
 IfInString,number2,-
 	IfNotInString,number1,-
 		return, true
@@ -372,8 +384,11 @@ loop,
 	else if (Substr(number2,A_index, 1) > SubStr(number1,A_Index, 1))
 		return,% (bothminus) ? (true) : (false)
 	
-	if (a_index == stop)
+	if (a_index == stop){
+		if (trueforequal)
+			return, true
 		break
+	}
 }
 }
 
@@ -386,7 +401,7 @@ if Instr(number, "-"){
 	StringReplace,number,number,-
 	negative := true
 }
-	
+
 if Instr(number, "."){
 loop,
 	if Instr(number, "0") = 1	;managing left hand side
