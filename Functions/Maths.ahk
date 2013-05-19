@@ -1,7 +1,8 @@
 ﻿/*
 MATHS LIBRARY
 by Avi Aryan
-v 0.7
+Thanks to Uberi, sinkfaze and justme for valuable suggestions and ideas.
+v 1.0
 ------------------------------------------------------------------------------
 http://www.avi-win-tips.blogspot.com
 ------------------------------------------------------------------------------
@@ -9,6 +10,13 @@ http://www.avi-win-tips.blogspot.com
 ##############################################################################
 MAIN FUNCTIONS
 ##############################################################################
+* Solve(Expression) --- Solves a Mathematical expression.
+  eg - Solve("1 + 3.5 - 2 * 3 + Antilog(0.3010, ""e"")")
+  Note the use of "" in e . You will have to escape the quote . 
+  Solve() supports infinetly large numbers and its +-/* is powered by the respective custom functions below so no need to use them in Solve().
+  Solve() doesnt support brackets . So be wise .
+  Solve() supports functions() .
+  
 * Evaluate(number1, number2) --- +/- massive numbers . Supports Real Nos (Everything)
 
 * Multiply(number1, number2) --- multiply two massive numbers . Supports everything
@@ -26,7 +34,7 @@ MAIN FUNCTIONS
 -----  BETTER PASS NUMBERS AS STRINGS FOR THE ABOVE FUNCTIONS ------------------
 -----  SEE THE COMMENTED MSGBOX CODE BELOW TO UNRSTND WHAT I MEAN --------------
 
-* Antilog(number) --- gives antilog of a number
+* Antilog(number, basetouse=10) --- gives antilog of a number . basetouse can be "e" .
 
 * nthRoot(number, n) ---- gives nth root of a number .
   nthroot(8, 3) gives cube root of 8 = 2
@@ -41,13 +49,66 @@ MISC
 
 * Toggle(boolean) --- Toggles a boolean value
 */
-
-;MsgBox,% Divide("19239230923023902323092392039023923023.230920390239007236275465367343434", "8989998989898909090909009909090909090908656454520")
+;msgbox,% Solve("Sqrt(4) * nthRoot(8, 3) * 2 * log(100) * antilog(0.3010) - 32")
+;Msgbox,% Greater(18.789, 187)
+;MsgBox,% Divide("434343455677690909087534208967834434444.5656", "8989998989898909090909009909090909090908656454520")
 ;MsgBox,% Multiply("111111111111111111111111111111111111111111.111","55555555555555555555555555555555555555555555.555")
 ;MsgBox,% Prefect("00.002000")
 ;Msgbox,% nthroot(3.375, 3)
-;Msgbox,% Evaluate("1111111111111111111111111111111111111","55555555555555555555555555.7878")
+;Msgbox,% Evaluate("-28","-98.007")
 ;return
+
+
+Solve(expression){
+StringReplace,expression,expression,%A_space%,,All	;The tricky part :-D
+StringReplace,expression,expression,%A_tab%,,All
+
+loop, parse, expression,+*-/\x
+{
+;Check for functions -- 
+firstch := Substr(A_loopfield, 1, 1)
+if firstch is not Integer
+	{
+	fname := Substr(A_LoopField, 1, Instr(A_loopfield,"(") - 1)	;extract func
+	ffeed := Substr(A_loopfield, Instr(A_loopfield, "(") + 1, Instr(A_loopfield, ")") - Instr(A_loopfield, "(") - 1)	;extract func feed
+	loop, parse, ffeed,`,
+		{
+		StringReplace,feed,A_loopfield,",,All
+		feed%A_index% := feed
+		totalfeeds := A_index
+		}
+	if totalfeeds = 1
+		number := %fname%(feed1)
+	else if totalfeeds = 2
+		number := %fname%(feed1, feed2)
+	else if totalfeeds = 3
+		number := %fname%(feed1, feed2, feed3)
+	else if totalfeeds = 4
+		number := %fname%(feed1, feed2, feed3, feed4)	;Add more like this if needed
+	}
+	else
+		number := A_LoopField
+;Perform the previous assignment routine
+if (char != ""){
+	if char = +
+		solved := Evaluate(solved, number)
+	else if char = -
+		solved := Evaluate(solved, "-" number)
+	else if ((char == "/") or (char == "\"))
+		solved := Divide(solved, number)
+	else if ((char == "*") or (char == "x"))
+		solved := Multiply(solved, number)
+}
+if solved = 
+	solved := number
+
+char := Substr(expression, Strlen(A_loopfield) + 1,1)
+expression := Substr(expression, Strlen(A_LoopField) + 2)	;Everything except number and char
+}
+return, Prefect(solved)
+}
+
+;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 Evaluate(number1, number2, prefect=true){	;Dont set Prefect false, Just forget about it.
 ;Processing
@@ -98,10 +159,7 @@ if count not in 1,3		;Add
 {
 loop,
 {
-if (carry)
-	digit := SubStr(number1,1 - A_Index, 1) + SubStr(number2, 1 - A_index, 1) + 1
-else
-	digit := SubStr(number1,1 - A_Index, 1) + SubStr(number2, 1 - A_index, 1)
+digit := SubStr(number1,1 - A_Index, 1) + SubStr(number2, 1 - A_index, 1) + (carry ? 1 : 0)
 
 if (A_index == n){
 	sum := digit . sum
@@ -132,11 +190,8 @@ if !(numbercompare){
 	number1 := mid
 }
 loop,
-{	
-if (borrow)
-	digit := SubStr(number1,1 - A_Index, 1) - 1 - SubStr(number2, 1 - A_index, 1)
-else
-	digit := SubStr(number1,1 - A_Index, 1) - SubStr(number2, 1 - A_index, 1)
+{
+digit := SubStr(number1,1 - A_Index, 1) - SubStr(number2, 1 - A_index, 1) + (borrow ? -1 : 0)
 
 if (A_index == n){
 	StringReplace,digit,digit,-
@@ -154,7 +209,6 @@ else
 sum := digit . sum
 }
 ;End of loop ;Giving Sign
-;sum := LTrim(sum, "0")
 ;
 If InStr(n2,"--"){
 	if (numbercompare)
@@ -175,93 +229,19 @@ If (dec)
 	if (sum)
 		sum := SubStr(sum,1,StrLen(sum) - dec) . "." . SubStr(sum,1 - dec)
 ;Prefect
-if (prefect)
-	return, Prefect(sum)
-else
-	return, sum
+return, Prefect ? Prefect(sum) : sum
 }
 
 ;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Antilog(number){
-IfInString,number,-
-{
-loop
-{
-	number+=A_Index
-	IfNotInString,number,-
-	{
-	negative := A_Index
-	break
-	}
-}
-}
-;Negative management
+Antilog(number, basetouse=10){
+oldformat := A_FormatFloat
+SetFormat, float, 0.16
 
-StringGetPos,dotpos,number,.
-if (dotpos == -1){
-	chrstc := number
-	mantsa := 0.0000
-}
-else{
-	StringLeft,chrstc,number,%dotpos%
-	StringTrimLeft,mantsa,number,%dotpos%
-	mantsa := "0" . mantsa
-	if (Strlen(mantsa) > 6)
-		StringLeft,mantsa,mantsa,6
-	else
-		loop,% (6 - Strlen(mantsa))
-			mantsa .= "0"
-}
-
-if mantsa between 0 and 0.3009
-	param := 0.9995	;Making suitable with param increment factor (Below)
-else if mantsa between 0.3009 and 0.4770
-	param := 1.99
-else if mantsa between 0.4770 and 0.6019
-	param := 2.99
-else if mantsa between 0.6019 and 0.6988
-	param := 3.99
-else if mantsa between 0.6988 and 0.7780
-	param := 4.99
-else if mantsa between 0.7780 and 0.8449
-	param := 5.99
-else if mantsa between 0.8449 and 0.9029
-	param := 6.99
-else if mantsa between 0.9029 and 0.9541
-	param := 7.99
-else
-	param := 8.99
-limit := param + 1.01
-
-loop, 
-{
-param := param + 0.0005
-if (Substr(log(param),1,6) == mantsa)
-	break
-if (param >= limit){
-	param :=
-	break
-}
-}
-;param generated
-IfNotEqual,param
-{
-intofactor := 1
-If (negative == "")
-{
-loop,% (chrstc)
-	intofactor := intofactor * 10
-return,% Prefect(param * intofactor)
-}
-;Negative
-else
-{
-loop,% (negative)
-	intofactor := intofactor * 10
-return,% Prefect(param / intofactor)
-}
-}
-;return only if param not equal to ""
+if basetouse = e
+	basetouse := 2.71828182845905
+toreturn := basetouse ** number
+SetFormat, floatfast, %oldformat%
+return, toreturn
 }
 ;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -328,7 +308,7 @@ oldformat := A_FormatFloat
 SetFormat, FloatFast, 0.16
 ;Case 1 n2 >= n1
 if Greater(number2, number1, true)
-	if (number1 / number2 != "0.0000000000000000"){		;v1.1.09
+	if (number1 / number2 != "0.0000000000000000"){		;per v1.1.09
 		toreturn := Prefect(number1 / number2)
 		SetFormat, FloatFast, %oldformat%
 		return,% ( (positive) ? ("") : ("-") ) . toreturn
@@ -377,12 +357,26 @@ IfInString,number1,-
 
 if (Instr(number1, "-") and Instr(number2, "-"))
 	bothminus := true
+; Manage Decimals
+dec1 := (Instr(number1,".")) ? ( StrLen(number1) - InStr(number1, ".") ) : (0)
+dec2 := (Instr(number2,".")) ? ( StrLen(number2) - InStr(number2, ".") ) : (0)
 
+if (dec1 > dec2)
+	loop,% (dec1 - dec2)
+		number2 .= "0"
+else if (dec2 > dec1)
+	loop,% (dec2 - dec1) 
+		number1 .= "0"
+
+StringReplace,number1,number1,.
+StringReplace,number2,number2,.
+; Compare Lengths
 if (Strlen(number1) > Strlen(number2))
 	return,% (bothminus) ? (false) : (true)
 else if (Strlen(number2) > Strlen(number1))
 	return,% (bothminus) ? (true) : (false)
-else{
+else	;The final way out
+{
 stop := StrLen(number1)
 loop,
 {
@@ -450,9 +444,7 @@ if Instr(number, "-")
 		return
 	sign := "-"
 }
-
-logy := (1 / n) * log(number)	;y = x^1/n
-return,% sign . Prefect(antilog(logy))
+return,% sign . Prefect(antilog( (1/n) * log(number) ))
 }
 
 ;################# NON - MATH FUNCTIONS ###################################
