@@ -49,6 +49,10 @@ MISC
 
 * Toggle(boolean) --- Toggles a boolean value
 */
+
+;var = sqrt(4) + nthroot(17248) * 892839.2382389 - 89238239.923
+;msgbox,% Solve(var)
+
 ;msgbox,% Solve("Sqrt(4) * nthRoot(8, 3) * 2 * log(100) * antilog(0.3010) - 32")
 ;Msgbox,% Greater(18.789, 187)
 ;MsgBox,% Divide("434343455677690909087534208967834434444.5656", "8989998989898909090909009909090909090908656454520")
