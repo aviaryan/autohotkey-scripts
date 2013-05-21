@@ -2,7 +2,7 @@
 MATHS LIBRARY
 by Avi Aryan
 Thanks to Uberi, sinkfaze and justme for valuable suggestions and ideas.
-v 1.0
+v 1.3
 ------------------------------------------------------------------------------
 http://www.avi-win-tips.blogspot.com
 ------------------------------------------------------------------------------
@@ -10,12 +10,14 @@ http://www.avi-win-tips.blogspot.com
 ##############################################################################
 MAIN FUNCTIONS
 ##############################################################################
-* Solve(Expression) --- Solves a Mathematical expression.
-  eg - Solve("1 + 3.5 - 2 * 3 + Antilog(0.3010, ""e"")")
-  Note the use of "" in e . You will have to escape the quote . 
-  Solve() supports infinetly large numbers and its +-/* is powered by the respective custom functions below so no need to use them in Solve().
-  Solve() doesnt support brackets . So be wise .
-  Solve() supports functions() .
+See Help - http://www.avi-win-tips.blogspot.com/2013/05/maths.html
+##############################################################################
+
+* Solve(Expression, AHK=false) --- Solves a Mathematical expression.
+  Use Pow(number, n) [provided below] in place of ** in Solve() 
+  Solve() supports infinetly large numbers and its +-/* is powered by the respective custom functions below (when AHK is false(default)) so no need to use 
+  them in Solve().
+  Solve() supports functions() . Solve() supports Nesting via [] brackets ( not () )
   
 * Evaluate(number1, number2) --- +/- massive numbers . Supports Real Nos (Everything)
 
@@ -23,36 +25,36 @@ MAIN FUNCTIONS
 
 * Divide(Dividend, Divisor) --- Divide two massive numbers . Supports everything
 
+* Roots("Coefficients") - Roots of a poly function 
+
 * Greater(number1, number2, trueforequal=false) --- compare two massive numbers . Should support everything
-  true if number1 > number2
-  false if number2 > number1
-  blank if number1 = number2 (trueforequal = Default)
-  true if number1 = number2 (trueforequal = true)
   
 * Prefect(number) --- convert a number to most suitable form. like ( 002 to 2 ) and ( 000.5600 to 0.56 )
 
 -----  BETTER PASS NUMBERS AS STRINGS FOR THE ABOVE FUNCTIONS ------------------
 -----  SEE THE COMMENTED MSGBOX CODE BELOW TO UNRSTND WHAT I MEAN --------------
 
+* UniquePMT(pattern, ID)	;gives the unique permutation possible .
+	eg -> UniquePMT("abcd", 17) >>> 17th unique permutaion for abcd . 
+	eg -> UniquePMT("ram,kam,shyam,nam", "All") >>> All permutations separated by linefeeds
+
 * Antilog(number, basetouse=10) --- gives antilog of a number . basetouse can be "e" .
 
 * nthRoot(number, n) ---- gives nth root of a number .
   nthroot(8, 3) gives cube root of 8 = 2
 
-* logB(base, number) --- log of a number at a partcular base.
-
-
-*******************************************************************************
-MISC
-*******************************************************************************
-* ReverseAKAFlip(string) --- Flips a string or number
-
-* Toggle(boolean) --- Toggles a boolean value
+* logB(number, base) --- log of a number at a partcular base.
 */
 
-;var = sqrt(4) + nthroot(17248) * 892839.2382389 - 89238239.923
-;msgbox,% Solve(var)
+;msgbox,% roots("1,1,1,-3")
+;msgbox,% UniquePMT("avi,annat,koiaur,aurkoi", "All")
+;msgbox,% Solve("[28*45] - [45*28]")
+;msgbox,% Roots("1,1,1,-3") ;xcube + xsq + x - 3 = 0
+;MsgBox,% Solve("23898239238923.2382398923 + 2378237238.238239 - 989939.9939 * 892398293823")
 
+;var = sqrt(4) - [nthroot(17248,3) * antilog(0.3010)] * [892839.2382389 - 89238239.923]
+;msgbox,% Solve(var)
+;msgbox,% UniquePMT("abd", 3)
 ;msgbox,% Solve("Sqrt(4) * nthRoot(8, 3) * 2 * log(100) * antilog(0.3010) - 32")
 ;Msgbox,% Greater(18.789, 187)
 ;MsgBox,% Divide("434343455677690909087534208967834434444.5656", "8989998989898909090909009909090909090908656454520")
@@ -62,12 +64,58 @@ MISC
 ;Msgbox,% Evaluate("-28","-98.007")
 ;return
 
-
-Solve(expression){
+Solve(expression, ahk=false){
 StringReplace,expression,expression,%A_space%,,All	;The tricky part :-D
 StringReplace,expression,expression,%A_tab%,,All
+; More Reps
+expression := Fixexpression(expression)
+; Solving Brackets first
+posofb := 0
+loop,
+{
+loop,
+{
+	posofb := Instr(expression, "[",false,1,A_index)
+	if !(Instr(expression, "[",false,1,A_index + 1)){
+		if (posofb)
+		{
+			get := Solve( Substr(expression, posofb + 1, Instr(expression, "]", false, posofb, 1) - posofb - 1) , ahk )	;solve the bracket
+			expression := Fixexpression( Substr(expression, 1, posofb - 1) . get . Substr(expression, Instr(expression, "]", false, posofb, 1) + 1) )
+		}
+		else
+			break
+	}
+}
+;Primary Loop
+if !(Instr(expression, "["))
+	break
+}
+;Changing +,-... in expressions to something different    ¢¤¥¦    =    +-*/
+loop,
+{
+	if !(Instr(expression, "(")){
+	StringReplace,expression,expression,+,¢,All
+	StringReplace,expression,expression,-,¤,All
+	StringReplace,expression,expression,*,¥,All
+	StringReplace,expression,expression,/,¦,All
+	StringReplace,expression,expression,\,¦,All
+	reserve .= expression
+	break
+	}
+	temp := Substr(expression, 1, Instr(expression, "(")) ;till  4+2 + sin(
+	StringReplace,temp,temp,+,¢,All
+	StringReplace,temp,temp,-,¤,All
+	StringReplace,temp,temp,*,¥,All
+	StringReplace,temp,temp,/,¦,All
+	StringReplace,temp,temp,\,¦,All
+	temp2 := SubStr(expression, Instr(expression, "(") + 1, Instr(expression, ")") - Instr(expression, "("))
+	reserve .= temp . temp2
+	expression := Substr(expression,Instr(expression, ")")+ 1)
+}
+;
+expression := reserve
 
-loop, parse, expression,+*-/\x
+loop, parse, expression,¢¤¥¦
 {
 ;Check for functions -- 
 firstch := Substr(A_loopfield, 1, 1)
@@ -94,14 +142,25 @@ if firstch is not Integer
 		number := A_LoopField
 ;Perform the previous assignment routine
 if (char != ""){
-	if char = +
+	if (Ahk){
+	if char = ¢
+		solved := solved + (number)
+	else if char = ¤
+		solved := solved - (number)
+	else if char = ¦
+		solved := solved / (number)
+	else if char = ¥
+		solved := solved * (number)
+	}else{
+	if char = ¢
 		solved := Evaluate(solved, number)
-	else if char = -
+	else if char = ¤
 		solved := Evaluate(solved, "-" number)
-	else if ((char == "/") or (char == "\"))
+	else if char = ¦
 		solved := Divide(solved, number)
-	else if ((char == "*") or (char == "x"))
+	else if char = ¥
 		solved := Multiply(solved, number)
+	}
 }
 if solved = 
 	solved := number
@@ -350,6 +409,119 @@ if !(positive)
 return, Intmd
 }
 
+;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Roots(expression){		;Enter a, b, c for quad. eqn ------  a, b, c, d for cubic eqn. and so on
+StringReplace,expression,expression,%A_space%,,All
+StringReplace,expression,expression,%A_tab%,,All
+;eqn, limit
+limit := 0
+loop, parse, expression,`,	;get individual coffs
+{
+	if !(Instr(A_Loopfield, "+") or Instr(A_loopfield, "-"))
+		coff%A_index% := "+" A_loopfield
+	else
+		coff%A_index% := A_loopfield
+	
+	limit := limit + Abs(A_loopfield)
+	nofterms := A_index
+}
+
+loop,% (nofterms - 1)	;not including contsant
+	term .= Substr(coff%A_index%, 1, 1) "[" Substr(coff%A_index%,2) . " * Pow(x, " . (nofterms - A_index) . ")" "]"
+term .= coff%nofterms%
+
+plot := limit
+if (limit / (nofterms-1) < 8)	;if roots are within short range, slow down
+	speed := defaultspeed := 0.2 , incomfac := "0.00" , lessfac := "0.01"
+else
+	speed := defaultspeed := 1 , incomfac := "0.0" , lessfac := "0.05"
+
+positive := true
+StringReplace,expression,term,x,%plot%,All	;getting starting value
+if Instr(Solve(expression), "-")
+	positive := false
+
+while (plot >= -limit)	;My theorem - Safe Range
+{
+	StringReplace,expression,term,x,%plot%,All
+	fx := Solve(expression, true)	;Over here ... Uses the AHK processes for faster results
+	
+	if (speed == defaultspeed){
+		if (fx == "0"){
+			roots .= Prefect(plot) . ","
+			positive := Toggle(positive) , plot-=speed
+			if (Instr(roots, ",", false, 1, nofterms - 1))	;if all roots have already been found, go out
+				break
+			continue
+			msgbox,% plot
+		}
+	}
+	else{
+		compare := Substr(Ltrim(fx, "-"),1,4)
+		if ((Instr(compare,incomfac) == 1) or compare+0 < lessfac+0)
+			{
+			roots .= Prefect(plot) . ","
+			speed := defaultspeed , positive := Toggle(positive) , plot-=speed
+			if (Instr(roots, ",", false, 1, nofterms - 1))
+				break
+			continue
+			}
+		}
+
+	if (positive){
+		if (Instr(fx,"-")){
+			plot+=defaultspeed , positive := Toggle(positive) , speed := 0.01	;Lower the value, more the time and accurateness
+			continue
+		}
+	}else{
+		if !(Instr(fx, "-")){
+			plot+=defaultspeed , positive := Toggle(positive) , speed := 0.01
+			continue
+		}
+	}
+	plot-=speed
+}
+return, Rtrim(roots, ",")
+}
+;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+UniquePmt(series, ID=1){
+if Instr(series, ",")
+	loop, parse, series,`,
+		item%A_index% := A_LoopField , last := lastbk := A_Index
+else{
+	loop, parse, series
+		item%A_index% := A_loopfield
+	last := lastbk := Strlen(series)	; Multilined for speed
+}
+; The theory
+if ID = All			;Return all possible permutations
+{
+	loop,% last - 1
+		last := last * A_index
+	loop,% last
+		toreturn .= UniquePmt(series, A_index) . "`n"
+	return, Rtrim(toreturn, "`n")
+}
+
+posfactor := (Mod(ID, last) == 0) ? last : Mod(ID, last)
+incfactor := (Mod(ID, last) == 0) ? Floor(ID / last) : Floor(ID / last) + 1
+
+loop,% last
+{
+	posfactor := (Mod(posfactor + incfactor - 1, last) == 0) ? last : Mod(posfactor + incfactor - 1, last)
+	res .= item%posfactor% "," , item%posfactor% := ""
+	loop,% lastbk
+		if (item%A_index% == "")
+			plus1 := A_index + 1 , item%A_index% := item%plus1% , item%plus1% := ""
+	last-=1
+	if (posfactor > last)
+		posfactor := 1
+}
+return, Rtrim(res, ",")
+}
+
 ;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 Greater(number1, number2, trueforequal=false){
 IfInString,number2,-
@@ -451,7 +623,66 @@ if Instr(number, "-")
 return,% sign . Prefect(antilog( (1/n) * log(number) ))
 }
 
+Pow(number, power){
+return, number ** power
+}
 ;################# NON - MATH FUNCTIONS ###################################
+
+FixExpression(expression){
+StringReplace,expression,expression,--,+,All
+StringReplace,expression,expression,-+,-,All
+StringReplace,expression,expression,+-,-,All
+StringReplace,expression,expression,++,+,All
+
+if (Substr(expression, 1, 1) != "+" or Substr(expression, 1, 1) != "-")
+	expression := "+" expression
+loop,
+{
+if Instr(expression, "*-"){
+	fromleft := Substr(expression, 1, Instr(expression, "*-"))
+	StringGetPos,posplus,fromleft,+,R
+	StringGetPos,posminus,fromleft,-,R
+	if (posplus > posminus)
+		fromleft := Substr(fromleft, 1, posplus) "-" Substr(fromleft, posplus + 2)
+	else
+		fromleft := Substr(fromleft, 1, posminus) "+" Substr(fromleft, posminus + 2)
+	expression := fromleft . Substr(expression, Instr(expression, "*-") + 2)
+}else if Instr(expression, "/-"){
+	fromleft := Substr(expression, 1, Instr(expression, "/-"))
+	StringGetPos,posplus,fromleft,+,R
+	StringGetPos,posminus,fromleft,-,R
+	if (posplus > posminus)
+		fromleft := Substr(fromleft, 1, posplus) "-" Substr(fromleft, posplus + 2)
+	else
+		fromleft := Substr(fromleft, 1, posminus) "+" Substr(fromleft, posminus + 2)
+	expression := fromleft . Substr(expression, Instr(expression, "/-") + 2)
+}else if Instr(expression, "\-"){
+	fromleft := Substr(expression, 1, Instr(expression, "\-"))
+	StringGetPos,posplus,fromleft,+,R
+	StringGetPos,posminus,fromleft,-,R
+	if (posplus > posminus)
+		fromleft := Substr(fromleft, 1, posplus) "-" Substr(fromleft, posplus + 2)
+	else
+		fromleft := Substr(fromleft, 1, posminus) "+" Substr(fromleft, posminus + 2)
+	expression := fromleft . Substr(expression, Instr(expression, "\-") + 2)
+}else if Instr(expression, "x-"){
+	fromleft := Substr(expression, 1, Instr(expression, "x-"))
+	StringGetPos,posplus,fromleft,+,R
+	StringGetPos,posminus,fromleft,-,R
+	if (posplus > posminus)
+		fromleft := Substr(fromleft, 1, posplus) "-" Substr(fromleft, posplus + 2)
+	else
+		fromleft := Substr(fromleft, 1, posminus) "+" Substr(fromleft, posminus + 2)
+	expression := fromleft . Substr(expression, Instr(expression, "x-") + 2)
+}else
+	break
+}
+StringReplace,expression,expression,--,+,All
+StringReplace,expression,expression,-+,-,All
+StringReplace,expression,expression,+-,-,All
+StringReplace,expression,expression,++,+,All
+return, expression
+}
 
 Toggle(bool){
 return,% (bool) ? (false) : (true)
