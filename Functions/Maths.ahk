@@ -2,13 +2,11 @@
 MATHS LIBRARY
 by Avi Aryan
 Thanks to Uberi, sinkfaze and justme for valuable suggestions and ideas.
-v 1.3
-------------------------------------------------------------------------------
-http://www.avi-win-tips.blogspot.com
+v 1.7
 ------------------------------------------------------------------------------
 
 ##############################################################################
-MAIN FUNCTIONS
+FUNCTIONS
 ##############################################################################
 See Help - http://www.avi-win-tips.blogspot.com/2013/05/maths.html
 ##############################################################################
@@ -20,16 +18,15 @@ See Help - http://www.avi-win-tips.blogspot.com/2013/05/maths.html
   Solve() supports functions() . Solve() supports Nesting via [] brackets ( not () )
   
 * Evaluate(number1, number2) --- +/- massive numbers . Supports Real Nos (Everything)
-
 * Multiply(number1, number2) --- multiply two massive numbers . Supports everything
-
 * Divide(Dividend, Divisor) --- Divide two massive numbers . Supports everything
-
 * Roots("Coefficients") - Roots of a poly function 
-
-* Greater(number1, number2, trueforequal=false) --- compare two massive numbers . Should support everything
-  
+* Greater(number1, number2, trueforequal=false) --- compare two massive numbers 
 * Prefect(number) --- convert a number to most suitable form. like ( 002 to 2 ) and ( 000.5600 to 0.56 )
+* fact(number) --- factorial of a number . supports large numbers 
+* Pow(number, power) --- power of a number . supports large numbers and powers
+* ModG(Dividend, Divisor) --- Mod() . Supports large numbers
+* FloorG(number) --- Floor() . Supports large numbers
 
 -----  BETTER PASS NUMBERS AS STRINGS FOR THE ABOVE FUNCTIONS ------------------
 -----  SEE THE COMMENTED MSGBOX CODE BELOW TO UNRSTND WHAT I MEAN --------------
@@ -39,25 +36,35 @@ See Help - http://www.avi-win-tips.blogspot.com/2013/05/maths.html
 	eg -> UniquePMT("ram,kam,shyam,nam", "All") >>> All permutations separated by linefeeds
 
 * Antilog(number, basetouse=10) --- gives antilog of a number . basetouse can be "e" .
-
 * nthRoot(number, n) ---- gives nth root of a number .
   nthroot(8, 3) gives cube root of 8 = 2
 
 * logB(number, base) --- log of a number at a partcular base.
 */
 
+;msgbox,% Pow("12","32")
+;MsgBox,% Divide("434343455677690909087534208967834434444.5656", "8989998989898909090909009909090909090908656454520", 10) 
+;msgbox,% UniquePMT("abcdefghijklmnop",2)
+;msgbox,% ModG("-22","-7")
+;msgbox,% Divide("40000.00","200")
+;msgbox,% Divide("2","7", 100)
+;msgbox,% Divide("48.45","19.45")
+;msgbox,% Divide("1200000000000000","3")
+;msgbox,% fact("38")
 ;msgbox,% roots("1,1,1,-3")
 ;msgbox,% UniquePMT("avi,annat,koiaur,aurkoi", "All")
-;msgbox,% Solve("[28*45] - [45*28]")
+;msgbox,% Solve("[28*45] - [45*28]", false)
+;msgbox,% Evaluate("1280", "-1280")
 ;msgbox,% Roots("1,1,1,-3") ;xcube + xsq + x - 3 = 0
-;MsgBox,% Solve("23898239238923.2382398923 + 2378237238.238239 - 989939.9939 * 892398293823")
+;MsgBox,% Solve("23898239238923.2382398923 + 2378237238.238239 - [989939.9939 * 892398293823]")
 
 ;var = sqrt(4) - [nthroot(17248,3) * antilog(0.3010)] * [892839.2382389 - 89238239.923]
 ;msgbox,% Solve(var)
-;msgbox,% UniquePMT("abd", 3)
+;msgbox,% UniquePMT("abd", "All")
 ;msgbox,% Solve("Sqrt(4) * nthRoot(8, 3) * 2 * log(100) * antilog(0.3010) - 32")
 ;Msgbox,% Greater(18.789, 187)
-;MsgBox,% Divide("434343455677690909087534208967834434444.5656", "8989998989898909090909009909090909090908656454520")
+;Send,% "`n" Divide("434343455677690909087534208967834434444.5656", "8989998989898909090909009909090909090908656454520")
+;Send,% "`n" Divideold("434343455677690909087534208967834434444.5656", "8989998989898909090909009909090909090908656454520")
 ;MsgBox,% Multiply("111111111111111111111111111111111111111111.111","55555555555555555555555555555555555555555555.555")
 ;MsgBox,% Prefect("00.002000")
 ;Msgbox,% nthroot(3.375, 3)
@@ -155,7 +162,7 @@ if (char != ""){
 	if char = ¢
 		solved := Evaluate(solved, number)
 	else if char = ¤
-		solved := Evaluate(solved, "-" number)
+		solved := Evaluate(solved,"-" . number)
 	else if char = ¦
 		solved := Divide(solved, number)
 	else if char = ¥
@@ -246,7 +253,7 @@ if (Instr(n2,"-") and Instr(n1, "-"))
 elsE
 {
 ;Compare numbers for suitable order
-numbercompare := Greater(number1, number2)
+numbercompare := Greater(number1, number2, true)
 if !(numbercompare){
 	mid := number2
 	number2 := number1
@@ -357,7 +364,7 @@ return, product
 
 ;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Divide(number1, number2){
+Divide(number1, number2, length=10){
 ;Getting Sign
 positive := true
 if (Instr(number2, "-"))
@@ -366,47 +373,95 @@ if (Instr(number1, "-"))
 	positive := Toggle(positive)
 StringReplace,number1,number1,-
 StringReplace,number2,number2,-
-;Checking if possible with AHK Only
-oldformat := A_FormatFloat
-SetFormat, FloatFast, 0.16
-;Case 1 n2 >= n1
-if Greater(number2, number1, true)
-	if (number1 / number2 != "0.0000000000000000"){		;per v1.1.09
-		toreturn := Prefect(number1 / number2)
-		SetFormat, FloatFast, %oldformat%
-		return,% ( (positive) ? ("") : ("-") ) . toreturn
-	}
-;Case 2 n1 > n2
-if Greater(number1, number2)
-	if !(Strlen(number1 / number2) > 17){	;As per tests, the greatest correct length seemed to be 17 (including "0.") (in non-dec denominator). We dont want 18.
-		toreturn := Prefect(number1 / number2)
-		SetFormat, FloatFast, %oldformat%
-		return,% ( (positive) ? ("") : ("-") ) . toreturn
-	}
-;
-if (Strlen(number2) > 15)	;do this only if required
-	number2 := Substr(number2, 1, Strlen(number2) - (Strlen(number2) - Instr(number2, ".") + 1))	;remove decs
+;Perfect them
+number1 := Prefect(number1) , number2 := Prefect(number2)
+;Remove Decimals
+dec := 0
+if Instr(number1, ".")
+	dec := - (Strlen(number1) - Instr(number1, "."))	;-ve as when the num is multiplied by 10, 10 is divided
+if Instr(number2, ".")
+	dec := Strlen(number2) - Instr(number2, ".") + dec + 0
+StringReplace,number1,number1,.
+StringReplace,number2,number2,.
 
-Intmd := Multiply(number1, 1 / SubStr(number2, 1, 15))	;Send to process directly
-if (Strlen(number2) > 15){
+number1 := Ltrim(number1, "0") , number2 := Ltrim(number2, "0")
+decimal := dec , num1 := number1 , num2 := number2	;These wiil be used to handle point insertion
+;Count trailing zeroes as power
+loop,
+	if (Substr(number1, 0) == "0")
+		number1 := Substr(number1,1,Strlen(number1) - 1) , dec+=1
+	else
+		break
+
+n1 := Strlen(number1) , n2 := StrLen(number2) ;Stroring n1 & n2 as they will be used heavily below
+;Widen number1
+loop,% n2 + length
+	number1 .= "0"
+coveredlength := 0 , dec := dec - n2 - length
+;Start
+while (number1 != "")
+{
+	n1fromleft := Substr(number1, 1, n2)
 	
-	if Instr(Intmd, "."){
-	numofzeros := Strlen(number2) - 15
-	Intmd := "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" . Intmd
-	dotpoint := Instr(Intmd, ".")
-	StringReplace,Intmd,Intmd,.
-	Intmd := SubStr(Intmd, 1, dotpoint - numofzeros - 1) . "." . SubStr(Intmd, dotpoint - numofzeros)
-	}else{
-	numofzeros := Strlen(number2) - 15
-	Intmd := "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" . Intmd
-	Intmd := Substr(Imtmd, 1, StrLen(Intmd) - numofzeros) . "." . SubStr(Intmd, StrLen(Intmd) - numofzeros + 1)
+	if Greater(n1fromleft, number2, true){
+		todivide := n1fromleft
+		times := Floor(Substr(todivide,1,10) / Substr(number2,1,10))	;Bit of risk here
 	}
+	else{
+		todivide := SubStr(number1, 1, n2+1)
+		if !(Greater(todivide, number2, true))
+			break
+		times := Floor(Substr(todivide,1,11) / Substr(number2,1,10))	;Bit of risk here
+	}
+	if times = 0
+		break
+
+	res .= times , coveredlength+=StrLen(todivide)
+	remainder := Evaluate(todivide, "-" Multiply(number2, times))
+
+	if Greater("0", remainder, true){
+		if (coveredlength >= n1){
+			StringReplace,number1,number1,%todivide%
+			number1 := "1" . number1
+			res := Multiply(res, number1)
+			break
+		}
+	}
+	number1 := (remainder == 0) ? ("") : (remainder) . Substr(number1, Strlen(todivide) + 1)
 }
-Intmd := Prefect(Intmd)
-SetFormat, FloatFast, %oldformat%
-if !(positive)
-	Intmd := "-" Intmd
-return, Intmd
+;Putting Decimal points"
+if (dec < 0)
+{
+	oldformat := A_formatfloat
+	SetFormat,float,0.16e
+	Divi := Substr(num1,1,15) / Substr(num2,1,15) ; answer in decimals
+	decimal := decimal + Strlen(Substr(num1,15)) - Strlen(Substr(num2,15))
+	
+	if (Instr(divi,"-"))
+		decimal := decimal - Substr(divi,-1) + 1
+	else
+		decimal := decimal + Substr(divi,-1) + 1
+	
+	if (decimal > 0)
+		res := Substr(res, 1, decimal) "." Substr(res, decimal+1)
+	else if (decimal < 0){
+		loop,% Abs(decimal)
+			zeroes_e .= "0"
+		res := "0." zeroes_e res
+	}
+	else
+		res := "0." res
+
+	SetFormat,float,%oldformat%
+}
+else
+{
+	num := "1"
+	loop,% dec
+		num .= "0"
+	res := Multiply(Prefect(res), num)
+}
+return, ( (positive) ? "" : "-" ) . Prefect(res)
 }
 
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -498,23 +553,24 @@ else{
 ; The theory
 if ID = All			;Return all possible permutations
 {
-	loop,% last - 1
-		last := last * A_index
-	loop,% last
+	fact := fact(last)
+	loop,% fact
 		toreturn .= UniquePmt(series, A_index) . "`n"
 	return, Rtrim(toreturn, "`n")
 }
 
-posfactor := (Mod(ID, last) == 0) ? last : Mod(ID, last)
-incfactor := (Mod(ID, last) == 0) ? Floor(ID / last) : Floor(ID / last) + 1
+posfactor := (ModG(ID, last) == "0") ? last : ModG(ID, last)
+incfactor := (ModG(ID, last) == "0") ? FloorG(ID / last) : FloorG(ID / last) + 1
 
 loop,% last
 {
-	posfactor := (Mod(posfactor + incfactor - 1, last) == 0) ? last : Mod(posfactor + incfactor - 1, last)
+	posfactor := (ModG(posfactor + incfactor - 1, last) == "0") ? last : ModG(posfactor + incfactor - 1, last)	;Extraction point
+
 	res .= item%posfactor% "," , item%posfactor% := ""
 	loop,% lastbk
 		if (item%A_index% == "")
 			plus1 := A_index + 1 , item%A_index% := item%plus1% , item%plus1% := ""
+
 	last-=1
 	if (posfactor > last)
 		posfactor := 1
@@ -561,11 +617,8 @@ loop,
 	else if (Substr(number2,A_index, 1) > SubStr(number1,A_Index, 1))
 		return,% (bothminus) ? (true) : (false)
 	
-	if (a_index == stop){
-		if (trueforequal)
-			return, true
-		break
-	}
+	if (a_index == stop)
+		return, (trueforequal) ? true : false
 }
 }
 
@@ -605,6 +658,41 @@ else
 }
 
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ModG(dividend, divisor){
+;Signs
+positive := true
+if (Instr(divisor, "-"))
+	positive := false
+if (Instr(dividend, "-"))
+	positive := Toggle(positive)
+StringReplace,dividend,dividend,-
+StringReplace,divisor,divisor,-
+
+Remainder := dividend
+;Calculate no of occurances
+if Greater(dividend, divisor){
+	div := Divide(dividend, divisor,1)
+	div := Instr(div, ".") ? SubStr(div, 1, Instr(div, ".") - 1) : 0
+	Remainder := Evaluate(dividend,"-" Multiply(divisor, div))
+}
+return, ( Positive ? "" : "-" ) . Remainder
+}
+
+;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+FloorG(number){
+number := Prefect(number)
+if Instr(number, "-")
+{
+	if Instr(number,".")
+		return, Evaluate(Substr(number, 1, Instr(number, ".") - 1), -1)
+	else
+		return, number
+}
+else
+	return, (Instr(number, ".")) ? Substr(number, 1, Instr(number, ".") - 1) : number
+}
+;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 LogB(number, base){
 IfNotInString,base,-
@@ -623,10 +711,22 @@ if Instr(number, "-")
 return,% sign . Prefect(antilog( (1/n) * log(number) ))
 }
 
-Pow(number, power){
-return, number ** power
+fact(number){
+return, (number+0<2) ? 1 : Multiply(number, fact(number-1))
 }
-;################# NON - MATH FUNCTIONS ###################################
+
+Pow(number, power){
+if (power < 1)
+	return, nthRoot(number, power)
+else{
+	multiple := 1
+	loop, %power%
+		multiple := Multiply(multiple, number)
+	return, multiple
+}
+}
+;################# NON - MATH FUNCTIONS #######################################
+;################# RESERVED ###################################################
 
 FixExpression(expression){
 StringReplace,expression,expression,--,+,All

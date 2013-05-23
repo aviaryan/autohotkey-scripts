@@ -82,10 +82,10 @@ return, v
 Fileatline(file, what, linenum){
 loop, read, %file%
 {
-if !(A_index == linenum)
-	filedata .= A_LoopReadLine . "`r`n"
-else
-	filedata .= what . "`r`n"
+	if !(A_index == linenum)
+		filedata .= A_LoopReadLine . "`r`n"
+	else
+		filedata .= what . "`r`n"
 }
 StringTrimRight,filedata,filedata,2
 FileDelete, %file%
@@ -99,12 +99,12 @@ BrowserRun(site){
 RegRead, OutputVar, HKCR, http\shell\open\command 
 IfNotEqual, Outputvar
 {
-StringReplace, OutputVar, OutputVar,"
-SplitPath, OutputVar,,OutDir,,OutNameNoExt, OutDrive
-run,% OutDir . "\" . OutNameNoExt . ".exe" . " """ . site . """"
+	StringReplace, OutputVar, OutputVar,"
+	SplitPath, OutputVar,,OutDir,,OutNameNoExt, OutDrive
+	run,% OutDir . "\" . OutNameNoExt . ".exe" . " """ . site . """"
 }
 else
-  run,% "iexplore.exe" . " """ . site . """"	;internet explorer
+	run,% "iexplore.exe" . " """ . site . """"	;internet explorer
 }
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -130,4 +130,10 @@ IfEqual,Data
 }
 
 BlockInput, Off
+}
+;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+;Concatenate a string n - times without using loop
+Concatenate(string, ntimes){
+return, (ntimes<2) ? string : string . Concatenate(string , ntimes-1)
 }
