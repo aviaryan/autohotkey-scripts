@@ -42,8 +42,11 @@ See Help - http://www.avi-win-tips.blogspot.com/2013/05/maths.html
 * logB(number, base) --- log of a number at a partcular base.
 */
 
+;msgbox,% Multiply(874596997.25, 40)
+;msgbox,% UniquePMT("abcdefghijklmnopqrstuvwxyz0123456789-:.(", 34983843989)
+;msgbox,% Divide("23232.3","23.98")
 ;msgbox,% Pow("12","32")
-;MsgBox,% Divide("434343455677690909087534208967834434444.5656", "8989998989898909090909009909090909090908656454520", 10) 
+;msgbox,% Divide("43", "89", 10) 
 ;msgbox,% UniquePMT("abcdefghijklmnop",2)
 ;msgbox,% ModG("-22","-7")
 ;msgbox,% Divide("40000.00","200")
@@ -406,16 +409,18 @@ while (number1 != "")
 	if Greater(n1fromleft, number2, true){
 		todivide := n1fromleft
 		times := Floor(Substr(todivide,1,10) / Substr(number2,1,10))	;Bit of risk here
+		res .= zeroes_r
 	}
 	else{
 		todivide := SubStr(number1, 1, n2+1)
 		if !(Greater(todivide, number2, true))
 			break
 		times := Floor(Substr(todivide,1,11) / Substr(number2,1,10))	;Bit of risk here
+		if (zeroes != "")
+			res .= zeroes_r "0"
 	}
 	if times = 0
 		break
-
 	res .= times , coveredlength+=StrLen(todivide)
 	remainder := Evaluate(todivide, "-" Multiply(number2, times))
 
@@ -427,7 +432,13 @@ while (number1 != "")
 			break
 		}
 	}
-	number1 := (remainder == 0) ? ("") : (remainder) . Substr(number1, Strlen(todivide) + 1)
+	if remainder = 0
+		remainder := ""
+	number1 := remainder . Substr(number1, Strlen(todivide) + 1)
+
+	zeroes_r := ""
+	loop,% n2 - StrLen(remainder) - 1
+		zeroes_r .= "0"
 }
 ;Putting Decimal points"
 if (dec < 0)
@@ -558,9 +569,8 @@ if ID = All			;Return all possible permutations
 		toreturn .= UniquePmt(series, A_index) . "`n"
 	return, Rtrim(toreturn, "`n")
 }
-
 posfactor := (ModG(ID, last) == "0") ? last : ModG(ID, last)
-incfactor := (ModG(ID, last) == "0") ? FloorG(ID / last) : FloorG(ID / last) + 1
+incfactor := (ModG(ID, last) == "0") ? FloorG(Divide(ID,last)) : FloorG(Divide(ID,last)) + 1
 
 loop,% last
 {
@@ -670,10 +680,13 @@ StringReplace,divisor,divisor,-
 
 Remainder := dividend
 ;Calculate no of occurances
-if Greater(dividend, divisor){
-	div := Divide(dividend, divisor,1)
+if Greater(dividend, divisor, true){
+	div := Divide(dividend, divisor)
 	div := Instr(div, ".") ? SubStr(div, 1, Instr(div, ".") - 1) : 0
-	Remainder := Evaluate(dividend,"-" Multiply(divisor, div))
+	if div = 0
+		Remainder := 0
+	else
+		Remainder := Evaluate(dividend,"-" Multiply(divisor, div))
 }
 return, ( Positive ? "" : "-" ) . Remainder
 }
