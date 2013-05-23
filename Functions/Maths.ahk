@@ -42,9 +42,6 @@ See Help - http://www.avi-win-tips.blogspot.com/2013/05/maths.html
 * logB(number, base) --- log of a number at a partcular base.
 */
 
-;msgbox,% Multiply(874596997.25, 40)
-;msgbox,% UniquePMT("abcdefghijklmnopqrstuvwxyz0123456789-:.(", 34983843989)
-;msgbox,% Divide("23232.3","23.98")
 ;msgbox,% Pow("12","32")
 ;msgbox,% Divide("43", "89", 10) 
 ;msgbox,% UniquePMT("abcdefghijklmnop",2)
@@ -101,6 +98,7 @@ if !(Instr(expression, "["))
 	break
 }
 ;Changing +,-... in expressions to something different    ¢¤¥¦    =    +-*/
+
 loop,
 {
 	if !(Instr(expression, "(")){
@@ -405,36 +403,49 @@ coveredlength := 0 , dec := dec - n2 - length
 while (number1 != "")
 {
 	n1fromleft := Substr(number1, 1, n2)
-	
+	lendivide := n2
 	if Greater(n1fromleft, number2, true){
 		todivide := n1fromleft
 		times := Floor(Substr(todivide,1,10) / Substr(number2,1,10))	;Bit of risk here
 		res .= zeroes_r
 	}
 	else{
-		todivide := SubStr(number1, 1, n2+1)
-		if !(Greater(todivide, number2, true))
-			break
+		indexcount := 0
+		loop,% Strlen(number1) - n2
+		{
+		todivide := SubStr(number1, 1, n2+A_index)
+		if (coveredlength != 0)	;add zeroes to quotient
+			if !(coveredlength >= n1)
+				zeroes_r .= "0"
+		lendivide+=1 , indexcount+=1
+		if !(Greater(todivide, number2))	;get one more if still less
+			continue
+		todivide := Ltrim(todivide, "0")
 		times := Floor(Substr(todivide,1,11) / Substr(number2,1,10))	;Bit of risk here
-		if (zeroes != "")
-			res .= zeroes_r "0"
+		break
+		}
+		res .= zeroes_r
+		
+		if (Indexcount >= Strlen(number1) - n2)
+			break
 	}
+
 	if times = 0
 		break
-	res .= times , coveredlength+=StrLen(todivide)
+	res .= times , coveredlength+=lendivide
 	remainder := Evaluate(todivide, "-" Multiply(number2, times))
+
+	if remainder = 0
+		remainder := ""
+	number1 := remainder . Substr(number1, lendivide + 1)
 
 	if Greater("0", remainder, true){
 		if (coveredlength >= n1){
-			StringReplace,number1,number1,%todivide%
 			number1 := "1" . number1
 			res := Multiply(res, number1)
 			break
 		}
 	}
-	if remainder = 0
-		remainder := ""
-	number1 := remainder . Substr(number1, Strlen(todivide) + 1)
 
 	zeroes_r := ""
 	loop,% n2 - StrLen(remainder) - 1
@@ -599,6 +610,7 @@ IfInString,number1,-
 
 if (Instr(number1, "-") and Instr(number2, "-"))
 	bothminus := true
+number1 := Prefect(number1) , number2 := Prefect(number2)
 ; Manage Decimals
 dec1 := (Instr(number1,".")) ? ( StrLen(number1) - InStr(number1, ".") ) : (0)
 dec2 := (Instr(number2,".")) ? ( StrLen(number2) - InStr(number2, ".") ) : (0)
