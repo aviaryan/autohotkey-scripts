@@ -1,8 +1,8 @@
 ﻿/*
 MATHS LIBRARY
 by Avi Aryan
-Thanks to Uberi, sinkfaze and justme for valuable suggestions and ideas.
-v 1.7
+Thanks to hd202, Uberi, sinkfaze and justme for valuable suggestions and ideas.
+v 1.8
 ------------------------------------------------------------------------------
 
 ##############################################################################
@@ -43,13 +43,14 @@ See Help - http://www.avi-win-tips.blogspot.com/2013/05/maths.html
 */
 
 ;msgbox,% Pow("12","32")
-;msgbox,% Divide("43", "89", 10) 
-;msgbox,% UniquePMT("abcdefghijklmnop",2)
+;msgbox,% Divide("43.034934034904334", "89.3467436743", 10)
+;msgbox,% Divide("0.00000000000001","0.0000000001")
+;msgbox,% UniquePMT("abcdefghijklmnop",656)
 ;msgbox,% ModG("-22","-7")
-;msgbox,% Divide("40000.00","200")
-;msgbox,% Divide("2","7", 100)
-;msgbox,% Divide("48.45","19.45")
-;msgbox,% Divide("1200000000000000","3")
+;msgbox,% Divide("232323","23")
+;msgbox,% Divide("22","7", 100)
+;msgbox,% Divide("48.45","19.45", 14)
+;Send,% Divide("1200000","3")
 ;msgbox,% fact("38")
 ;msgbox,% roots("1,1,1,-3")
 ;msgbox,% UniquePMT("avi,annat,koiaur,aurkoi", "All")
@@ -387,12 +388,6 @@ StringReplace,number2,number2,.
 
 number1 := Ltrim(number1, "0") , number2 := Ltrim(number2, "0")
 decimal := dec , num1 := number1 , num2 := number2	;These wiil be used to handle point insertion
-;Count trailing zeroes as power
-loop,
-	if (Substr(number1, 0) == "0")
-		number1 := Substr(number1,1,Strlen(number1) - 1) , dec+=1
-	else
-		break
 
 n1 := Strlen(number1) , n2 := StrLen(number2) ;Stroring n1 & n2 as they will be used heavily below
 ;Widen number1
@@ -400,72 +395,92 @@ loop,% n2 + length
 	number1 .= "0"
 coveredlength := 0 , dec := dec - n2 - length
 ;Start
-while (number1 != "")
+while(number1 != "")
 {
-	n1fromleft := Substr(number1, 1, n2)
-	lendivide := n2
-	if Greater(n1fromleft, number2, true){
-		todivide := n1fromleft
-		times := Floor(Substr(todivide,1,10) / Substr(number2,1,10))	;Bit of risk here
-		res .= zeroes_r
-	}
-	else{
-		indexcount := 0
-		loop,% Strlen(number1) - n2
-		{
-		todivide := SubStr(number1, 1, n2+A_index)
-		if (coveredlength != 0)	;add zeroes to quotient
-			if !(coveredlength >= n1)
-				zeroes_r .= "0"
-		lendivide+=1 , indexcount+=1
-		if !(Greater(todivide, number2))	;get one more if still less
-			continue
-		todivide := Ltrim(todivide, "0")
-		times := Floor(Substr(todivide,1,11) / Substr(number2,1,10))	;Bit of risk here
-		break
-		}
-		res .= zeroes_r
-		
-		if (Indexcount >= Strlen(number1) - n2)
-			break
-	}
+	times := 0 , below := "" , lendivide := 0 , n1fromleft := Substr(number1, 1, n2)
 
-	if times = 0
-		break
+	if Greater(n1fromleft, number2, true)
+	{
+		todivide := n1fromleft
+		loop, 10
+		{
+			num2temp%A_index% := Multiply(number2, A_index)
+			if !(Greater(todivide, num2temp%A_index%, true)){
+				lendivide := n2
+				times := A_index - 1 , below := num2temp%times%
+				break
+			}
+		}
+		if (n1 >= coveredlength)
+			res .= zeroes_r
+	}
+	else
+	{
+		todivide := SubStr(number1, 1, n2+1)
+		loop, 10
+		{
+			num2temp%A_index% := Multiply(number2, A_index)
+			if !(Greater(todivide, num2temp%A_index%, true)){
+				lendivide := n2 + 1
+				times := A_index - 1 , below := num2temp%times%
+				break
+			}
+		}
+		if (coveredlength != 0)
+			if (n1 >= coveredlength)
+				res .= zeroes_r
+	}
 	res .= times , coveredlength+=lendivide
-	remainder := Evaluate(todivide, "-" Multiply(number2, times))
+	remainder := Evaluate(todivide, "-" below)
 
 	if remainder = 0
 		remainder := ""
 	number1 := remainder . Substr(number1, lendivide + 1)
 
-	if Greater("0", remainder, true){
-		if (coveredlength >= n1){
+	if Greater("0", remainder, true)
+	{
+		zeroes_k := ""
+		loop,% Strlen(number1)
+			zeroes_k .= "0"
+		if (number1 == zeroes_k){
+			StringTrimRight,number1,number1,1
 			number1 := "1" . number1
 			res := Multiply(res, number1)
 			break
 		}
 	}
+	if times = 0
+		break
 
 	zeroes_r := ""
+	if (remainder == "") {
+		loop,
+		{
+			if (Instr(number1, "0") == "1")
+				zeroes_r .= "0" , number1 := Substr(number1, 2)
+			else
+				break
+		}
+	}
 	loop,% n2 - StrLen(remainder) - 1
 		zeroes_r .= "0"
 }
 ;Putting Decimal points"
+
 if (dec < 0)
 {
 	oldformat := A_formatfloat
 	SetFormat,float,0.16e
 	Divi := Substr(num1,1,15) / Substr(num2,1,15) ; answer in decimals
-	decimal := decimal + Strlen(Substr(num1,15)) - Strlen(Substr(num2,15))
-	
+	decimal := decimal + Strlen(Substr(num1,16)) - Strlen(Substr(num2,16))
+
 	if (Instr(divi,"-"))
 		decimal := decimal - Substr(divi,-1) + 1
 	else
 		decimal := decimal + Substr(divi,-1) + 1
-	
+
 	if (decimal > 0)
-		res := Substr(res, 1, decimal) "." Substr(res, decimal+1)
+		res := Substr(res, 1, decimal) . "." . Substr(res, decimal + 1)
 	else if (decimal < 0){
 		loop,% Abs(decimal)
 			zeroes_e .= "0"
