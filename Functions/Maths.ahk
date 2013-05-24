@@ -42,10 +42,9 @@ See Help - http://www.avi-win-tips.blogspot.com/2013/05/maths.html
 * logB(number, base) --- log of a number at a partcular base.
 */
 
-;msgbox,% Pow("12","32")
 ;msgbox,% Divide("43.034934034904334", "89.3467436743", 10)
 ;msgbox,% Divide("0.00000000000001","0.0000000001")
-;msgbox,% UniquePMT("abcdefghijklmnop",656)
+;msgbox,% UniquePMT("abcdefghijklmnopqrstuvwxyz0123456789",12344)
 ;msgbox,% ModG("-22","-7")
 ;msgbox,% Divide("232323","23")
 ;msgbox,% Divide("22","7", 100)
@@ -65,7 +64,6 @@ See Help - http://www.avi-win-tips.blogspot.com/2013/05/maths.html
 ;msgbox,% Solve("Sqrt(4) * nthRoot(8, 3) * 2 * log(100) * antilog(0.3010) - 32")
 ;Msgbox,% Greater(18.789, 187)
 ;Send,% "`n" Divide("434343455677690909087534208967834434444.5656", "8989998989898909090909009909090909090908656454520")
-;Send,% "`n" Divideold("434343455677690909087534208967834434444.5656", "8989998989898909090909009909090909090908656454520")
 ;MsgBox,% Multiply("111111111111111111111111111111111111111111.111","55555555555555555555555555555555555555555555.555")
 ;MsgBox,% Prefect("00.002000")
 ;Msgbox,% nthroot(3.375, 3)
@@ -393,11 +391,11 @@ n1 := Strlen(number1) , n2 := StrLen(number2) ;Stroring n1 & n2 as they will be 
 ;Widen number1
 loop,% n2 + length
 	number1 .= "0"
-coveredlength := 0 , dec := dec - n2 - length
+coveredlength := 0 , dec := dec - n2 - length , takeone := false
 ;Start
 while(number1 != "")
 {
-	times := 0 , below := "" , lendivide := 0 , n1fromleft := Substr(number1, 1, n2)
+	times := 0 , below := "" , lendivide := 0 , n1fromleft := (takeone) ? Substr(number1, 1, n2+1) : Substr(number1, 1, n2)
 
 	if Greater(n1fromleft, number2, true)
 	{
@@ -406,7 +404,7 @@ while(number1 != "")
 		{
 			num2temp%A_index% := Multiply(number2, A_index)
 			if !(Greater(todivide, num2temp%A_index%, true)){
-				lendivide := n2
+				lendivide := (takeone) ? n2 + 1 : n2
 				times := A_index - 1 , below := num2temp%times%
 				break
 			}
@@ -416,7 +414,7 @@ while(number1 != "")
 	}
 	else
 	{
-		todivide := SubStr(number1, 1, n2+1)
+		todivide := SubStr(number1, 1, n2+1)	; :-P (takeone) will not be needed here
 		loop, 10
 		{
 			num2temp%A_index% := Multiply(number2, A_index)
@@ -427,12 +425,14 @@ while(number1 != "")
 			}
 		}
 		if (coveredlength != 0)
-			if (n1 >= coveredlength)
+			if (n1 == coveredlength)	;if all nums have been bought down, time for decimal no Zero
 				res .= zeroes_r
+			else if (n1 >= (coveredlength+n2-1))
+				res .= zeroes_r "0"
 	}
 	res .= times , coveredlength+=lendivide
 	remainder := Evaluate(todivide, "-" below)
-
+	
 	if remainder = 0
 		remainder := ""
 	number1 := remainder . Substr(number1, lendivide + 1)
@@ -452,18 +452,21 @@ while(number1 != "")
 	if times = 0
 		break
 
-	zeroes_r := ""
+	zeroes_r := "" , takeone := false
 	if (remainder == "") {
 		loop,
 		{
 			if (Instr(number1, "0") == "1")
-				zeroes_r .= "0" , number1 := Substr(number1, 2)
+				zeroes_r .= "0" , number1 := Substr(number1, 2) , coveredlength+=1
 			else
 				break
 		}
 	}
-	loop,% n2 - StrLen(remainder) - 1
-		zeroes_r .= "0"
+	if (Strlen(remainder) == n2 and n1 > coveredlength)
+		takeone := true
+	else
+		loop,% n2 - StrLen(remainder) - 1
+			zeroes_r .= "0"
 }
 ;Putting Decimal points"
 
@@ -578,9 +581,9 @@ return, Rtrim(roots, ",")
 }
 ;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-UniquePmt(series, ID=1){
-if Instr(series, ",")
-	loop, parse, series,`,
+UniquePmt(series, ID=1, delimeter=","){
+if Instr(series, delimeter)
+	loop, parse, series,%delimeter%
 		item%A_index% := A_LoopField , last := lastbk := A_Index
 else{
 	loop, parse, series
@@ -601,8 +604,8 @@ incfactor := (ModG(ID, last) == "0") ? FloorG(Divide(ID,last)) : FloorG(Divide(I
 loop,% last
 {
 	posfactor := (ModG(posfactor + incfactor - 1, last) == "0") ? last : ModG(posfactor + incfactor - 1, last)	;Extraction point
-
 	res .= item%posfactor% "," , item%posfactor% := ""
+
 	loop,% lastbk
 		if (item%A_index% == "")
 			plus1 := A_index + 1 , item%A_index% := item%plus1% , item%plus1% := ""
