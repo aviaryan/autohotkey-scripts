@@ -33,7 +33,7 @@ sizey := 500 , sizex := 350
 ;-------------+
 ;1 - Clips, 2- version, 3 - hotkey ,4 - size
 FileReadLine,oldversion,q-settings/settings.ini,2
-If !(FileExist("q-settings/settings.ini") or oldversion > version)
+If !(FileExist("q-settings/settings.ini") or version > oldversion)
 {
 FileCreateDir,Q-settings
 FileAppend,13`n%version%`n+Z`n100,q-settings/settings.ini	;appending
@@ -64,7 +64,7 @@ Gui, Font, S14 CBlue bold, Consolas
 Gui, Add, Text, x0 y0 w%sizex% h30 +Center gabout, LaunchQ
 Gui, Font, S%sizetext% CBlack
 AddtoGUI()
-Gui, Font, CYellow
+Gui, Font, CYellow S12
 Gui, Add, Text,% "x0 y" sizey-25 " w" sizex  " h" septext " +Center gwebsite", Add Web-Site
 
 ;GUI 2 - Add item
