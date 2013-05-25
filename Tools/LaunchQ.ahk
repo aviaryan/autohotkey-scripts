@@ -1,7 +1,7 @@
 ﻿/* 
 ##########################################################
 LAUNCHQ - MINIMALIST APPLICATION LAUNCHER
-v1.5 
+v2.0 
 ##########################################################
 
 Copyright 2013 Avi Aryan  
@@ -25,17 +25,18 @@ limitations under the License.
 SetWorkingDir %A_ScriptDir%
 SetBatchLines, -1
 Page = http://www.avi-win-tips.blogspot.com/2013/05/launchq.html
-version = 1.5
+version = 2.0
+sizey := 500 , sizex := 350
 
 ;-------------+
 ;INITIALIZE   |
 ;-------------+
-;1 - Clips, 2- version, 3 - hotkey
-
-IfNotExist,Q-settings/settings.ini
+;1 - Clips, 2- version, 3 - hotkey ,4 - size
+FileReadLine,oldversion,q-settings/settings.ini,2
+If !(FileExist("q-settings/settings.ini") or oldversion > version)
 {
 FileCreateDir,Q-settings
-FileAppend,13`n%version%`n+Z,q-settings/settings.ini
+FileAppend,13`n%version%`n+Z`n100,q-settings/settings.ini	;appending
 
 FileDelete,q-settings/paths.lq
 FileDelete,q-settings/names.lq
@@ -48,6 +49,11 @@ Arrange()
 
 FileReadLine,curhot,q-settings/settings.ini,3
 Hotkey,%curhot%,ShowGui,On
+;Size
+FileReadLine,sizefactor,q-settings/settings.ini,4
+sizex := sizefactor / 100 * sizex , sizey := sizefactor / 100 * sizey
+;Text Size = sizey / 40 ||| Text Sep = sizey / 20
+sizetext := Floor(sizey / 40) , septext := Floor(sizey / 20) , hiettext := Floor(sizey / 11.5)	;ht used in AddtoGUI label
 
 ;---------+
 ;GUI      |
@@ -55,11 +61,11 @@ Hotkey,%curhot%,ShowGui,On
 Gui, -Caption +ToolWindow +AlwaysOnTop
 Gui, Color, CB2322
 Gui, Font, S14 CBlue bold, Consolas
-Gui, Add, Text, x0 y0 w350 h30 +Center gabout, LaunchQ
-Gui, Font, S12 CBlack
+Gui, Add, Text, x0 y0 w%sizex% h30 +Center gabout, LaunchQ
+Gui, Font, S%sizetext% CBlack
 AddtoGUI()
 Gui, Font, CYellow
-Gui, Add, Text, x0 y480 w350 h20 +Center gwebsite,Add Web-Site
+Gui, Add, Text,% "x0 y" sizey-25 " w" sizex  " h" septext " +Center gwebsite", Add Web-Site
 
 ;GUI 2 - Add item
 Gui, 2: +ToolWindow 
@@ -78,16 +84,17 @@ Gui, 2:Font, S10 CBlue Italic, Consolas
 Gui, 2:Add, Text, x2 y30 w210 h20 vavlblty, 
 
 ;GUI 3 - About
-Gui, 3: +ToolWindow
 Gui, 3:Font, S16 CRed, Consolas
 Gui, 3:Add, Text, x2 y0 w590 h30 +Center gpage, LaunchQ v%version% : by Avi Aryan
 Gui, 3:Font, S14 CBlue, Consolas
 Gui, 3:Add, Text, x2 y30 w590 h20 +Center gblog, More Tools
 Gui, 3:Font, S14 CGreen, Consolas
 Gui, 3:Add, Text, x2 y70 w220 h20 , Main Shortcut
-Gui, 3:Add, Text, x2 y110 w590 h20 +Center gupdate, Check for Updates
+Gui, 3:Add, Text, x2 y110 w220 h20 , Size
+Gui, 3:Add, Text, x2 y150 w590 h20 +Center gupdate, Check for Updates
 Gui, 3:Font, S12 CBlack, Consolas
 Gui, 3:Add, Hotkey, x342 y70 w170 h25 ghotkeychange vhotkey,
+Gui, 3:Add, Edit, x342 y110 w170 h25 gsize vsizefactor, %sizefactor%
 Gui, 3:Add, edit, x1000 y1000 w1 h1 vtofool,
 
 ;-------+
@@ -120,14 +127,14 @@ return
 ;END OF AUTO-EXCEUTE : FUNCS AND SUBS
 ;###############################################################################
 
-Scroll(y, x){
+Scroll(y, x, sizex, sizey){
 IfInString,y,-
 {
 ToolTip
 IfNotEqual,ontop,1
 {
 StringTrimLeft,y,y,1
-y := 300 - y
+y := sizey - 200 - y	;500 - 200 in older versions of Lq
 IfLess,y,20
 	y := 20
 ontop-=1
@@ -140,13 +147,13 @@ sleep, %y%
 }
 }
 ;End of Up scroll
-else IfGreater,y,500
+else IfGreater,y,%sizey%
 {
 ToolTip
 FileReadLine,index,q-settings/settings.ini,1
 IfLess,ontop,% (index - 9)
 {
-y := 800 - y	;500 is default
+y := sizey + 300 - y	;500  + 300 in default
 if instr(y, "-")
 	y := 20
 ontop+=1
@@ -161,7 +168,7 @@ sleep, %y%
 ;End of down scroll
 else
 {
-IfLess,x,350
+IfLess,x,%sizex%
 	if !(Instr(x, "-"))
 	{
 	MouseGetPos,,,,classnn
@@ -172,6 +179,10 @@ IfLess,x,350
 	StringReplace,path,path,|,`n,All
 	Tooltip, %path%
 	}
+	else if classnn = 1
+		Tooltip, LaunchQ - Click to open Settings
+	else if classnn = 12
+		ToolTip, Add web link to LaunchQ
 	else
 		ToolTip
 	}
@@ -186,7 +197,7 @@ FileReadLine,index,q-settings/settings.ini,1
 IfGreaterOrEqual,index,1
 {
 FileReadLine,pname,Q-settings/names.lq,1
-Gui, Add, Text, x10 y50 w330 h25 vitem1 glaunch,%pname%
+Gui, Add, Text, x10 y50 w%sizey% h%septext% vitem1 glaunch,%pname%
 
 loop,9
 {
@@ -194,7 +205,7 @@ FileReadLine,pname,Q-settings/names.lq,% (A_index + 1)
 if Errorlevel = 1
 	break
 item := "item" . (A_Index + 1)
-Gui, Add, Text, xp+0 yp+43 w350 h25 glaunch v%item%,%pname%
+Gui, Add, Text, xp+0 yp+%hiettext% w%sizey% h%septext% glaunch v%item%,%pname%
 }
 }
 }
@@ -214,7 +225,7 @@ GuiControl,1:,item%a_index%,%pname%
 EmptyMem()
 }
 ;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Deleter(){
+Deleter(sizex, sizey){
 BlockInput, MouseMove
 MouseGetPos,,,Hwnd
 WinGetTitle, title, ahk_id %Hwnd%
@@ -225,7 +236,9 @@ MouseGetPos,,,,classnn
 BlockInput,MouseMoveOff
 KeyWait,Lbutton
 MouseGetPos,fx,fy
-if (fx < 0 or fx > 350 or fy < 0 or fy > 500)
+if (fx < 0 or fx > sizex or fy < 0 or fy > sizey)
+	{
+	If (classnn != "")
 	{
 	StringTrimLeft,classnn,classnn,6	;Staticx where x from 2 to 11
 	FileReadLine,name,q-settings/names.lq,% (ontop - 1 + classnn - 1)
@@ -234,6 +247,7 @@ if (fx < 0 or fx > 350 or fy < 0 or fy > 500)
 	UpdateGUI()
 	Sleep, 1000
 	ToolTip
+	}
 	}
 	else{
 	Send, {Lbutton Down}
@@ -283,7 +297,7 @@ FileReadLine,path,q-settings/paths.lq,% (linetolaunch + ontop - 1)
 loop,parse,path,|
 {
 try{
-	IfInString,A_LoopField,http://
+	If (Instr(A_LoopField,"http://") or Instr(A_LoopField,"https://") or Instr(A_loopfield,"ftp://"))
 		BrowserRun(A_LoopField)
 	else
 		run, %A_loopfield%
@@ -335,8 +349,25 @@ return
 ShowGUI:
 IfWinNotExist, LaunchQ ahk_class AutoHotkeyGUI
 {
-Gui, Show, w350 h500, LaunchQ
-WinSet, Region, 0-0 W350 H500 R40-40, LaunchQ ahk_class AutoHotkeyGUI
+CoordMode,Mouse,Screen
+MouseGetPos,xax,yax
+
+if (xax > (A_screenwidth - (0.5 * sizex)))
+	xax := A_ScreenWidth - sizex
+else if ( (sizex / 2) > xax )
+	xax := 0
+else xax := xax - (sizex / 2)
+	
+if ((0.5 * sizey) > yax)
+	yax := 10	;to enable scrolling up
+else if (yax > (A_ScreenHeight - (0.5 * sizey)))
+	yax := A_ScreenHeight - sizey
+else yax := yax - (sizey / 2)
+
+Coordmode,Mouse,Window
+
+Gui, Show, x%xax% y%yax% w%sizex% h%sizey%, LaunchQ
+WinSet, Region, 0-0 W%sizex% H%sizey% R40-40, LaunchQ ahk_class AutoHotkeyGUI
 Winset, Transparent, 180, LaunchQ ahk_class AutoHotkeyGUI
 WinActivate,LaunchQ
 SetTimer,Mousecheck,100
@@ -364,18 +395,17 @@ return
 ;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 website:
-Gui, 1:Hide
-Hotkey,$Lbutton,LeftMouse,Off
-SetTimer,mousecheck,Off
-InputBox,allfile,URL,Write here the URL of the web-link,,300,200,,,,,http://www.avi-win-tips.blogspot.com
-IfNotEqual,allfile
-{
-If !(Instr(allfile, "http://") or InStr(allfile, "https://") or InStr(allfile, "ftp://"))
-	allfile := "http://" . allfile
-GuiControl,2:,shorts,%allfile%
-Gui, 2:Show, w480 h191, Choose a Name
-GuiControl,2:Disable,proceed
-}
+DisableGUI()
+InputBox,allfile,URL,Write here the URL of the web-link,,300,200,,,,,https://www.avi-win-tips.blogspot.in
+If Errorlevel = 0
+	If (allfile != "")
+	{
+	If !(Instr(allfile, "http://") or InStr(allfile, "https://") or InStr(allfile, "ftp://"))
+		allfile := "http://" . allfile
+	GuiControl,2:,shorts,%allfile%
+	Gui, 2:Show, w480 h191, Choose a Name
+	GuiControl,2:Disable,proceed
+	}
 return
 ;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 Arrange(){
@@ -390,8 +420,8 @@ loop, read, q-settings/names.lq
 {
 IfEqual,name,%A_loopreadline%
 {
-FileReadLine,path,q-settings/paths.lq,%a_index%
-break
+	FileReadLine,path,q-settings/paths.lq,%a_index%
+	break
 }
 }
 newpath .= path . "`n"
@@ -440,11 +470,15 @@ FileAtline("q-settings/settings.ini", strength, 1)
 MouseCheck:
 ;Critical
 MouseGetPos,x,y
-Scroll(y, x)
+Scroll(y, x, sizex, sizey)
 return
 
 LeftMouse:
-Deleter()
+Deleter(sizex, sizey)
+return
+
+3GuiClose:
+Reload
 return
 
 2guiclose:
@@ -502,7 +536,7 @@ return
 about:
 DisableGUI()
 GuiControl,3:,hotkey,%curhot%
-Gui, 3:Show, w595 h143, LaunchQ by Avi
+Gui, 3:Show, w595 h193, LaunchQ by Avi
 return
 help:
 BrowserRun("http://www.avi-win-tips.blogspot.com/2013/05/lqguide.html")
@@ -523,6 +557,13 @@ Hotkey,%curhot%,ShowGUI, Off
 Hotkey,%hotkey%,ShowGUI, On
 curhot := hotkey
 }
+return
+
+size:
+Gui, 3:Submit, Nohide
+If (sizefactor == 0 or sizefactor == "")
+	sizefactor := 100
+Fileatline("q-settings/settings.ini", sizefactor, 4)
 return
 
 update:
