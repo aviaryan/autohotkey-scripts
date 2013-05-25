@@ -1,8 +1,8 @@
 ﻿/*
 MATHS LIBRARY
 by Avi Aryan
-Thanks to hd202, Uberi, sinkfaze and justme for valuable suggestions and ideas.
-v 1.8
+Thanks to hd0202, Uberi, sinkfaze and justme for valuable suggestions and ideas.
+v 2.0
 ------------------------------------------------------------------------------
 
 ##############################################################################
@@ -42,9 +42,10 @@ See Help - http://www.avi-win-tips.blogspot.com/2013/05/maths.html
 * logB(number, base) --- log of a number at a partcular base.
 */
 
+;msgbox,% Divide("3426326","30")
 ;msgbox,% Divide("43.034934034904334", "89.3467436743", 10)
 ;msgbox,% Divide("0.00000000000001","0.0000000001")
-;msgbox,% UniquePMT("abcdefghijklmnopqrstuvwxyz0123456789",12344)
+;msgbox,% UniquePMT("abcdefghijklmnopqrstuvwxyz0123456789",12389898)
 ;msgbox,% ModG("-22","-7")
 ;msgbox,% Divide("232323","23")
 ;msgbox,% Divide("22","7", 100)
@@ -427,12 +428,12 @@ while(number1 != "")
 		if (coveredlength != 0)
 			if (n1 == coveredlength)	;if all nums have been bought down, time for decimal no Zero
 				res .= zeroes_r
-			else if (n1 >= (coveredlength+n2-1))
+			else if (n1 >= (coveredlength+1))
 				res .= zeroes_r "0"
 	}
-	res .= times , coveredlength+=lendivide
+	res .= times , coveredlength+=(lendivide - Strlen(remainder))	;length of previous remainder will add to number1 and so is not counted
 	remainder := Evaluate(todivide, "-" below)
-	
+
 	if remainder = 0
 		remainder := ""
 	number1 := remainder . Substr(number1, lendivide + 1)
@@ -581,9 +582,9 @@ return, Rtrim(roots, ",")
 }
 ;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-UniquePmt(series, ID=1, delimeter=","){
-if Instr(series, delimeter)
-	loop, parse, series,%delimeter%
+UniquePmt(series, ID=1, Delimiter=","){
+if Instr(series, Delimiter)
+	loop, parse, series,%Delimiter%
 		item%A_index% := A_LoopField , last := lastbk := A_Index
 else{
 	loop, parse, series
@@ -603,8 +604,9 @@ incfactor := (ModG(ID, last) == "0") ? FloorG(Divide(ID,last)) : FloorG(Divide(I
 
 loop,% last
 {
-	posfactor := (ModG(posfactor + incfactor - 1, last) == "0") ? last : ModG(posfactor + incfactor - 1, last)	;Extraction point
-	res .= item%posfactor% "," , item%posfactor% := ""
+	tempmod := ModG(posfactor + incfactor - 1, last)	;should be faster
+	posfactor := (tempmod == "0") ? last : tempmod 	;Extraction point
+	res .= item%posfactor% . Delimiter , item%posfactor% := ""
 
 	loop,% lastbk
 		if (item%A_index% == "")
@@ -614,7 +616,7 @@ loop,% last
 	if (posfactor > last)
 		posfactor := 1
 }
-return, Rtrim(res, ",")
+return, Rtrim(res, Delimiter)
 }
 
 ;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
