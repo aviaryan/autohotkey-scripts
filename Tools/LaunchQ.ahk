@@ -1,7 +1,7 @@
 ﻿/* 
 ##########################################################
 LAUNCHQ - MINIMALIST APPLICATION LAUNCHER
-v2.0 
+v2.1 
 ##########################################################
 
 Copyright 2013 Avi Aryan  
@@ -25,7 +25,7 @@ limitations under the License.
 SetWorkingDir %A_ScriptDir%
 SetBatchLines, -1
 Page = http://www.avi-win-tips.blogspot.com/2013/05/launchq.html
-version = 2.0
+version = 2.1
 sizey := 500 , sizex := 350
 
 ;-------------+
@@ -33,7 +33,8 @@ sizey := 500 , sizex := 350
 ;-------------+
 ;1 - Clips, 2- version, 3 - hotkey ,4 - size
 FileReadLine,oldversion,q-settings/settings.ini,2
-If !(FileExist("q-settings/settings.ini") or version > oldversion)
+
+If !(FileExist("q-settings/settings.ini"))
 {
 FileCreateDir,Q-settings
 FileAppend,13`n%version%`n+Z`n100,q-settings/settings.ini	;appending
@@ -45,6 +46,11 @@ FileAppend,Notepad`nPaint`nWordpad`nWindows Explorer`nInternet Explorer`nWindows
 FileAppend,notepad.exe`nmspaint.exe`nwordpad.exe`nexplorer.exe`niexplore.exe`nwmplayer.exe`ncalc.exe`n%A_programfiles%`n%A_WinDir%\system32`n%A_MyDocuments%`nhttp://www.facebook.com`nhttp://www.google.com`n%Page%,q-settings/paths.lq
 
 Arrange()
+}
+else if (version > oldversion)
+{
+	Fileatline("q-settings/settings.ini", version, 2)	;version
+	Fileatline("q-settings/settings.ini", "100", 4)	;size
 }
 
 FileReadLine,curhot,q-settings/settings.ini,3
@@ -277,6 +283,9 @@ IfInString,a_loopfield,.lnk
 }
 else
 	allfile .= A_LoopField . "|"
+
+if A_index = 1
+	tempshortname := Substr(A_loopfield, Instr(A_LoopField,"\",false,0) + 1)
 }
 StringTrimRight,allfile,allfile,1
 Gui, 1:Hide
@@ -288,6 +297,8 @@ allfilex =
 Gui, 2:Show, w480 h191, Choose a Name
 SetTimer,mousecheck,Off
 GuiControl,2:Disable,proceed
+GuiControl,2:,sname,%tempshortname%
+gosub, snamechange
 return
 ;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 launch:
@@ -318,14 +329,8 @@ FileAtline("q-settings/settings.ini", strength, 1)
 
 Arrange()
 UpdateGUI()
-file =
-strength =
-index =
-Gui, 1:Show
-SetTimer,mousecheck,100
-allfile = 
-GuiControl,2:,sname
-EmptyMem()
+file := "" , strength := "" , index := ""
+gosub, ShowGUI
 return
 ;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 snamechange:
@@ -366,7 +371,7 @@ else yax := yax - (sizey / 2)
 
 Coordmode,Mouse,Window
 
-Gui, Show, x%xax% y%yax% w%sizex% h%sizey%, LaunchQ
+Gui, 1:Show, x%xax% y%yax% w%sizex% h%sizey%, LaunchQ
 WinSet, Region, 0-0 W%sizex% H%sizey% R40-40, LaunchQ ahk_class AutoHotkeyGUI
 Winset, Transparent, 180, LaunchQ ahk_class AutoHotkeyGUI
 WinActivate,LaunchQ
@@ -405,6 +410,9 @@ If Errorlevel = 0
 	GuiControl,2:,shorts,%allfile%
 	Gui, 2:Show, w480 h191, Choose a Name
 	GuiControl,2:Disable,proceed
+	tempshortname := Substr(allfile, Instr(allfile, "//") + 2 , Instr(allfile, ".", false, 0) - Instr(allfile, "//") - 2)
+	Guicontrol,2:,sname,%tempshortname%
+	gosub, snamechange
 	}
 return
 ;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
