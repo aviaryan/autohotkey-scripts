@@ -1,7 +1,7 @@
 ﻿/* 
 ##########################################################
 LAUNCHQ - MINIMALIST APPLICATION LAUNCHER
-v2.1 
+v2.2 
 ##########################################################
 
 Copyright 2013 Avi Aryan  
@@ -25,7 +25,7 @@ limitations under the License.
 SetWorkingDir %A_ScriptDir%
 SetBatchLines, -1
 Page = http://www.avi-win-tips.blogspot.com/2013/05/launchq.html
-version = 2.1
+version = 2.2
 sizey := 500 , sizex := 350
 
 ;-------------+
@@ -199,9 +199,6 @@ IfLess,x,%sizex%
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 AddtoGUI(){
 global
-FileReadLine,index,q-settings/settings.ini,1
-IfGreaterOrEqual,index,1
-{
 FileReadLine,pname,Q-settings/names.lq,1
 Gui, Add, Text, x10 y50 w%sizey% h%septext% vitem1 glaunch,%pname%
 
@@ -209,15 +206,14 @@ loop,9
 {
 FileReadLine,pname,Q-settings/names.lq,% (A_index + 1)
 if Errorlevel = 1
-	break
+	pname =
 item := "item" . (A_Index + 1)
 Gui, Add, Text, xp+0 yp+%hiettext% w%sizey% h%septext% glaunch v%item%,%pname%
 }
 }
-}
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 UpdateGUI(){
-ontop := 1
+ontop := 0
 loop, 10
 	GuiControl,1:,item%a_index%
 ;;Blanking
@@ -227,6 +223,7 @@ FileReadLine,pname,Q-settings/names.lq,% (A_index)
 if Errorlevel = 1
 	break
 GuiControl,1:,item%a_index%,%pname%
+ontop := 1
 }
 EmptyMem()
 }
@@ -273,7 +270,8 @@ else{
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 GuiDropFiles:
 ToolTip
-
+if (ontop)
+	ontop := 1
 loop,parse,A_guievent,`n
 {
 IfInString,a_loopfield,.lnk
@@ -321,15 +319,17 @@ return
 ;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 2buttonproceed:
 Gui, 2:submit, hide
-FileAppend,`n%sname%,q-settings/names.lq
-FileAppend,`n%allfile%,q-settings/paths.lq
 FileReadLine,index,q-settings/settings.ini,1
 strength := index + 1
 FileAtline("q-settings/settings.ini", strength, 1)
+if (index != "0")
+	sname := "`n" sname , allfile := "`n" allfile
+FileAppend,%sname%,q-settings/names.lq
+FileAppend,%allfile%,q-settings/paths.lq
 
 Arrange()
 UpdateGUI()
-file := "" , strength := "" , index := ""
+file := "" , strength := "" , index := "" , allfile := "" , sname := ""
 gosub, ShowGUI
 return
 ;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -407,10 +407,12 @@ If Errorlevel = 0
 	{
 	If !(Instr(allfile, "http://") or InStr(allfile, "https://") or InStr(allfile, "ftp://"))
 		allfile := "http://" . allfile
+	if (ontop)
+		ontop := 1
 	GuiControl,2:,shorts,%allfile%
 	Gui, 2:Show, w480 h191, Choose a Name
 	GuiControl,2:Disable,proceed
-	tempshortname := Substr(allfile, Instr(allfile, "//") + 2 , Instr(allfile, ".", false, 0) - Instr(allfile, "//") - 2)
+	tempshortname := Substr(allfile, Instr(allfile, "//") + 2)
 	Guicontrol,2:,sname,%tempshortname%
 	gosub, snamechange
 	}
@@ -448,6 +450,8 @@ loop,% (linenumber - 1)
 {
 FileReadLine,name,q-settings/names.lq,%A_index%
 FileReadLine,path,q-settings/paths.lq,%A_Index%
+if Errorlevel = 1	;make firstname and secondname empty. This will only happen when linenumber = 1
+	break
 firstname .= name . "`n"
 firstpath .= path . "`n"
 }
