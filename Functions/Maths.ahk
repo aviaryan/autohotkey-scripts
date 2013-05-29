@@ -1,8 +1,8 @@
 ﻿/*
 MATHS LIBRARY
 by Avi Aryan
-Thanks to hd0202, Uberi, sinkfaze and justme for valuable suggestions and ideas.
-v 2.0
+Thanks to hd0202, Uberi and sinkfaze for valuable suggestions and ideas.
+v 2.2
 ------------------------------------------------------------------------------
 
 ##############################################################################
@@ -19,14 +19,15 @@ See Help - http://www.avi-win-tips.blogspot.com/2013/05/maths.html
   
 * Evaluate(number1, number2) --- +/- massive numbers . Supports Real Nos (Everything)
 * Multiply(number1, number2) --- multiply two massive numbers . Supports everything
-* Divide(Dividend, Divisor) --- Divide two massive numbers . Supports everything
+* Divide(Dividend, Divisor, length) --- Divide two massive numbers . Supports everything . length is number of decimals smartly rounded.
 * Roots("Coefficients") - Roots of a poly function 
 * Greater(number1, number2, trueforequal=false) --- compare two massive numbers 
 * Prefect(number) --- convert a number to most suitable form. like ( 002 to 2 ) and ( 000.5600 to 0.56 )
 * fact(number) --- factorial of a number . supports large numbers 
 * Pow(number, power) --- power of a number . supports large numbers and powers
 * ModG(Dividend, Divisor) --- Mod() . Supports large numbers
-* FloorG(number) --- Floor() . Supports large numbers
+* RoundG(number, decimals) --- Round() . Large numbers
+* FloorG(number) --- Floor() . large numbers
 
 -----  BETTER PASS NUMBERS AS STRINGS FOR THE ABOVE FUNCTIONS ------------------
 -----  SEE THE COMMENTED MSGBOX CODE BELOW TO UNRSTND WHAT I MEAN --------------
@@ -38,23 +39,24 @@ See Help - http://www.avi-win-tips.blogspot.com/2013/05/maths.html
 * Antilog(number, basetouse=10) --- gives antilog of a number . basetouse can be "e" .
 * nthRoot(number, n) ---- gives nth root of a number .
   nthroot(8, 3) gives cube root of 8 = 2
-
 * logB(number, base) --- log of a number at a partcular base.
-*/
 
+*/
+;msgbox,% Divide(34389193, 30, 2) "  " 34389193 / 30
+;msgbox,% RoundG("124389438943894389430909430438098232323.427239238023823923984",4)
 ;msgbox,% Divide("3426326","30")
 ;msgbox,% Divide("43.034934034904334", "89.3467436743", 10)
-;msgbox,% Divide("0.00000000000001","0.0000000001")
-;msgbox,% UniquePMT("abcdefghijklmnopqrstuvwxyz0123456789",12389898)
+;msgbox,% Divide("0.2893","0.0000000001")
+;msgbox,% UniquePMT("abcdefghijklmnopqrstuvwxyz0123456789",12367679898956098)
 ;msgbox,% ModG("-22","-7")
 ;msgbox,% Divide("232323","23")
-;msgbox,% Divide("22","7", 100)
-;msgbox,% Divide("48.45","19.45", 14)
+;msgbox,% Divide("22","7", 1)
+;msgbox,% Divide("48.45","19.45",2)
 ;Send,% Divide("1200000","3")
 ;msgbox,% fact("38")
 ;msgbox,% roots("1,1,1,-3")
 ;msgbox,% UniquePMT("avi,annat,koiaur,aurkoi", "All")
-;msgbox,% Solve("[28*45] - [45*28]", false)
+;msgbox,% Solve("[28*45] - [45*28]")
 ;msgbox,% Evaluate("1280", "-1280")
 ;msgbox,% Roots("1,1,1,-3") ;xcube + xsq + x - 3 = 0
 ;MsgBox,% Solve("23898239238923.2382398923 + 2378237238.238239 - [989939.9939 * 892398293823]")
@@ -62,9 +64,10 @@ See Help - http://www.avi-win-tips.blogspot.com/2013/05/maths.html
 ;var = sqrt(4) - [nthroot(17248,3) * antilog(0.3010)] * [892839.2382389 - 89238239.923]
 ;msgbox,% Solve(var)
 ;msgbox,% UniquePMT("abd", "All")
-;msgbox,% Solve("Sqrt(4) * nthRoot(8, 3) * 2 * log(100) * antilog(0.3010) - 32")
+;msgbox,% Solve("Sqrt(4) * nthRoot(8, 3) * 2 * log(100) * antilog(0.3010) - 32"
 ;Msgbox,% Greater(18.789, 187)
-;Send,% "`n" Divide("434343455677690909087534208967834434444.5656", "8989998989898909090909009909090909090908656454520")
+;Send,% Divide("434343455677690909087534208967834434444.5656", "8989998989898909090909009909090909090908656454520", 100)
+;0.00000000004831407168851917996894167387553355392868017271310508310531756041233543865298474909530220708088953654
 ;MsgBox,% Multiply("111111111111111111111111111111111111111111.111","55555555555555555555555555555555555555555555.555")
 ;MsgBox,% Prefect("00.002000")
 ;Msgbox,% nthroot(3.375, 3)
@@ -392,7 +395,7 @@ n1 := Strlen(number1) , n2 := StrLen(number2) ;Stroring n1 & n2 as they will be 
 ;Widen number1
 loop,% n2 + length
 	number1 .= "0"
-coveredlength := 0 , dec := dec - n2 - length , takeone := false
+coveredlength := 0 , dec := dec - n2 - length , takeone := false , n1f := n1 + n2 + length
 ;Start
 while(number1 != "")
 {
@@ -410,8 +413,7 @@ while(number1 != "")
 				break
 			}
 		}
-		if (n1 >= coveredlength)
-			res .= zeroes_r
+		res .= zeroes_r
 	}
 	else
 	{
@@ -426,9 +428,6 @@ while(number1 != "")
 			}
 		}
 		if (coveredlength != 0)
-			if (n1 == coveredlength)	;if all nums have been bought down, time for decimal no Zero
-				res .= zeroes_r
-			else if (n1 >= (coveredlength+1))
 				res .= zeroes_r "0"
 	}
 	res .= times , coveredlength+=(lendivide - Strlen(remainder))	;length of previous remainder will add to number1 and so is not counted
@@ -456,14 +455,12 @@ while(number1 != "")
 	zeroes_r := "" , takeone := false
 	if (remainder == "") {
 		loop,
-		{
-			if (Instr(number1, "0") == "1")
+			if (Instr(number1, "0") == 1)
 				zeroes_r .= "0" , number1 := Substr(number1, 2) , coveredlength+=1
 			else
 				break
-		}
 	}
-	if (Strlen(remainder) == n2 and n1 > coveredlength)
+	if (Strlen(remainder) == n2)
 		takeone := true
 	else
 		loop,% n2 - StrLen(remainder) - 1
@@ -502,7 +499,7 @@ else
 		num .= "0"
 	res := Multiply(Prefect(res), num)
 }
-return, ( (positive) ? "" : "-" ) . Prefect(res)
+return, ( (positive) ? "" : "-" ) . RoundG(Prefect(res), decimal < 0 ? Abs(decimal)+length : length)
 }
 
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -607,7 +604,7 @@ loop,% last
 	tempmod := ModG(posfactor + incfactor - 1, last)	;should be faster
 	posfactor := (tempmod == "0") ? last : tempmod 	;Extraction point
 	res .= item%posfactor% . Delimiter , item%posfactor% := ""
-
+	
 	loop,% lastbk
 		if (item%A_index% == "")
 			plus1 := A_index + 1 , item%A_index% := item%plus1% , item%plus1% := ""
@@ -721,6 +718,32 @@ if Greater(dividend, divisor, true){
 		Remainder := Evaluate(dividend,"-" Multiply(divisor, div))
 }
 return, ( Positive ? "" : "-" ) . Remainder
+}
+
+;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+RoundG(number, decimals){
+if Instr(number,".")
+{
+	nofdecimals := StrLen(number) - ( Instr(number, ".") = 0 ? Strlen(number) : Instr(number, ".") )
+
+	if (nofdecimals > decimals)
+	{
+		secdigit := Substr(number, Instr(number,".")+decimals+1, 1)
+		if secdigit >= 5
+			loop,% decimals-1
+				zeroes .= "0"
+		number := Evaluate(Substr(number, 1, Instr(number, ".")+decimals), (secdigit >= 5) ? "0." zeroes "1" : "0")
+	}
+	else
+	{
+		loop,% decimals - nofdecimals
+			zeroes .= "0"
+		number .= zeroes
+	}
+	return, Rtrim(number, ".")
+}
+else
+	return, number
 }
 
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
