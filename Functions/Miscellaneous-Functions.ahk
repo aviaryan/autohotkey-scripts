@@ -41,9 +41,9 @@ GetIconforext(ext){
     RegRead, DefaultIcon, HKEY_CLASSES_ROOT, %ThisExtClass%\DefaultIcon
 	IfEqual, Defaulticon
 	{
-	Regread, Application, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\%ext%\UserChoice, Progid
-	IfNotEqual, Application
-		Regread, DefaultIcon, HKCR, %Application%\DefaultIcon
+		Regread, Application, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\%ext%\UserChoice, Progid
+		IfNotEqual, Application
+			Regread, DefaultIcon, HKCR, %Application%\DefaultIcon
 	}
     Return DefaultIcon
 }
@@ -76,20 +76,30 @@ return, v
 }
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-;Add data to a line of a file .
-;Only works when (linenum <= total no of lines in file)
+;Add data to a line of a file . Replaces that line
 
-Fileatline(file, what, linenum){
-loop, read, %file%
+Fileatline(file, what, linenum, replace=true){
+loop
 {
+	FileReadLine,readline,%file%,%A_index%
+	if Errorlevel = 1
+		lineended := true , readline := ""
+
 	if !(A_index == linenum)
-		filedata .= A_LoopReadLine . "`r`n"
+		filedata .= readline . "`r`n"
 	else
-		filedata .= what . "`r`n"
+		if (replace)
+			filedata .= what . "`r`n"
+		else
+			filedata .= readline what "`r`n"
+
+	if (A_index >= linenum)
+		if (lineended)
+			break
 }
 StringTrimRight,filedata,filedata,2
 FileDelete, %file%
-FileAppend, %filedata%, %file%
+FileAppend, % Rtrim(filedata, "`r`n"), %file%
 }
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -137,3 +147,5 @@ BlockInput, Off
 Concatenate(string, ntimes){
 return, (ntimes<2) ? string : string . Concatenate(string , ntimes-1)
 }
+;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+

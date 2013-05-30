@@ -24,6 +24,7 @@ Avi's Autohotkey Scripts and Functions Repository
 * **LaunchQ** - Fast, Simple, Productive Application Launcher
 * **Extreme Screen Clipper** - Capture Screenshots, resize, crop and save them as an image file instantly
 * **Maths()** - A Collection of non-native, heavily requested Autohotkey Mathematical Functions.
+* **_Ini()** - Ini Library with ini-comment(s) support.
 * **Hparse()** - Convert User shortcuts such as (Ctrl + PageDown) to Autohotkey shortcuts (here Ctrl & PgDn)
 * **Miscellanous Functions()** - A library of my random useful functions
 * **Sublime Text Autocomplete Adder** - Add Auto-comlpetions in Sublime Text with a GUI and Duplicates Filter
