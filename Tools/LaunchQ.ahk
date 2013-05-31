@@ -1,7 +1,7 @@
 ﻿/* 
 ##########################################################
 LAUNCHQ - MINIMALIST APPLICATION LAUNCHER
-v2.2 
+v2.5 
 ##########################################################
 
 Copyright 2013 Avi Aryan  
@@ -19,25 +19,27 @@ See the License for the specific language governing permissions and
 limitations under the License.  
 
 */
+;Thanks to Datalife, Ken for their ideas and support
+;Thanks to Majniketor for ColorDlg
 
 #NoEnv
 #SingleInstance, force
 SetWorkingDir %A_ScriptDir%
 SetBatchLines, -1
 Page = http://www.avi-win-tips.blogspot.com/2013/05/launchq.html
-version = 2.2
+version := 2.5 , color := "CB2322" , textcolor := "Black" , transparency := 180
 sizey := 500 , sizex := 350
 
 ;-------------+
 ;INITIALIZE   |
 ;-------------+
-;1 - Clips, 2- version, 3 - hotkey ,4 - size
+;1 - Clips, 2- version, 3 - hotkey ,4 - size, 5 - color , 6 - textcolor , 7 -transparemcy
 FileReadLine,oldversion,q-settings/settings.ini,2
 
 If !(FileExist("q-settings/settings.ini"))
 {
 FileCreateDir,Q-settings
-FileAppend,13`n%version%`n+Z`n100,q-settings/settings.ini	;appending
+FileAppend,13`n%version%`n+Z`n100`n%color%`n%textcolor%`n%transparency%,q-settings/settings.ini		;appending
 
 FileDelete,q-settings/paths.lq
 FileDelete,q-settings/names.lq
@@ -50,7 +52,9 @@ Arrange()
 else if (version > oldversion)
 {
 	Fileatline("q-settings/settings.ini", version, 2)	;version
-	Fileatline("q-settings/settings.ini", "100", 4)	;size
+	Fileatline("q-settings/settings.ini", color, 5)	;color
+	Fileatline("q-settings/settings.ini", textcolor, 6)	;textcolor
+	Fileatline("q-settings/settings.ini", transparency, 7)	;trans
 }
 
 FileReadLine,curhot,q-settings/settings.ini,3
@@ -60,15 +64,18 @@ FileReadLine,sizefactor,q-settings/settings.ini,4
 sizex := sizefactor / 100 * sizex , sizey := sizefactor / 100 * sizey
 ;Text Size = sizey / 40 ||| Text Sep = sizey / 20
 sizetext := Floor(sizey / 40) , septext := Floor(sizey / 20) , hiettext := Floor(sizey / 11.5)	;ht used in AddtoGUI label
+FileReadLine,color,q-settings/settings.ini,5
+FileReadLine,textcolor,q-settings/settings.ini,6
+FileReadLine,transparency,q-settings/settings.ini,7
 
 ;---------+
 ;GUI      |
 ;---------+
 Gui, -Caption +ToolWindow +AlwaysOnTop
-Gui, Color, CB2322
+Gui, Color,% color
 Gui, Font, S14 CBlue bold, Consolas
 Gui, Add, Text, x0 y0 w%sizex% h30 +Center gabout, LaunchQ
-Gui, Font, S%sizetext% CBlack
+Gui, Font, S%sizetext% C%textcolor%
 AddtoGUI()
 Gui, Font, CYellow S12
 Gui, Add, Text,% "x0 y" sizey-25 " w" sizex  " h" septext " +Center gwebsite", Add Web-Site
@@ -91,16 +98,23 @@ Gui, 2:Add, Text, x2 y30 w210 h20 vavlblty,
 
 ;GUI 3 - About
 Gui, 3:Font, S16 CRed, Consolas
+Gui, 3:Color, 0xefe6a3
 Gui, 3:Add, Text, x2 y0 w590 h30 +Center gpage, LaunchQ v%version% : by Avi Aryan
 Gui, 3:Font, S14 CBlue, Consolas
 Gui, 3:Add, Text, x2 y30 w590 h20 +Center gblog, More Tools
 Gui, 3:Font, S14 CGreen, Consolas
 Gui, 3:Add, Text, x2 y70 w220 h20 , Main Shortcut
 Gui, 3:Add, Text, x2 y110 w220 h20 , Size
-Gui, 3:Add, Text, x2 y150 w590 h20 +Center gupdate, Check for Updates
+Gui, 3:Add, Text, xp+0 yp+40 w220 h20 , Background Color
+Gui, 3:Add, Text, xp+0 yp+40 w220 h20 , Text Color
+Gui, 3:Add, Text, xp+0 yp+40 w220 h20 , Transparency
+Gui, 3:Add, Text, xp+0 yp+40 w590 h20 +Center gupdate, Check for Updates	;290
 Gui, 3:Font, S12 CBlack, Consolas
 Gui, 3:Add, Hotkey, x342 y70 w170 h25 ghotkeychange vhotkey,
 Gui, 3:Add, Edit, x342 y110 w170 h25 gsize vsizefactor, %sizefactor%
+Gui, 3:Add, Text, xp+0 yp+40 w170 h25 gbackcolor c%color%, Click to Select
+Gui, 3:Add, Text, xp+0 yp+40 w170 h25 gtxtcolor c%textcolor%, Click to Select
+Gui, 3:Add, slider, xp-5 yp+40 w170 h25 gtrans vtransparency cBlack Range1-255, %transparency%
 Gui, 3:Add, edit, x1000 y1000 w1 h1 vtofool,
 
 ;-------+
@@ -373,7 +387,7 @@ Coordmode,Mouse,Window
 
 Gui, 1:Show, x%xax% y%yax% w%sizex% h%sizey%, LaunchQ
 WinSet, Region, 0-0 W%sizex% H%sizey% R40-40, LaunchQ ahk_class AutoHotkeyGUI
-Winset, Transparent, 180, LaunchQ ahk_class AutoHotkeyGUI
+Winset, Transparent, %transparency%, LaunchQ ahk_class AutoHotkeyGUI
 WinActivate,LaunchQ
 SetTimer,Mousecheck,100
 Hotkey,$Lbutton,LeftMouse,On
@@ -493,6 +507,23 @@ return
 Reload
 return
 
+backcolor:
+CmnDlg_Color( color := color )
+Fileatline("q-settings/settings.ini", color, 5)	;color
+gui, 1:color, %color%
+return
+
+txtcolor:
+CmnDlg_Color( textcolor := textcolor )
+Fileatline("q-settings/settings.ini", textcolor, 6)	;textcolor
+Reload
+return
+
+trans:
+Gui, 3:Submit, nohide
+Fileatline("q-settings/settings.ini", transparency, 7)	;trans
+return
+
 2guiclose:
 2buttoncancel:
 Gui, 2:hide
@@ -508,12 +539,20 @@ dllcall("psapi.dll\EmptyWorkingSet", "UInt", -1)
 
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 Fileatline(file, what, linenum){
-loop, read, %file%
+loop
 {
-if !(A_index == linenum)
-	filedata .= A_LoopReadLine . "`r`n"
-else
-	filedata .= what . "`r`n"
+	FileReadLine,readline,%file%,%A_index%
+	if Errorlevel = 1
+		lineended := true , readline := ""
+
+	if !(A_index == linenum)
+		filedata .= readline . "`r`n"
+	else
+		filedata .= what . "`r`n"
+
+	if (A_index >= linenum)
+		if (lineended)
+			break
 }
 StringTrimRight,filedata,filedata,2
 FileDelete, %file%
@@ -548,7 +587,7 @@ return
 about:
 DisableGUI()
 GuiControl,3:,hotkey,%curhot%
-Gui, 3:Show, w595 h193, LaunchQ by Avi
+Gui, 3:Show, w595 h310, LaunchQ by Avi
 return
 help:
 BrowserRun("http://www.avi-win-tips.blogspot.com/2013/05/lqguide.html")
@@ -599,7 +638,42 @@ gosub, hotkeychange
 GuiControl,3:focus,tofool
 return
 }
+#IfWinActive, LaunchQ
+{
+WheelDown::Scroll(30+sizey, 0, sizex, sizey)
+WheelUp::Scroll(-30, 0 ,sizex, sizey)
+}
 #IfWinNotActive, LaunchQ by Avi
 {
 Hotkey,%curhot%,ShowGUI,On
 }
+;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+;Majniketors ColorDlg
+CmnDlg_Color(ByRef pColor, hGui=0)
+ { 
+  ;covert from rgb
+    clr := ((pColor & 0xFF) << 16) + (pColor & 0xFF00) + ((pColor >> 16) & 0xFF) 
+    VarSetCapacity(sCHOOSECOLOR, 0x24, 0) 
+    VarSetCapacity(aChooseColor, 64, 0) 
+    NumPut(0x24,		 sCHOOSECOLOR, 0)      ; DWORD lStructSize 
+    NumPut(hGui,		 sCHOOSECOLOR, 4)      ; HWND hwndOwner (makes dialog "modal"). 
+    NumPut(clr,			 sCHOOSECOLOR, 12)     ; clr.rgbResult 
+    NumPut(&aChooseColor,sCHOOSECOLOR, 16)     ; COLORREF *lpCustColors 
+    NumPut(0x00000103,	 sCHOOSECOLOR, 20)     ; Flag: CC_ANYCOLOR || CC_RGBINIT 
+    nRC := DllCall("comdlg32\ChooseColorA", str, sCHOOSECOLOR)  ; Display the dialog. 
+    if (errorlevel <> 0) || (nRC = 0) 
+       Return  false 
+  
+    clr := NumGet(sCHOOSECOLOR, 12) 
+    
+    oldFormat := A_FormatInteger 
+    SetFormat, integer, hex  ; Show RGB color extracted below in hex format. 
+ ;convert to rgb 
+    pColor := (clr & 0xff00) + ((clr & 0xff0000) >> 16) + ((clr & 0xff) << 16) 
+    StringTrimLeft, pColor, pColor, 2 
+    loop, % 6-strlen(pColor) 
+		pColor=0%pColor% 
+    pColor=0x%pColor% 
+    SetFormat, integer, %oldFormat% 
+	Return true
+ }

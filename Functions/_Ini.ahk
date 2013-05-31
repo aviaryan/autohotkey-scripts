@@ -23,7 +23,9 @@ POINTS
 Bugs - Please report
 */
 
-;~ SetWorkingDir, %A_desktop%
+;SetWorkingDir, %A_desktop%
+;IniRead,var,black.ini,section1,exepathname
+;msgbox,% var
 ;~ _iniwrite("black.ini","section1","exepathname","kath","kath","Section 1 comment")
 ;~ _iniwrite("black.ini","section1","exe2","belkath","exe2 cmnt")
 ;~ _iniwrite("black.ini","section1","exe3","belkath","exe3 cmnt")
@@ -32,7 +34,7 @@ Bugs - Please report
 ;msgbox,%  _iniread("black.ini","hollo", "exe2", keycmnt, seccmnt) "`nKey comment - " keycmnt "`nSection comment - " seccmnt
 
 ;~ _inidelete("black.ini","hollo","exe2")
-;~ return
+;return
 
 ;===========
 ;_IniRead() |
