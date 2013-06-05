@@ -29,7 +29,6 @@ be appreciated.
 • DISTRIBUTION
 Distribution is only allowed as long as sufficient credits are provided to the original author (me).
 */
-
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 ;Get default registered icon for an extension
@@ -149,3 +148,7 @@ return, (ntimes<2) ? string : string . Concatenate(string , ntimes-1)
 }
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+;Reverse a string
+ReverseAKAFlip(string){
+return, Strlen(string) < 2 ? Substr(string,1) : Substr(string,0) ReverseAKAFlip(Substr(string,1,-1))
+}
