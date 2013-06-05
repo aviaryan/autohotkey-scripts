@@ -27,6 +27,7 @@ Avi's Autohotkey Scripts and Functions Repository
 * **_Ini()** - Ini Library with ini-comment(s) support.
 * **Hparse()** - Convert User shortcuts such as (Ctrl + PageDown) to Autohotkey shortcuts (here Ctrl & PgDn)
 * **Miscellanous Functions()** - A library of my random useful functions
+* **DayofDate()** - Gives day name (like Sunday) of a requested date
 * **Sublime Text Autocomplete Adder** - Add Auto-comlpetions in Sublime Text with a GUI and Duplicates Filter
 * **Autohotkey Updater** - Check the registered or selected version of Autohotkey for updates
   

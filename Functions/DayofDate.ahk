@@ -11,7 +11,7 @@ Licensed under Apache License v2.0
 -------------------------------------------------------------------------------------------------
 msgbox,% DayofDate("6 June 2013")
 msgbox,% DayofDate(A_Now)
-
+msgbox,% DayofDate("2013")  ;Day of 1st Jan 2013
 */
 
 DayofDate(Date){
