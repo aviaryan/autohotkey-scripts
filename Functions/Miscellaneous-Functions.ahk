@@ -29,6 +29,7 @@ be appreciated.
 • DISTRIBUTION
 Distribution is only allowed as long as sufficient credits are provided to the original author (me).
 */
+
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 ;Get default registered icon for an extension
@@ -120,24 +121,23 @@ else
 ;Send text on the basis of characters/second
 ;Eg -->
 ;Clipboard := "dfhkjdfkdfjkdfjkdfjdfkjdfkdf"
-;SendperSec(Clipboard, 7)	;Sends 7 characters from clipboard per second
+;SendperSec(Clipboard, 7, true)	;Sends 7 characters from clipboard per second
 
-Sendpersec(Data, Chs, persist=true){
+Sendpersec(Data, Chs, persist=false){
 if (persist)
 	BlockInput, On
-sleeptime := (1000 / Chs) - 10	;-10 to be more accurate, to counter-effect the time consumed in loop
-IfLess,sleeptime,1
-    sleeptime := 1
-loop,
-{
-StringLeft,tosend,Data,1
-Send, %tosend%
-sleep,%sleeptime%
-StringTrimLeft,Data,Data,1
-IfEqual,Data
-    break
-}
 
+sleeptime := (1000 / Chs) - 10	;-10 to be more accurate, to counter-effect the time consumed in loop
+sleeptime := 1>sleeptime ? 1 : sleeptime
+
+loop
+{
+	Send,% Substr(Data, 1, 1)
+	sleep,% sleeptime
+	StringTrimLeft,Data,Data,1
+	If Data = 
+		break
+}
 BlockInput, Off
 }
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
