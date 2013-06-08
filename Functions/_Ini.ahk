@@ -1,5 +1,5 @@
 ﻿/*
-_Ini Library v0.1 beta
+_Ini Library v0.2 beta
 by Avi Aryan
 Licensed under Apache License v2.0 (See Readme.md)
 ###############################################################
@@ -23,9 +23,7 @@ POINTS
 Bugs - Please report
 */
 
-;SetWorkingDir, %A_desktop%
-;IniRead,var,black.ini,section1,exepathname
-;msgbox,% var
+;~ SetWorkingDir, %A_desktop%
 ;~ _iniwrite("black.ini","section1","exepathname","kath","kath","Section 1 comment")
 ;~ _iniwrite("black.ini","section1","exe2","belkath","exe2 cmnt")
 ;~ _iniwrite("black.ini","section1","exe3","belkath","exe3 cmnt")
@@ -34,7 +32,7 @@ Bugs - Please report
 ;msgbox,%  _iniread("black.ini","hollo", "exe2", keycmnt, seccmnt) "`nKey comment - " keycmnt "`nSection comment - " seccmnt
 
 ;~ _inidelete("black.ini","hollo","exe2")
-;return
+;~ return
 
 ;===========
 ;_IniRead() |
@@ -65,8 +63,10 @@ if (keyline != "")
 {
 	FileReadLine,Keycommentvar,%Inipath%,% (keyline+1)
 	keycommentvar := Instr(Ltrim(Keycommentvar), ";") = 1 ? Ltrim(Substr(keycommentvar, 2)) : ""	;if no comment , return blank
+	StringReplace,keycommentvar,keycommentvar,``n,`n,All
 	FileReadLine,sectioncommentvar,%Inipath%,% (lineofsection+1)
 	sectioncommentvar := Instr(sectioncommentvar, ";") = 1 ? Ltrim(Substr(sectioncommentvar, 2)) : ""
+	StringReplace,sectioncommentvar,sectioncommentvar,``n,`n,All
 	return, Ltrim(Substr(curline, Strlen(key) + 2), "=")	;if equal is left, possible in rare case
 }
 }
