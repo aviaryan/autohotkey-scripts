@@ -26,6 +26,7 @@ Avi's Autohotkey Scripts and Functions Repository
 * **Maths()** - A Collection of non-native, heavily requested Autohotkey Mathematical Functions.
 * **_Ini()** - Ini Library with ini-comment(s) support.
 * **Hparse()** - Convert User shortcuts such as (Ctrl + PageDown) to Autohotkey shortcuts (here Ctrl & PgDn)
+* **talk()** - Inter-script Communication Provider
 * **Miscellanous Functions()** - A library of my random useful functions
 * **DayofDate()** - Gives day name (like Sunday) of a requested date
 * **Sublime Text Autocomplete Adder** - Add Auto-comlpetions in Sublime Text with a GUI and Duplicates Filter
