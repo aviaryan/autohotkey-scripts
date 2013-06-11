@@ -1,7 +1,9 @@
 Avi's Autohotkey Scripts and Functions Repository
 ==========================
+[See My AHK Website](http://avi-aryan.github.io/Avis-Autohotkey-Repo/)  
+  
 [Blog](http://www.avi-win-tips.blogspot.com)  
-[Index of my works](http://avi-win-tips.blogspot.com/p/my-autohotkey.html)  
+[Blog Index](http://avi-win-tips.blogspot.com/p/my-autohotkey.html)  
 [E-Mail](mailto:avi.aryan123@gmail.com)  
 
 `Copyright 2013 Avi Aryan`  
@@ -18,19 +20,4 @@ Avi's Autohotkey Scripts and Functions Repository
 `See the License for the specific language governing permissions and`  
 `limitations under the License.`  
   
-  
-#### INDEX ####
-  
-* **LaunchQ** - Fast, Simple, Productive Application Launcher
-* **Extreme Screen Clipper** - Capture Screenshots, resize, crop and save them as an image file instantly
-* **Maths()** - A Collection of non-native, heavily requested Autohotkey Mathematical Functions.
-* **_Ini()** - Ini Library with ini-comment(s) support.
-* **Hparse()** - Convert User shortcuts such as (Ctrl + PageDown) to Autohotkey shortcuts (here Ctrl & PgDn)
-* **talk()** - Inter-script Communication Provider
-* **Miscellanous Functions()** - A library of my random useful functions
-* **DayofDate()** - Gives day name (like Sunday) of a requested date
-* **Sublime Text Autocomplete Adder** - Add Auto-comlpetions in Sublime Text with a GUI and Duplicates Filter
-* **Autohotkey Updater** - Check the registered or selected version of Autohotkey for updates
-  
-
 See [Notice.txt](NOTICE.txt) for more information.  
