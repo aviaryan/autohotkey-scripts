@@ -53,26 +53,26 @@ GetIconforext(ext){
 
 GetFolder()
 {
-WinGetClass,var,A
-If var in CabinetWClass,ExplorerWClass,Progman
-{
-IfEqual,var,Progman
-	v := A_Desktop
-else
-{
-	winGetText,Fullpath,A
-	loop,parse,Fullpath,`r`n
+	WinGetClass,var,A
+	If var in CabinetWClass,ExplorerWClass,Progman
 	{
-		IfInString,A_LoopField,:\
+		IfEqual,var,Progman
+			v := A_Desktop
+		else
 		{
-		StringGetPos,pos,A_Loopfield,:\,L
-		Stringtrimleft,v,A_loopfield,(pos - 1)
-		break
+			winGetText,Fullpath,A
+			loop,parse,Fullpath,`r`n
+			{
+				IfInString,A_LoopField,:\
+				{
+					StringGetPos,pos,A_Loopfield,:\,L
+					Stringtrimleft,v,A_loopfield,(pos - 1)
+					break
+				}
+			}
 		}
+	return v
 	}
-}
-return, v
-}
 }
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -101,6 +101,7 @@ StringTrimRight,filedata,filedata,2
 FileDelete, %file%
 FileAppend, % Rtrim(filedata, "`r`n"), %file%
 }
+
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 ;Run a web-site . Eliminates issues with running the site using the traditional method.
@@ -140,15 +141,49 @@ loop
 }
 BlockInput, Off
 }
+
+;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+/*
+SuperInstr()
+	Returns min/max position for a | separated values of Needle(s)
+	
+	return_min = true  ; return minimum position
+	return_min = false ; return maximum position
+
+*/
+SuperInstr(Hay, Needles, return_min=true, Case=false, Startpoint=1, Occurrence=1){
+	
+	pos := return_min*Strlen(Hay)
+	if return_min
+	{
+		loop, parse, Needles,|
+			if ( pos > (var := Instr(Hay, A_LoopField, Case, startpoint, Occurrence)) )
+				pos := ( var = 0 ? pos : var )
+	}
+	else
+	{
+		loop, parse, Needles,|
+			if ( (var := Instr(Hay, A_LoopField, Case, startpoint, Occurrence)) > pos )
+				pos := var
+	}
+	return pos
+}
+
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 ;Concatenate a string n - times without using loop
-Concatenate(string, ntimes){
-return, (ntimes<2) ? string : string . Concatenate(string , ntimes-1)
+Concatenate(string, ntimes){		
+return ntimes<1 ? "" : (ntimes<2 ? string : string Concatenate(string, ntimes-1))
 }
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 ;Reverse a string
 ReverseAKAFlip(string){
 return, Strlen(string) < 2 ? Substr(string,1) : Substr(string,0) ReverseAKAFlip(Substr(string,1,-1))
+}
+;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+;Copy.com Direct Link Generator (Parsing)
+CopydotcomParser(link){
+	return RegExReplace(link, "i)(.*)www.(.*)/s(.*)(\?download=1)+", "$1$2$3")
 }
