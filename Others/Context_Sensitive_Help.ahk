@@ -6,7 +6,8 @@ v0.1                                #
 */
 
 ;--- CONFIGURE -------------------------------------------------
-F1::RunHelp()
+F1::RunHelp("Autohotkey.chm")		;The shortcut key
+;Autohotkey.chm is supposed to be in Script's folder.
 
 ;--- XXXXXXXXX -------------------------------------------------
 
