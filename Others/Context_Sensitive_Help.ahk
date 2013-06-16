@@ -1,22 +1,37 @@
 /*
 #####################################
 Context Sensitive Help by Avi Aryan #
-v0.1                                #
+v0.2                                #
 #####################################
 */
-
-;--- CONFIGURE -------------------------------------------------
-F1::RunHelp("Autohotkey.chm")		;The shortcut key
-;Autohotkey.chm is supposed to be in Script's folder.
-
-;--- XXXXXXXXX -------------------------------------------------
 
 #SingleInstance, force
 SetWorkingDir, %A_scriptdir%
 
-RunHelp(Helpfile="Autohotkey.chm"){
+if !FileExist("Autohotkey.chm")		;Searching for Help file
+{
+	RegRead, ovar, HKLM, SOFTWARE\AutoHotkey, InstallDir
+	if !FileExist(ovar "\Autohotkey.chm")
+	{
+		FileSelectFile, selfile,,,Select Autohotkey Help file,Autohotkey Help(Autohotkey.chm)
+		Helpfile := selfile
+	}
+	else
+		Helpfile := ovar "\Autohotkey.chm"
+}
+else
+	Helpfile := "Autohotkey.chm"
+
+
+;--- CONFIGURE -------------------------------------------------
+
+F1::RunHelp(Helpfile)		;The shortcut key
+
+;--- XXXXXXXXX -------------------------------------------------
+
+RunHelp(Helpfile){
+
 	BlockInput, Sendandmouse
-	
 	oldclip := ClipboardAll
 	Send, +{End}^c
 	copiedcode1 := Clipboard
