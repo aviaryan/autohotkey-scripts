@@ -40,7 +40,7 @@ RunHelp(Helpfile){
 	leftofcaret := Substr(copiedcode2, 1, Instr(copiedcode2, copiedcode1, false, 0)-1) 	;leftside
 	
 	if ( ( !Instr(copiedcode1, " ") ? Strlen(copiedcode1) : Instr(copiedcode1, " ") ) > ( !Instr(copiedcode1, "(") ? Strlen(copiedcode1) : Instr(copiedcode1, "(") ) )
-		needles := "=|+|-|*|?|:|(|% |%	|\|/|,"		;added /\,
+		needles := "=|+|-|*|?|:|(|% |%	|\|/|,|!|<|>"		;added /\,!<>
 	else
 		needles := "=|+|-|*|?|:|(|% |%	"
 	
