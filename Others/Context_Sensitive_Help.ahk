@@ -1,7 +1,7 @@
 /*
 #####################################
 Context Sensitive Help by Avi Aryan #
-v0.2                                #
+v0.4                                #
 #####################################
 */
 
@@ -34,11 +34,17 @@ RunHelp(Helpfile){
 	BlockInput, Sendandmouse
 	oldclip := ClipboardAll
 	Send, +{End}^c
-	copiedcode1 := Clipboard
+	copiedcode1 := Clipboard	;rightside
 	Send, {Home}+{End}^c{Right}
 	copiedcode2 := Clipboard
-	leftofcaret := Substr(copiedcode2, 1, Instr(copiedcode2, copiedcode1, false, 0)-1)
-	copiedcode := Ltrim( (temp_pos := SuperInstr(leftofcaret, "=|+|-|*|?|:|(|% |%	", 0, false, 0)) ? Substr(leftofcaret, temp_pos+1) : leftofcaret )
+	leftofcaret := Substr(copiedcode2, 1, Instr(copiedcode2, copiedcode1, false, 0)-1) 	;leftside
+	
+	if ( ( !Instr(copiedcode1, " ") ? Strlen(copiedcode1) : Instr(copiedcode1, " ") ) > ( !Instr(copiedcode1, "(") ? Strlen(copiedcode1) : Instr(copiedcode1, "(") ) )
+		needles := "=|+|-|*|?|:|(|% |%	|\|/|,"		;added /\,
+	else
+		needles := "=|+|-|*|?|:|(|% |%	"
+	
+	copiedcode := Ltrim( (temp_pos := SuperInstr(leftofcaret, needles, 0, false, 0)) ? Substr(leftofcaret, temp_pos+1) : leftofcaret )
 	copiedcode .= copiedcode1
 	comand := RegExReplace(copiedcode, "([A-Z]*)(,|`t| |\()(.*)", $1)
 	BlockInput, off
