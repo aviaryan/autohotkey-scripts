@@ -1,27 +1,14 @@
 /*
 #####################################
 Context Sensitive Help by Avi Aryan #
-v0.4                                #
+v0.6                                #
 #####################################
 */
 
 #SingleInstance, force
 SetWorkingDir, %A_scriptdir%
 
-if !FileExist("Autohotkey.chm")		;Searching for Help file
-{
-	RegRead, ovar, HKLM, SOFTWARE\AutoHotkey, InstallDir
-	if !FileExist(ovar "\Autohotkey.chm")
-	{
-		FileSelectFile, selfile,,,Select Autohotkey Help file,Autohotkey Help(Autohotkey.chm)
-		Helpfile := selfile
-	}
-	else
-		Helpfile := ovar "\Autohotkey.chm"
-}
-else
-	Helpfile := "Autohotkey.chm"
-
+helpfile := Search4AhkHelp()
 
 ;--- CONFIGURE -------------------------------------------------
 
@@ -40,9 +27,9 @@ RunHelp(Helpfile){
 	leftofcaret := Substr(copiedcode2, 1, Instr(copiedcode2, copiedcode1, false, 0)-1) 	;leftside
 	
 	if ( ( !Instr(copiedcode1, " ") ? Strlen(copiedcode1) : Instr(copiedcode1, " ") ) > ( !Instr(copiedcode1, "(") ? Strlen(copiedcode1) : Instr(copiedcode1, "(") ) )
-		needles := "=|+|-|*|?|:|(|% |%	|\|/|,|!|<|>"		;added /\,!<>
+		needles := "=|+|-|*|?|:|(|% |%	|\|/|,|!|<|>|.| "
 	else
-		needles := "=|+|-|*|?|:|(|% |%	"
+		needles := "%|=|."	;If it is a command, we dont need any parsing, but if it is a Sys variable, we need . Add more from above if you find it right
 	
 	copiedcode := Ltrim( (temp_pos := SuperInstr(leftofcaret, needles, 0, false, 0)) ? Substr(leftofcaret, temp_pos+1) : leftofcaret )
 	copiedcode .= copiedcode1
@@ -86,4 +73,18 @@ SuperInstr(Hay, Needles, return_min=true, Case=false, Startpoint=1, Occurrence=1
 				pos := var
 	}
 	return pos
+}
+
+/*
+	Searches for Ahk Help file
+*/
+Search4AhkHelp(){
+	
+	if FileExist( helpfile := Substr(A_ahkpath, 1, Instr(A_ahkpath, "\", false, 0)) "Autohotkey.chm" )
+		return helpfile
+	else
+	{
+		FileSelectFile, selfile,,,Select Autohotkey Help file,Autohotkey Help(Autohotkey.chm)
+		return selfile
+	}
 }
