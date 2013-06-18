@@ -1,7 +1,7 @@
 /*
 #####################################
 Context Sensitive Help by Avi Aryan #
-v0.6                                #
+v0.7                                #
 #####################################
 */
 
@@ -43,8 +43,8 @@ RunHelp(Helpfile){
 		WinWait, AutoHotkey Help
 		WinActivate, AutoHotkey Help
 		WinWaitActive, AutoHotkey Help
-		Sendplay, !n
-		SendPlay, !w%comand%{enter}
+		Sendplay, !r!n
+		SendPlay, +{Home}%comand%{enter}
 	}
 }
 
