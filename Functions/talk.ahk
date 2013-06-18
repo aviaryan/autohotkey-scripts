@@ -1,6 +1,6 @@
 ﻿/*
 ########################
-talk v0.1			   #
+talk v0.2			   #
 by Avi Aryan		   #
 ##################################
 Thanks to Autohotkey help file   #
@@ -60,6 +60,11 @@ class talk
 		return
 	}
 	
+	;suspends the client for a certain time
+	suspend(timeinms){
+		talk_send(timeinms " \ " A_scriptname " \ " "suspend", this.Script)
+	}
+	
 	terminate(){
 		talk_send("terminate" " \ " A_scriptname " \ " "terminate", this.Script)
 	}
@@ -72,7 +77,7 @@ talk_reciever(wParam, lParam){
 	local Data, Params, ScriptName, What, Param1, tosend
 	
     Data := StrGet( NumGet(lParam + 2*A_PtrSize) )
-	;Structure... Message \ SenderScriptName \ What \ Param1
+	;Structure... Data \ SenderScriptName \ What \ Param1
 	Params := Substr(Data, Instr(Data, " \ ")+3) , ScriptName := Substr(Params, 1, Instr(Params, " \ ")-1)
 
 	What := Substr(Params, Instr(Params, " \ ")+3, Instr(Params, " \ ",false,1,2) - Instr(Params, " \ ") - 3)
@@ -106,6 +111,13 @@ talk_reciever(wParam, lParam){
 		if islabel(Data)
 			gosub, %Data%
 		talk_send("runlabel" " \ " A_ScriptName " \ " "talk", ScriptName)
+		return
+	}
+	else if What = suspend
+	{
+		Suspend
+		sleep,% Data
+		Suspend
 		return
 	}
 	else if What = terminate
