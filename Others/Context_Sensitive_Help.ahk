@@ -1,18 +1,19 @@
 /*
 #####################################
 Context Sensitive Help by Avi Aryan #
-v0.8                                #
+v0.9                                #
 #####################################
 */
 
 #SingleInstance, force
 SetWorkingDir, %A_scriptdir%
 
+
 helpfile := Search4AhkHelp()
 
 ;--- CONFIGURE ---------------------------------------------------------------
 
-F1::RunHelp(Helpfile, true, "!r!n")
+F1::RunHelp(Helpfile, true)
 
 ;--- XXXXXXXXX ---------------------------------------------------------------
 
@@ -20,10 +21,7 @@ F1::RunHelp(Helpfile, true, "!r!n")
 
 ;Single File = true		 means all the help will be managed in a single help file
 
-;Indexshortcut = the shortcut to open Index tab inside the Help file 
-	;See - http://www.autohotkey.com/board/topic/94493-context-sensitive-help-in-any-editor-best-edition/page-2#entry595850
-
-RunHelp(Helpfile, SingleFile=true, IndexShortcut="!r!n"){
+RunHelp(Helpfile, SingleFile=true){
 
 	BlockInput, Sendandmouse
 	oldclip := ClipboardAll
@@ -53,7 +51,8 @@ RunHelp(Helpfile, SingleFile=true, IndexShortcut="!r!n"){
 		WinWait, AutoHotkey Help
 		WinActivate, AutoHotkey Help
 		WinWaitActive, AutoHotkey Help
-		Sendplay,% IndexShortcut
+		SendMessage, 0x1330, 1,, SysTabControl321
+		SendMessage, 0x130C, 1,, SysTabControl321
 		SendPlay, +{Home}%comand%{enter}
 	}
 }
