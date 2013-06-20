@@ -697,7 +697,7 @@ if SM_Greater(dividend, divisor, true){
 	else
 		Remainder := SM_Add(dividend,"-" SM_Multiply(divisor, div))
 }
-return, ( Positive ? "" : "-" ) . Remainder
+return, ( (Positive or Remainder=0) ? "" : "-" ) . Remainder
 }
 
 ;############################################################################################################################################
