@@ -1,80 +1,88 @@
-ï»¿/*
-MATHS LIBRARY
+/*
+
+Scientific MATHS LIBRARY ( Filename = Maths.ahk )
 by Avi Aryan
-Thanks to hd0202, Uberi and sinkfaze for valuable suggestions and ideas.
-v 2.2
+Thanks to hd0202, Uberi and sinkfaze
+v 2.4
 ------------------------------------------------------------------------------
 
 ##############################################################################
 FUNCTIONS
 ##############################################################################
-See Help - http://www.avi-win-tips.blogspot.com/2013/05/maths.html
-##############################################################################
 
-* Solve(Expression, AHK=false) --- Solves a Mathematical expression.
-  Use Pow(number, n) [provided below] in place of ** in Solve() 
-  Solve() supports infinetly large numbers and its +-/* is powered by the respective custom functions below (when AHK is false(default)) so no need to use 
-  them in Solve().
-  Solve() supports functions() . Solve() supports Nesting via [] brackets ( not () )
-  
-* Evaluate(number1, number2) --- +/- massive numbers . Supports Real Nos (Everything)
-* Multiply(number1, number2) --- multiply two massive numbers . Supports everything
-* Divide(Dividend, Divisor, length) --- Divide two massive numbers . Supports everything . length is number of decimals smartly rounded.
-* Roots("Coefficients") - Roots of a poly function 
-* Greater(number1, number2, trueforequal=false) --- compare two massive numbers 
-* Prefect(number) --- convert a number to most suitable form. like ( 002 to 2 ) and ( 000.5600 to 0.56 )
-* fact(number) --- factorial of a number . supports large numbers 
-* Pow(number, power) --- power of a number . supports large numbers and powers
-* ModG(Dividend, Divisor) --- Mod() . Supports large numbers
-* RoundG(number, decimals) --- Round() . Large numbers
-* FloorG(number) --- Floor() . large numbers
+* NOTES ARE PROVIDED WITH EACH FUNCTION IN THE FORM OF COMMENTS. EXPLORE
 
------  BETTER PASS NUMBERS AS STRINGS FOR THE ABOVE FUNCTIONS ------------------
------  SEE THE COMMENTED MSGBOX CODE BELOW TO UNRSTND WHAT I MEAN --------------
+* SM_Solve(Expression, AHK=false) --- Solves a Mathematical expression.
+* SM_Add(number1, number2) --- +/- massive numbers . Supports Real Nos (Everything)
+* SM_Multiply(number1, number2) --- multiply two massive numbers . Supports everything
+* SM_Divide(Dividend, Divisor, length) --- Divide two massive numbers . Supports everything . length is number of decimals smartly rounded.
+* SM_Greater(number1, number2, trueforequal=false) --- compare two massive numbers 
+* SM_Prefect(number) --- convert a number to most suitable form. like ( 002 to 2 ) and ( 000.5600 to 0.56 )
+* SM_fact(number) --- factorial of a number . supports large numbers 
+* SM_Exp(number, decimals) --- Converts a number to Scientific notation format
+* SM_Pow(number, power) --- power of a number . supports large numbers and powers
+* SM_Mod(Dividend, Divisor) --- Mod() . Supports large numbers
+* SM_Round(number, decimals) --- Round() . Large numbers
+* SM_Floor(number) --- Floor() . large numbers
+* SM_UniquePmt(pattern, ID)	;gives the unique permutation possible .
 
-* UniquePMT(pattern, ID)	;gives the unique permutation possible .
-	eg -> UniquePMT("abcd", 17) >>> 17th unique permutaion for abcd . 
-	eg -> UniquePMT("ram,kam,shyam,nam", "All") >>> All permutations separated by linefeeds
 
-* Antilog(number, basetouse=10) --- gives antilog of a number . basetouse can be "e" .
-* nthRoot(number, n) ---- gives nth root of a number .
-  nthroot(8, 3) gives cube root of 8 = 2
-* logB(number, base) --- log of a number at a partcular base.
+################################################################################
+READ
+################################################################################
+
+* Pass the numbers as strings in each of these functions. This is done to avoid number trimming due to Internal AHK Limit
+* For a collection of general Math functions, see  < Math-functions.ahk >
 
 */
-;msgbox,% Divide(34389193, 30, 2) "  " 34389193 / 30
-;msgbox,% RoundG("124389438943894389430909430438098232323.427239238023823923984",4)
-;msgbox,% Divide("3426326","30")
-;msgbox,% Divide("43.034934034904334", "89.3467436743", 10)
-;msgbox,% Divide("0.2893","0.0000000001")
-;msgbox,% UniquePMT("abcdefghijklmnopqrstuvwxyz0123456789",12367679898956098)
-;msgbox,% ModG("-22","-7")
-;msgbox,% Divide("232323","23")
-;msgbox,% Divide("22","7", 1)
-;msgbox,% Divide("48.45","19.45",2)
-;Send,% Divide("1200000","3")
-;msgbox,% fact("38")
-;msgbox,% roots("1,1,1,-3")
-;msgbox,% UniquePMT("avi,annat,koiaur,aurkoi", "All")
-;msgbox,% Solve("[28*45] - [45*28]")
-;msgbox,% Evaluate("1280", "-1280")
-;msgbox,% Roots("1,1,1,-3") ;xcube + xsq + x - 3 = 0
-;MsgBox,% Solve("23898239238923.2382398923 + 2378237238.238239 - [989939.9939 * 892398293823]")
 
-;var = sqrt(4) - [nthroot(17248,3) * antilog(0.3010)] * [892839.2382389 - 89238239.923]
-;msgbox,% Solve(var)
-;msgbox,% UniquePMT("abd", "All")
-;msgbox,% Solve("Sqrt(4) * nthRoot(8, 3) * 2 * log(100) * antilog(0.3010) - 32"
-;Msgbox,% Greater(18.789, 187)
-;Send,% Divide("434343455677690909087534208967834434444.5656", "8989998989898909090909009909090909090908656454520", 100)
-;0.00000000004831407168851917996894167387553355392868017271310508310531756041233543865298474909530220708088953654
-;MsgBox,% Multiply("111111111111111111111111111111111111111111.111","55555555555555555555555555555555555555555555.555")
-;MsgBox,% Prefect("00.002000")
-;Msgbox,% nthroot(3.375, 3)
-;Msgbox,% Evaluate("-28","-98.007")
-;return
+;~ msgbox,% SM_POW(2,100)
+;~ msgbox,% SM_Divide(34389193, 30, 2)
+;~ msgbox,% SM_Round("124389438943894389430909430438098232323.427239238023823923984",4)
+;~ msgbox,% SM_Divide("3426326","30")
+;~ msgbox,% SM_Exp("328923823982398239283923.238239238923", 3)
+;~ msgbox,% SM_Divide("43.034934034904334", "89.3467436743", 10)
+;~ msgbox,% SM_UniquePmt("abcdefghijklmnopqrstuvwxyz0123456789",12367679898956098)
+;~ msgbox,% SM_Mod("-22","-7")
+;~ msgbox,% SM_Divide("232323","23")
+;~ msgbox,% SM_Divide("22","7", 1)
+;~ msgbox,% SM_Divide("48.45","19.45",2)
+;~ msgbox,% SM_Divide("1200000","3")
+;~ msgbox,% SM_fact("38")
+;~ msgbox,% SM_UniquePmt("avi,annat,koiaur,aurkoi")
+;~ msgbox,% SM_Solve("[28*45] - [45*28]")
+;~ msgbox,% SM_Add("1280", "-1280")
+;~ MsgBox,% SM_Solve("23898239238923.2382398923 + 2378237238.238239 - [989939.9939 * 892398293823]")
+;~ msgbox,% SM_Exp("0.1004354545")
+;~ var = sqrt(4) - [892839.2382389 - 89238239.923]
+;~ msgbox,% SM_Solve(var)
+;~ msgbox,% SM_Solve("Sqrt(4) * 2 * log(100) * SM_Pow(45,8) - 32")
+;~ msgbox,% SM_UniquePmt("abcdefghijklmnopqrstuvwxyz123456789", 2)	;<----- That's called huge numbers
+;~ Msgbox,% SM_Greater(18.789, 187)
+;~ msgbox,% SM_Divide("434343455677690909087534208967834434444.5656", "8989998989898909090909009909090909090908656454520", 100)
+;~ MsgBox,% SM_Multiply("111111111111111111111111111111111111111111.111","55555555555555555555555555555555555555555555.555")
+;~ MsgBox,% SM_Prefect("00.002000")
+;~ Msgbox,% SM_Add("-28","-98.007")
+;~ return
 
-Solve(expression, ahk=false){
+;###################################################################################################################################################################
+
+/*
+
+SM_Solve(expression, ahk=false)
+
+Solves the expression in string. SM_Solve() uses the powerful functions present in the library for processing
+ahk = true will make SM_Solve() use Ahk's +-/* for processing. Will be faster
+
+* To nest expressions with brackets , use [ ] and not the conventional ( ) 
+* Use SM_Pow(number, n) function [provided below] in place of ** in SM_Solve() 
+
+Example
+	msgbox,% SM_Solve("Sqrt(4) * 2 * log(100) * SM_Pow(45,8) - 32")
+
+*/
+
+SM_Solve(expression, ahk=false){
 StringReplace,expression,expression,%A_space%,,All	;The tricky part :-D
 StringReplace,expression,expression,%A_tab%,,All
 ; More Reps
@@ -89,7 +97,7 @@ loop,
 	if !(Instr(expression, "[",false,1,A_index + 1)){
 		if (posofb)
 		{
-			get := Solve( Substr(expression, posofb + 1, Instr(expression, "]", false, posofb, 1) - posofb - 1) , ahk )	;solve the bracket
+			get := SM_Solve( Substr(expression, posofb + 1, Instr(expression, "]", false, posofb, 1) - posofb - 1) , ahk )	;solve the bracket
 			expression := Fixexpression( Substr(expression, 1, posofb - 1) . get . Substr(expression, Instr(expression, "]", false, posofb, 1) + 1) )
 		}
 		else
@@ -100,25 +108,25 @@ loop,
 if !(Instr(expression, "["))
 	break
 }
-;Changing +,-... in expressions to something different    Â¢Â¤Â¥Â¦    =    +-*/
+;Changing +,-... in expressions to something different    ¢¤¥¦    =    +-*/
 
 loop,
 {
 	if !(Instr(expression, "(")){
-	StringReplace,expression,expression,+,Â¢,All
-	StringReplace,expression,expression,-,Â¤,All
-	StringReplace,expression,expression,*,Â¥,All
-	StringReplace,expression,expression,/,Â¦,All
-	StringReplace,expression,expression,\,Â¦,All
+	StringReplace,expression,expression,+,¢,All
+	StringReplace,expression,expression,-,¤,All
+	StringReplace,expression,expression,*,¥,All
+	StringReplace,expression,expression,/,¦,All
+	StringReplace,expression,expression,\,¦,All
 	reserve .= expression
 	break
 	}
 	temp := Substr(expression, 1, Instr(expression, "(")) ;till  4+2 + sin(
-	StringReplace,temp,temp,+,Â¢,All
-	StringReplace,temp,temp,-,Â¤,All
-	StringReplace,temp,temp,*,Â¥,All
-	StringReplace,temp,temp,/,Â¦,All
-	StringReplace,temp,temp,\,Â¦,All
+	StringReplace,temp,temp,+,¢,All
+	StringReplace,temp,temp,-,¤,All
+	StringReplace,temp,temp,*,¥,All
+	StringReplace,temp,temp,/,¦,All
+	StringReplace,temp,temp,\,¦,All
 	temp2 := SubStr(expression, Instr(expression, "(") + 1, Instr(expression, ")") - Instr(expression, "("))
 	reserve .= temp . temp2
 	expression := Substr(expression,Instr(expression, ")")+ 1)
@@ -126,7 +134,7 @@ loop,
 ;
 expression := reserve
 
-loop, parse, expression,Â¢Â¤Â¥Â¦
+loop, parse, expression,¢¤¥¦
 {
 ;Check for functions -- 
 firstch := Substr(A_loopfield, 1, 1)
@@ -154,23 +162,23 @@ if firstch is not Integer
 ;Perform the previous assignment routine
 if (char != ""){
 	if (Ahk){
-	if char = Â¢
+	if char = ¢
 		solved := solved + (number)
-	else if char = Â¤
+	else if char = ¤
 		solved := solved - (number)
-	else if char = Â¦
+	else if char = ¦
 		solved := solved / (number)
-	else if char = Â¥
+	else if char = ¥
 		solved := solved * (number)
 	}else{
-	if char = Â¢
-		solved := Evaluate(solved, number)
-	else if char = Â¤
-		solved := Evaluate(solved,"-" . number)
-	else if char = Â¦
-		solved := Divide(solved, number)
-	else if char = Â¥
-		solved := Multiply(solved, number)
+	if char = ¢
+		solved := SM_Add(solved, number)
+	else if char = ¤
+		solved := SM_Add(solved,"-" . number)
+	else if char = ¦
+		solved := SM_Divide(solved, number)
+	else if char = ¥
+		solved := SM_Multiply(solved, number)
 	}
 }
 if solved = 
@@ -179,12 +187,20 @@ if solved =
 char := Substr(expression, Strlen(A_loopfield) + 1,1)
 expression := Substr(expression, Strlen(A_LoopField) + 2)	;Everything except number and char
 }
-return, Prefect(solved)
+return, SM_Prefect(solved)
 }
 
-;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+;###############################################################################################################################
 
-Evaluate(number1, number2, prefect=true){	;Dont set Prefect false, Just forget about it.
+/*
+SM_Add(number1, number2, prefect=true)
+
+Adds or subtracts 2 numbers
+To subtract A and B , do like 		SM_Add(A, "-" B)	i.e. append a minus
+
+*/
+
+SM_Add(number1, number2, prefect=true){	;Dont set Prefect false, Just forget about it.
 ;Processing
 IfInString,number2,--
 	count := 2
@@ -257,7 +273,7 @@ if (Instr(n2,"-") and Instr(n1, "-"))
 elsE
 {
 ;Compare numbers for suitable order
-numbercompare := Greater(number1, number2, true)
+numbercompare := SM_Greater(number1, number2, true)
 if !(numbercompare){
 	mid := number2
 	number2 := number1
@@ -303,29 +319,26 @@ If (dec)
 	if (sum)
 		sum := SubStr(sum,1,StrLen(sum) - dec) . "." . SubStr(sum,1 - dec)
 ;Prefect
-return, Prefect ? Prefect(sum) : sum
+return, Prefect ? SM_Prefect(sum) : sum
 }
 
-;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Antilog(number, basetouse=10){
-oldformat := A_FormatFloat
-SetFormat, float, 0.16
+;###################################################################################################################
 
-if basetouse = e
-	basetouse := 2.71828182845905
-toreturn := basetouse ** number
-SetFormat, floatfast, %oldformat%
-return, toreturn
-}
-;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+/*
 
-Multiply(number1, number2){
+SM_Multiply(number1, number2)
+
+Multiplies any two numbers
+
+*/
+
+SM_Multiply(number1, number2){
 ;Getting Sign
 positive := true
 if (Instr(number2, "-"))
 	positive := false
 if (Instr(number1, "-"))
-	positive := Toggle(positive)
+	positive := !positive
 StringReplace,number1,number1,-
 StringReplace,number2,number2,-
 ; Removing Dot
@@ -335,7 +348,9 @@ IfInString,number2,.
 StringReplace,number1,number1,.
 StringReplace,number2,number2,.
 ; Multiplying
-number2 := ReverseAKAFlip(number2)
+loop,% Strlen(number2)
+	number2temp .= Substr(number2, 1-A_Index, 1)
+number2 := number2temp
 ;Reversing for suitable order
 product := "0"
 Loop,parse,number2
@@ -345,7 +360,7 @@ row := "0"
 zeros := ""
 if (A_loopfield)
 	loop,% (A_loopfield)
-		row := Evaluate(row, number1)
+		row := SM_Add(row, number1)
 else
 	loop,% (Strlen(number1) - 1)	;one zero is already 5 lines above
 		row .= "0"
@@ -353,12 +368,12 @@ else
 loop,% (A_index - 1)	;add suitable zeroes to end
 	zeros .= "0"
 row .= zeros
-product := Evaluate(product, row, false)
+product := SM_Add(product, row, false)
 }
 ;Give Dots
 if (dec){
 	product := SubStr(product,1,StrLen(product) - dec) . "." . SubStr(product,1 - dec)
-	product := Prefect(product)
+	product := SM_Prefect(product)
 }
 ;Give sign
 if !(positive)
@@ -366,19 +381,27 @@ if !(positive)
 return, product
 }
 
-;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+;######################################################################################################################################
+/*
 
-Divide(number1, number2, length=10){
+SM_Divide(number1, number2, length=10)
+
+Divide any two numbers
+	length = defines the number of decimal places in the result
+	
+*/
+
+SM_Divide(number1, number2, length=10){
 ;Getting Sign
 positive := true
 if (Instr(number2, "-"))
 	positive := false
 if (Instr(number1, "-"))
-	positive := Toggle(positive)
+	positive := !positive
 StringReplace,number1,number1,-
 StringReplace,number2,number2,-
 ;Perfect them
-number1 := Prefect(number1) , number2 := Prefect(number2)
+number1 := SM_Prefect(number1) , number2 := SM_Prefect(number2)
 ;Remove Decimals
 dec := 0
 if Instr(number1, ".")
@@ -401,13 +424,13 @@ while(number1 != "")
 {
 	times := 0 , below := "" , lendivide := 0 , n1fromleft := (takeone) ? Substr(number1, 1, n2+1) : Substr(number1, 1, n2)
 
-	if Greater(n1fromleft, number2, true)
+	if SM_Greater(n1fromleft, number2, true)
 	{
 		todivide := n1fromleft
 		loop, 10
 		{
-			num2temp%A_index% := Multiply(number2, A_index)
-			if !(Greater(todivide, num2temp%A_index%, true)){
+			num2temp%A_index% := SM_Multiply(number2, A_index)
+			if !(SM_Greater(todivide, num2temp%A_index%, true)){
 				lendivide := (takeone) ? n2 + 1 : n2
 				times := A_index - 1 , below := num2temp%times%
 				break
@@ -420,8 +443,8 @@ while(number1 != "")
 		todivide := SubStr(number1, 1, n2+1)	; :-P (takeone) will not be needed here
 		loop, 10
 		{
-			num2temp%A_index% := Multiply(number2, A_index)
-			if !(Greater(todivide, num2temp%A_index%, true)){
+			num2temp%A_index% := SM_Multiply(number2, A_index)
+			if !(SM_Greater(todivide, num2temp%A_index%, true)){
 				lendivide := n2 + 1
 				times := A_index - 1 , below := num2temp%times%
 				break
@@ -431,13 +454,13 @@ while(number1 != "")
 				res .= zeroes_r "0"
 	}
 	res .= times , coveredlength+=(lendivide - Strlen(remainder))	;length of previous remainder will add to number1 and so is not counted
-	remainder := Evaluate(todivide, "-" below)
+	remainder := SM_Add(todivide, "-" below)
 
 	if remainder = 0
 		remainder := ""
 	number1 := remainder . Substr(number1, lendivide + 1)
 
-	if Greater("0", remainder, true)
+	if SM_Greater("0", remainder, true)
 	{
 		zeroes_k := ""
 		loop,% Strlen(number1)
@@ -445,7 +468,7 @@ while(number1 != "")
 		if (number1 == zeroes_k){
 			StringTrimRight,number1,number1,1
 			number1 := "1" . number1
-			res := Multiply(res, number1)
+			res := SM_Multiply(res, number1)
 			break
 		}
 	}
@@ -497,111 +520,54 @@ else
 	num := "1"
 	loop,% dec
 		num .= "0"
-	res := Multiply(Prefect(res), num)
+	res := SM_Multiply(SM_Prefect(res), num)
 }
-return, ( (positive) ? "" : "-" ) . RoundG(Prefect(res), decimal < 0 ? Abs(decimal)+length : length)
-}
-
-;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Roots(expression){		;Enter a, b, c for quad. eqn ------  a, b, c, d for cubic eqn. and so on
-StringReplace,expression,expression,%A_space%,,All
-StringReplace,expression,expression,%A_tab%,,All
-;eqn, limit
-limit := 0
-loop, parse, expression,`,	;get individual coffs
-{
-	if !(Instr(A_Loopfield, "+") or Instr(A_loopfield, "-"))
-		coff%A_index% := "+" A_loopfield
-	else
-		coff%A_index% := A_loopfield
-	
-	limit := limit + Abs(A_loopfield)
-	nofterms := A_index
+return, ( (positive) ? "" : "-" ) . SM_Round(SM_Prefect(res), decimal < 0 ? Abs(decimal)+length : length)
 }
 
-loop,% (nofterms - 1)	;not including contsant
-	term .= Substr(coff%A_index%, 1, 1) "[" Substr(coff%A_index%,2) . " * Pow(x, " . (nofterms - A_index) . ")" "]"
-term .= coff%nofterms%
+;##########################################################################################################################################
 
-plot := limit
-if (limit / (nofterms-1) < 8)	;if roots are within short range, slow down
-	speed := defaultspeed := 0.2 , incomfac := "0.00" , lessfac := "0.01"
-else
-	speed := defaultspeed := 1 , incomfac := "0.0" , lessfac := "0.05"
+/*
 
-positive := true
-StringReplace,expression,term,x,%plot%,All	;getting starting value
-if Instr(Solve(expression), "-")
-	positive := false
+SM_UniquePmt(series, ID="", Delimiter=",")
 
-while (plot >= -limit)	;My theorem - Safe Range
-{
-	StringReplace,expression,term,x,%plot%,All
-	fx := Solve(expression, true)	;Over here ... Uses the AHK processes for faster results
-	
-	if (speed == defaultspeed){
-		if (fx == "0"){
-			roots .= Prefect(plot) . ","
-			positive := Toggle(positive) , plot-=speed
-			if (Instr(roots, ",", false, 1, nofterms - 1))	;if all roots have already been found, go out
-				break
-			continue
-			msgbox,% plot
-		}
-	}
-	else{
-		compare := Substr(Ltrim(fx, "-"),1,4)
-		if ((Instr(compare,incomfac) == 1) or compare+0 < lessfac+0)
-			{
-			roots .= Prefect(plot) . ","
-			speed := defaultspeed , positive := Toggle(positive) , plot-=speed
-			if (Instr(roots, ",", false, 1, nofterms - 1))
-				break
-			continue
-			}
-		}
+Powerful Permutation explorer function that uses an unique algorithm made by the author to give a unique sequence linked to a number.
+For example, the word "abc" has 6 permutations . So, SM_UniquePmt("abc", 1) gives a different sequence,  ("abc", 2) a different till ("abc", 6)
 
-	if (positive){
-		if (Instr(fx,"-")){
-			plot+=defaultspeed , positive := Toggle(positive) , speed := 0.01	;Lower the value, more the time and accurateness
-			continue
-		}
-	}else{
-		if !(Instr(fx, "-")){
-			plot+=defaultspeed , positive := Toggle(positive) , speed := 0.01
-			continue
-		}
-	}
-	plot-=speed
-}
-return, Rtrim(roots, ",")
-}
-;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+As the function is powered by the the specialist Mod, Division and Multiply functions, it can handle series larger series too.
 
-UniquePmt(series, ID=1, Delimiter=","){
+Examples --
+
+msgbox,% SM_UniquePmt("abcd")	;leaving ID = "" gives all permutations
+msgbox,% SM_UniquePmt("abcdefghijklmnopqrstuvwxyz123456789", 23322323323)	;<----- That's called huge numbers
+
+*/
+
+SM_UniquePmt(series, ID="", Delimiter=","){
+
 if Instr(series, Delimiter)
 	loop, parse, series,%Delimiter%
 		item%A_index% := A_LoopField , last := lastbk := A_Index
 else{
 	loop, parse, series
 		item%A_index% := A_loopfield
-	last := lastbk := Strlen(series)	; Multilined for speed
+	last := lastbk := Strlen(series) , Delimiter := ""
 }
-; The theory
-if ID = All			;Return all possible permutations
+
+if (ID == "")			;Return all possible permutations
 {
-	fact := fact(last)
+	fact := SM_fact(last)
 	loop,% fact
-		toreturn .= UniquePmt(series, A_index) . "`n"
+		toreturn .= SM_UniquePmt(series, A_index) . "`n"
 	return, Rtrim(toreturn, "`n")
 }
-posfactor := (ModG(ID, last) == "0") ? last : ModG(ID, last)
-incfactor := (ModG(ID, last) == "0") ? FloorG(Divide(ID,last)) : FloorG(Divide(ID,last)) + 1
+
+posfactor := (SM_Mod(ID, last) == "0") ? last : SM_Mod(ID, last)
+incfactor := (SM_Mod(ID, last) == "0") ? SM_Floor(SM_Divide(ID,last)) : SM_Floor(SM_Divide(ID,last)) + 1
 
 loop,% last
 {
-	tempmod := ModG(posfactor + incfactor - 1, last)	;should be faster
+	tempmod := SM_Mod(posfactor + incfactor - 1, last)	;should be faster
 	posfactor := (tempmod == "0") ? last : tempmod 	;Extraction point
 	res .= item%posfactor% . Delimiter , item%posfactor% := ""
 	
@@ -616,8 +582,18 @@ loop,% last
 return, Rtrim(res, Delimiter)
 }
 
-;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Greater(number1, number2, trueforequal=false){
+;####################################################################################################################################
+/*
+
+SM_Greater(number1, number2, trueforqual=false)
+
+Evaluates to true if number1 > number2
+If the "trueforequal" param is true , the function will also evaluate to true if number1 = number2
+
+*/
+
+SM_Greater(number1, number2, trueforequal=false){
+	
 IfInString,number2,-
 	IfNotInString,number1,-
 		return, true
@@ -627,7 +603,7 @@ IfInString,number1,-
 
 if (Instr(number1, "-") and Instr(number2, "-"))
 	bothminus := true
-number1 := Prefect(number1) , number2 := Prefect(number2)
+number1 := SM_Prefect(number1) , number2 := SM_Prefect(number2)
 ; Manage Decimals
 dec1 := (Instr(number1,".")) ? ( StrLen(number1) - InStr(number1, ".") ) : (0)
 dec2 := (Instr(number2,".")) ? ( StrLen(number2) - InStr(number2, ".") ) : (0)
@@ -648,80 +624,128 @@ else if (Strlen(number2) > Strlen(number1))
 	return,% (bothminus) ? (true) : (false)
 else	;The final way out
 {
-stop := StrLen(number1)
-loop,
-{
-	if (SubStr(number1,A_Index, 1) > Substr(number2,A_index, 1))
-		return,% (bothminus) ? (false) : (true)
-	else if (Substr(number2,A_index, 1) > SubStr(number1,A_Index, 1))
-		return,% (bothminus) ? (true) : (false)
+	stop := StrLen(number1)
+	loop,
+	{
+		if (SubStr(number1,A_Index, 1) > Substr(number2,A_index, 1))
+			return bothminus ? 0 : 1
+		else if (Substr(number2,A_index, 1) > SubStr(number1,A_Index, 1))
+			return bothminus ? 1 : 0
 	
-	if (a_index == stop)
-		return, (trueforequal) ? true : false
-}
-}
-
+		if (a_index == stop)
+			return, (trueforequal) ? 1 : 0
+	}
 }
 
-;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Prefect(number){
+}
+
+;#########################################################################################################################################
+/*
+
+SM_Prefect(number)
+
+Converts any number to Perfect form i.e removes extra zeroes and adds reqd. ones. eg > SM_Prefect(000343453.4354500000)
+
+*/
+
+SM_Prefect(number){
 number .= ""	;convert to string if needed
-if Instr(number, "-"){
-	StringReplace,number,number,-
-	negative := true
-}
+if Instr(number, "-")
+	number := Substr(number, 2) , negative := true
 
 if Instr(number, "."){
-loop,
-	if Instr(number, "0") = 1	;managing left hand side
-		StringTrimLeft,number,number,1
-	else
-		break
-
-if (Substr(number,1,1) == ".")	;if num like	.6767
-	number := "0" number
-
-number := Rtrim(number, "0")
-if (Substr(number, 0) == ".")	;like 456.
-	StringTrimRight,number,number,1
-
-return,% (negative) ? ("-" . number) : (number)
+	number := Trim(number, "0")
+	if (Substr(number,1,1) == ".")	;if num like	.6767
+		number := "0" number
+	if (Substr(number, 0) == ".")	;like 456.
+		number := Substr(number, 1, -1)
+	return,% (negative) ? ("-" . number) : (number)
 } ; Non-decimal below
 else
 {
-if (number != 0)
-	return,% (negative) ? ("-" . Ltrim(number, "0")) : (Ltrim(number, "0"))
-else
-	return, 0
+	if (number != 0)
+		return (negative) ? ("-" . Ltrim(number, "0")) : (Ltrim(number, "0"))
+	else
+		return 0
 }
 }
 
-;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-ModG(dividend, divisor){
+;###########################################################################################################################################
+/*
+
+SM_Mod(dividend, divisor)
+
+Gives remanider when dividend is divided by divisor
+
+*/
+
+SM_Mod(dividend, divisor){
 ;Signs
 positive := true
-if (Instr(divisor, "-"))
+if Instr(divisor, "-")
 	positive := false
 if (Instr(dividend, "-"))
-	positive := Toggle(positive)
-StringReplace,dividend,dividend,-
-StringReplace,divisor,divisor,-
+	positive := !positive
+dividend := Substr(dividend, Instr(dividend, "-") ? 2 : 1) , divisor := Substr(divisor, Instr(divisor, "-") ? 2 : 1) , Remainder := dividend
 
-Remainder := dividend
 ;Calculate no of occurances
-if Greater(dividend, divisor, true){
-	div := Divide(dividend, divisor)
+if SM_Greater(dividend, divisor, true){
+	div := SM_Divide(dividend, divisor)
 	div := Instr(div, ".") ? SubStr(div, 1, Instr(div, ".") - 1) : 0
 	if div = 0
 		Remainder := 0
 	else
-		Remainder := Evaluate(dividend,"-" Multiply(divisor, div))
+		Remainder := SM_Add(dividend,"-" SM_Multiply(divisor, div))
 }
 return, ( Positive ? "" : "-" ) . Remainder
 }
 
-;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-RoundG(number, decimals){
+;############################################################################################################################################
+/*
+
+SM_Exp(number, decimals="")
+
+Gives exponential form of representing a number.
+If decimals param is omitted , it is automatically detected.
+
+*/
+
+SM_Exp(number, decimals=""){
+
+	if (dec_pos := Instr(number, "."))
+	{
+		number := SM_Prefect(number) , number := Substr(number, Instr(number, "0")=1 ? 2 : 1)
+		Loop, parse, number
+		{
+			if A_loopfield > 0
+				break
+			tempnum .= A_LoopField
+		}
+		number := Substr(number, Strlen(tempnum)+1) , power := dec_pos-Strlen(tempnum)-2
+		number2 := Substr(number, 2)
+		StringReplace,number2,number2,.
+		number := Substr(number, 1, 1) "." number2
+		decimals := ( decimals="" or decimals>Strlen(number2) ) ? Strlen(number2) : decimals
+		return SM_Round(number, decimals) "e" power
+	}
+	else
+	{
+		number := SM_Prefect(number) , decimals := ( decimals="" or decimals>Strlen(Substr(number,2)) ) ? Strlen(Substr(number,2)) : decimals
+		return SM_Round( Substr(number, 1, 1) "." Substr(number, 2), decimals ) "e" Strlen(number)-1
+	}
+}
+
+;#######################################################################################################################################
+
+/*
+
+SM_Round(number, decimals)
+
+Rounds a infinitely sized number to given number of decimals
+
+*/
+
+SM_Round(number, decimals){
 if Instr(number,".")
 {
 	nofdecimals := StrLen(number) - ( Instr(number, ".") = 0 ? Strlen(number) : Instr(number, ".") )
@@ -732,7 +756,7 @@ if Instr(number,".")
 		if secdigit >= 5
 			loop,% decimals-1
 				zeroes .= "0"
-		number := Evaluate(Substr(number, 1, Instr(number, ".")+decimals), (secdigit >= 5) ? "0." zeroes "1" : "0")
+		number := SM_Add(Substr(number, 1, Instr(number, ".")+decimals), (secdigit >= 5) ? "0." zeroes "1" : "0")
 	}
 	else
 	{
@@ -746,53 +770,72 @@ else
 	return, number
 }
 
-;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+;###################################################################################################################################################
 
-FloorG(number){
-number := Prefect(number)
+/*
+
+SM_Floor(number)
+
+Floor function with extended support. Refer to Ahk documentation for Floor()
+
+*/
+
+SM_Floor(number){
+number := SM_Prefect(number)
 if Instr(number, "-")
 {
 	if Instr(number,".")
-		return, Evaluate(Substr(number, 1, Instr(number, ".") - 1), -1)
+		return, SM_Add(Substr(number, 1, Instr(number, ".") - 1), -1)
 	else
 		return, number
 }
 else
 	return, (Instr(number, ".")) ? Substr(number, 1, Instr(number, ".") - 1) : number
 }
-;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-LogB(number, base){
-IfNotInString,base,-
-	IfNotInString,number,-
-		return,% Prefect(log(number) / log(base))
-}
+;#################################################################################################################################################
 
-nthRoot(number, n){
-if Instr(number, "-")
-{
-	StringReplace,number,number,-
-	if (Mod(n, 2) == 0)		;check for even
-		return
-	sign := "-"
-}
-return,% sign . Prefect(antilog( (1/n) * log(number) ))
+/*
+
+SM_fact(number)
+
+Gives factorial of number of any size. Dont get carried away and try something like 198 . Your computer will freeze
+
+*/
+
+SM_fact(number){
+	return (number+0<2) ? 1 : SM_Multiply(number, SM_fact(number-1))
 }
 
-fact(number){
-return, (number+0<2) ? 1 : Multiply(number, fact(number-1))
+/*
+
+SM_Pow(number, power)
+
+Gives the power of a number . Uses SM_Multiply() for the purpose
+
+*/
+
+SM_Pow(number, power){
+	if (power < 1)
+	{
+		if Instr(number, "-")
+		{
+			number := Substr(number,2)
+			if !Mod( (-1*power) , 2)		;check for even
+				return
+			sign := "-"
+		}
+		return sign . Round( number**( power=0 ?  0 : -1/power ) )
+	}
+	else
+	{
+		multiple := 1
+		loop % power
+			multiple := SM_Multiply(multiple, number)
+		return multiple
+	}
 }
 
-Pow(number, power){
-if (power < 1)
-	return, nthRoot(number, power)
-else{
-	multiple := 1
-	loop, %power%
-		multiple := Multiply(multiple, number)
-	return, multiple
-}
-}
 ;################# NON - MATH FUNCTIONS #######################################
 ;################# RESERVED ###################################################
 
@@ -852,11 +895,4 @@ StringReplace,expression,expression,++,+,All
 return, expression
 }
 
-Toggle(bool){
-return,% (bool) ? (false) : (true)
-}
-ReverseAKAFlip(string){
-loop,% Strlen(string)
-	flip .= Substr(string, 1 - A_index, 1)
-return, flip
-}
+;<-------------------------------------------    BYE      -------------------------------------------------------------------------------->
