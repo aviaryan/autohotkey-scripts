@@ -10,6 +10,8 @@ NOTES
 *  Pass should be only alphabets. No case senstive
 *  Max Pass Length = 24 characters
 
+* Requires Maths.ahk (Scientific Maths lib)
+
 */
 
 ;msgbox,% Encrypt("autohotkey_l", "lexikos")
@@ -77,4 +79,4 @@ Crypt(baselist, parsedlist, text){
 	return text
 }
 
-#Include, %A_ScriptDir%/Maths/Maths.ahk
+;#Include, %A_ScriptDir%/Maths/Maths.ahk
