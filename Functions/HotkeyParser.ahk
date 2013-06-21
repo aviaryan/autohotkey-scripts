@@ -1,28 +1,23 @@
 ﻿/*
 HParse()
 © Avi Aryan
-Page -http://avi-win-tips.blogspot.com/2013/04/hparse.html
 
-Third Revision - 11/5/13
-=================================================================
-Extract Autohotkey hotkeys from user-friendly shortcuts reliably.
-=================================================================
+4th Revision - 21/6/13
+=========================================================================
+Extract Autohotkey hotkeys from user-friendly shortcuts reliably and V.V
+=========================================================================
 ==========================================
 EXAMPLES - Pre-Runs
 ==========================================
 
-• Hparse("Contro + S")			;returns ^s
-• Hparse("Cotrol + ass + S")		;returns ^s
 • Hparse("Cntrol + ass + S", false)		;returns <blank>   	As 'ass' is out of scope and RemoveInvaild := false
 • Hparse("Contrl + At + S")		;returns ^!s
 • Hparse("^!s")			;returns	^!s		as the function-feed is already in Autohotkey format.
 • Hparse("LeftContrl + X")		;returns Lcontrol & X
 • Hparse("Contrl + Pageup + S")		;returns <blank>  As the hotkey is invalid
 • HParse("PagUp + Ctrl", true)		;returns  ^PgUp  	as  ManageOrder is true (by default)
-• HParse("PagUp + Ctrl", true, false)		;returns  <blank>  	as ManageOrder is false and hotkey is invalid
-• HParse("Pageup + Paegdown")		;returns  PgUp & PgDn	
+• HParse("PagUp + Ctrl", true, false)		;returns  <blank>  	as ManageOrder is false and hotkey is invalid	
 • Hparse("Ctrl + Alt + Ctrl + K")		;returns  <blank> 	as two Ctrls are wrong
-• HParse("Mbuttn + LControl", true)		;returns  Mbutton & LControl
 • HParse("Control + Alt")		;returns  ^Alt and NOT ^!
 • HParse("Ctrl + F1 + Nmpd1")		;returns <blank>	As the hotkey is invalid
 • HParse("Prbitscreen + f1")		;returns	PrintScreen & F1
@@ -31,117 +26,121 @@ EXAMPLES - Pre-Runs
 • HParse("Ctrl + joy1")			;returns	Ctrl & Joy1
 • Hparse("pagup & paegdown")		;returns	PgUp & PgDn
 
-###################################################################
-PARAMETERS - HParse()
--------------------------------
-HParse(Hotkey, RemoveInvalid, ManageOrder)
-###################################################################
-
-• Hotkey - The user shortcut such as (Control + Alt + X) to be converted
-
-• RemoveInvalid(true) - Remove Invalid entries such as the 'ass' from (Control + ass + S) so that the return is ^s. When false the function will return <blank> when an
-  invalid entry is found.
-  
-• ManageOrder(true) - Change (X + Control) to ^x and not x^ so that you are free from errors. If false, a <blank> value is returned when the hotkey is found un-ordered.
+• Hparse_rev("^!s")		;returns Ctrl+Alt+S
+• Hparse_rev("Pgup & PgDn")		;returns Pageup & PgDn
 
 */
 
-HParse(Hotkey,RemoveInvaild = true,ManageOrder = true)
+;###################################################################
+;PARAMETERS - HParse() 		[See also Hparse_Rev() below]
+;-------------------------------
+;HParse(Hotkey, RemoveInvalid, ManageOrder)
+;###################################################################
+
+;• Hotkey - The user shortcut such as (Control + Alt + X) to be converted
+
+;• RemoveInvalid(true) - Remove Invalid entries such as the 'ass' from (Control + ass + S) so that the return is ^s. When false the function will return <blank> when an
+;  invalid entry is found.
+  
+;• ManageOrder(true) - Change (X + Control) to ^x and not x^ so that you are free from errors. If false, a <blank> value is returned when the hotkey is found un-ordered.
+
+HParse(Hotkey, RemoveInvaild = true,ManageOrder = true)
 {
-StringLeft,firstkey,Hotkey,1
+
+firstkey := Substr(Hotkey, 1, 1)
 if firstkey in ^,!,+,#
-	return,% Hotkey
+	return, Hotkey
 
 loop,parse,Hotkey,+-&,%a_space%
 {
-if (Strlen(A_LoopField) != 1)
-{
-	parsed := LiteRegexM(A_LoopField)
-	If !(RemoveInvaild)
+	if (Strlen(A_LoopField) != 1)
 	{
-		IfEqual,parsed
+		parsed := Hparse_LiteRegexM(A_LoopField)
+		If !(RemoveInvaild)
 		{
-			Combo = 
-			break
+			IfEqual,parsed
+			{
+				Combo = 
+				break
+			}
+			else
+				Combo .= " & " . parsed
 		}
 		else
-			Combo .= " & " . parsed
+			IfNotEqual,parsed
+				Combo .= " & " . parsed
 	}
 	else
-		IfNotEqual,parsed
-			Combo .= " & " . parsed
-}
-else
-	Combo .= " & " . A_LoopField
+		Combo .= " & " . A_LoopField
 }
 
 non_hotkey := 0
 IfNotEqual, Combo		;Convert the hotkey to perfect format
 {
-StringTrimLeft,Combo,Combo,3
-loop,parse,Combo,&,%A_Space%
-{
-if A_Loopfield not in ^,!,+,#
-	non_hotkey+=1
-}
+	StringTrimLeft,Combo,Combo,3
+	loop,parse,Combo,&,%A_Space%
+	{
+		if A_Loopfield not in ^,!,+,#
+			non_hotkey+=1
+	}
 ;END OF LOOP
-if (non_hotkey == 0)
-{
-StringRight,rightest,Combo,1
-StringTrimRight,Combo,Combo,1
-IfEqual,rightest,^
-	rightest = Ctrl
-	else IfEqual,rightest,!
-		rightest = Alt
+	if (non_hotkey == 0)
+	{
+		StringRight,rightest,Combo,1
+		StringTrimRight,Combo,Combo,1
+		IfEqual,rightest,^
+			rightest = Ctrl
+		else IfEqual,rightest,!
+			rightest = Alt
 		ELSE IfEqual,rightest,+
 			rightest = Shift
-			else rightest = LWin
-Combo := Combo . Rightest
-}
+		else rightest = LWin
+		Combo := Combo . Rightest
+	}
 ;Remove last non
-IfLess,non_hotkey,2
-{
+	IfLess,non_hotkey,2
+	{
 	IfNotInString,Combo,Joy
 	{
-	StringReplace,Combo,Combo,%A_Space%&%A_Space%,,All
-	temp := Combo
-	loop,parse,temp
-	{
-	if A_loopfield in ^,!,+,#
-	{
-		StringReplace,Combo,Combo,%A_loopfield%
-		_hotkey .= A_loopfield
-	}
-	}
-	Combo := _hotkey . Combo
+		StringReplace,Combo,Combo,%A_Space%&%A_Space%,,All
+		temp := Combo
+		loop,parse,temp
+		{
+			if A_loopfield in ^,!,+,#
+			{
+			StringReplace,Combo,Combo,%A_loopfield%
+			_hotkey .= A_loopfield
+			}
+		}
+		Combo := _hotkey . Combo
 	
-	If !(ManageOrder)				;ManageOrder
-		IfNotEqual,Combo,%temp%
-			Combo = 
+		If !(ManageOrder)				;ManageOrder
+			IfNotEqual,Combo,%temp%
+				Combo = 
 	
-	temp := "^!+#"		;just reusing the variable . Checking for Duplicates Actually.
-	IfNotEqual,Combo
-	{
-	loop,parse,temp
-	{
-	StringGetPos,pos,Combo,%A_loopfield%,L2
-	IF (pos != -1){
-		Combo = 
-		break
-	}
-	}
-	}
+		temp := "^!+#"		;just reusing the variable . Checking for Duplicates Actually.
+		IfNotEqual,Combo
+		{
+			loop,parse,temp
+			{
+				StringGetPos,pos,Combo,%A_loopfield%,L2
+				IF (pos != -1){
+					Combo = 
+					break
+				}
+			}
+		}
 	;End of Joy
 	}
 	else	;Managing Joy
 	{
-	StringReplace,Combo,Combo,^,Ctrl
-	StringReplace,Combo,Combo,!,Alt
-	StringReplace,Combo,Combo,+,Shift
-	StringReplace,Combo,Combo,#,LWin
-	StringGetPos,pos,Combo,&,L2
-	if (pos != -1)
-		Combo = 
+		StringReplace,Combo,Combo,^,Ctrl
+		StringReplace,Combo,Combo,!,Alt
+		StringReplace,Combo,Combo,+,Shift
+		StringReplace,Combo,Combo,#,LWin
+		StringGetPos,pos,Combo,&,L2
+		if (pos != -1)
+			Combo = 
 	}
 }
 else
@@ -155,37 +154,65 @@ else
 return, Combo
 }
 
-;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-LiteRegexM(matchitem, primary=1)
+;###########################################################################################
+;Hparse_rev(Keycombo)
+;	Returns the user displayable format of Ahk Hotkey
+;###########################################################################################
+
+HParse_rev(Keycombo){
+
+	if Instr(Keycombo, "&")
+	{
+		loop,parse,Keycombo,&,%A_space%%A_tab%
+			toreturn .= A_LoopField " + "
+		return Substr(toreturn, 1, -3)
+	}
+	Else
+	{
+		StringReplace, Keycombo, Keycombo,^,Ctrl&
+		StringReplace, Keycombo, Keycombo,#,Win&
+		StringReplace, Keycombo, Keycombo,+,Shift&
+		StringReplace, Keycombo, Keycombo,!,Alt&
+		loop,parse,Keycombo,&,%A_space%%A_tab%
+			toreturn .= A_LoopField " + "
+		return Substr(toreturn, 1, -3)
+	}
+}
+
+;------------------------------------------------------
+;SYSTEM FUNCTIONS : NOT FOR USER'S USE
+;------------------------------------------------------
+
+Hparse_LiteRegexM(matchitem, primary=1)
 {
 
-regX := ListGen("RegX", primary)
-keys := Listgen("Keys", primary)
+regX := Hparse_ListGen("RegX", primary)
+keys := Hparse_Listgen("Keys", primary)
 matchit := matchitem
 
 loop,parse,Regx,`r`n,
 {
-curX := A_LoopField
-matchitem := matchit
-exitfrombreak := false
+	curX := A_LoopField
+	matchitem := matchit
+	exitfrombreak := false
 
-loop,parse,A_LoopField,*
-{
-if (A_index == 1)
-	if (SubStr(matchitem, 1, 1) != A_LoopField){
-		exitfrombreak := true
-		break
+	loop,parse,A_LoopField,*
+	{
+		if (A_index == 1)
+			if (SubStr(matchitem, 1, 1) != A_LoopField){
+				exitfrombreak := true
+				break
+			}
+
+		if (Hparse_comparewith(matchitem, A_loopfield))
+			matchitem := Hparse_Vanish(matchitem, A_LoopField)
+		else{
+			exitfrombreak := true
+			break
+		}
 	}
 
-if (comparewith(matchitem, A_loopfield))
-	matchitem := Vanish(matchitem, A_LoopField)
-else{
-		exitfrombreak := true
-		break
-	}
-}
-
-if !(exitfrombreak){
+	if !(exitfrombreak){
 		linenumber := A_Index
 		break
 	}
@@ -193,22 +220,22 @@ if !(exitfrombreak){
 
 IfNotEqual, linenumber
 {
-StringGetPos,pos1,keys,`n,% "L" . (linenumber - 1)
-StringGetPos,pos2,keys,`n,% "L" . (linenumber)
-return, Substr(keys, (pos1 + 2), (pos2 - pos1 - 1))
+	StringGetPos,pos1,keys,`n,% "L" . (linenumber - 1)
+	StringGetPos,pos2,keys,`n,% "L" . (linenumber)
+	return, Substr(keys, (pos1 + 2), (pos2 - pos1 - 1))
 }
 else
-	return,% LiteRegexM(matchit, 2)
+	return Hparse_LiteRegexM(matchit, 2)
 }
 ; Extra Functions -----------------------------------------------------------------------------------------------------------------
 
-Vanish(matchitem, character){
-StringGetPos,pos,matchitem,%character%,L
-StringTrimLeft,matchitem,matchitem,(pos + 1)
-return, matchitem
+Hparse_Vanish(matchitem, character){
+	StringGetPos,pos,matchitem,%character%,L
+	StringTrimLeft,matchitem,matchitem,(pos + 1)
+	return, matchitem
 }
 
-comparewith(first, second)
+Hparse_comparewith(first, second)
 {
 if first is Integer
 	IfEqual,first,%second%
@@ -225,7 +252,7 @@ else
 ;######################   DANGER    ################################
 ;SIMPLY DONT EDIT BELOW THIS . MORE OFTEN THAN NOT, YOU WILL MESS IT.
 ;###################################################################
-ListGen(what,primary=1){
+Hparse_ListGen(what,primary=1){
 if (primary == 1)
 {
 IfEqual,what,Regx
