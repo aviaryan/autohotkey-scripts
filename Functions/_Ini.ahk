@@ -23,15 +23,17 @@ POINTS
 Bugs - Please report
 */
 
-;~ SetWorkingDir, %A_desktop%
-;~ _iniwrite("black.ini","section1","exepathname","kath","kath","Section 1 comment")
+;~ SetWorkingDir, %A_ScriptDir%
+
+;~ _iniwrite("black.ini","section1","exepathname","kath","exepathname comment","Section 1 comment")
 ;~ _iniwrite("black.ini","section1","exe2","belkath","exe2 cmnt")
 ;~ _iniwrite("black.ini","section1","exe3","belkath","exe3 cmnt")
 ;~ _iniwrite("black.ini","sec2","exepathnamekollo","kath","comment kath","sec2 comment")
 ;~ _iniwrite("black.ini","sec2","koram","blah")
-;msgbox,%  _iniread("black.ini","hollo", "exe2", keycmnt, seccmnt) "`nKey comment - " keycmnt "`nSection comment - " seccmnt
 
-;~ _inidelete("black.ini","hollo","exe2")
+;~ msgbox,%  _iniread("black.ini","section1", "exe2", keycmnt, seccmnt) "`nKey comment - " keycmnt "`nSection comment - " seccmnt
+
+;~ _inidelete("black.ini","section1","exe2")
 ;~ return
 
 ;===========
@@ -209,6 +211,7 @@ else	;delete key
 ;MISCELLANEOUS HELPER FUNCTIONS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;Modified Function. taken from Avi's Miscellaneous Functions.ahk
+
 Fileatline(file, what="", linenum=1){
 FileRead,filedata,%file%
 file1 := Substr(filedata, 1, Instr(filedata, "`r`n", false, 1, linenum-1)-1)	;dont take `r`n
