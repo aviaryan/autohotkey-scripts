@@ -3,7 +3,7 @@
 Scientific MATHS LIBRARY ( Filename = Maths.ahk )
 by Avi Aryan
 Thanks to hd0202, Uberi and sinkfaze
-v 2.4
+v 2.5
 ------------------------------------------------------------------------------
 
 ##############################################################################
@@ -24,6 +24,8 @@ FUNCTIONS
 * SM_Mod(Dividend, Divisor) --- Mod() . Supports large numbers
 * SM_Round(number, decimals) --- Round() . Large numbers
 * SM_Floor(number) --- Floor() . large numbers
+* SM_Ceil(number)  --- Ceil() . large number
+* SM_e(N) --- returns e to the power N
 * SM_UniquePmt(pattern, ID)	;gives the unique permutation possible .
 
 
@@ -36,8 +38,7 @@ READ
 
 */
 
-;~ msgbox,% SM_POW(2,100)
-;~ msgbox,% SM_Divide(34389193, 30, 2)
+;~ msgbox,% SM_Mod( SM_Pow(3,77), 79)
 ;~ msgbox,% SM_Round("124389438943894389430909430438098232323.427239238023823923984",4)
 ;~ msgbox,% SM_Divide("3426326","30")
 ;~ msgbox,% SM_Exp("328923823982398239283923.238239238923", 3)
@@ -57,12 +58,12 @@ READ
 ;~ var = sqrt(4) - [892839.2382389 - 89238239.923]
 ;~ msgbox,% SM_Solve(var)
 ;~ msgbox,% SM_Solve("Sqrt(4) * 2 * log(100) * SM_Pow(45,8) - 32")
-;~ msgbox,% SM_UniquePmt("abcdefghijklmnopqrstuvwxyz123456789", 2)	;<----- That's called huge numbers
+;~ msgbox,% SM_UniquePmt("abcdefghijklmnopqrstuvwxyz123456789", 25653464543)	;<----- That's called huge numbers
 ;~ Msgbox,% SM_Greater(18.789, 187)
 ;~ msgbox,% SM_Divide("434343455677690909087534208967834434444.5656", "8989998989898909090909009909090909090908656454520", 100)
 ;~ MsgBox,% SM_Multiply("111111111111111111111111111111111111111111.111","55555555555555555555555555555555555555555555.555")
 ;~ MsgBox,% SM_Prefect("00.002000")
-;~ Msgbox,% SM_Add("-28","-98.007")
+;~ Msgbox,% SM_Add("8","-" "98.007")
 ;~ return
 
 ;###################################################################################################################################################################
@@ -216,8 +217,8 @@ n2 := number2
 StringReplace,number1,number1,-,,All
 StringReplace,number2,number2,-,,All
 ;Decimals
-dec1 := (Instr(number1,".")) ? ( StrLen(number1) - InStr(number1, ".") ) : (0)
-dec2 := (Instr(number2,".")) ? ( StrLen(number2) - InStr(number2, ".") ) : (0)
+dec1 := Instr(number1,".") ? StrLen(number1) - InStr(number1, ".") : 0
+dec2 := Instr(number2,".") ? StrLen(number2) - InStr(number2, ".") : 0 
 
 if (dec1 > dec2){
 	dec := dec1
@@ -289,14 +290,12 @@ if (A_index == n){
 	break
 }
 
-if (Instr(digit, "-")){
-	borrow:= true
-	digit := 10 + digit		;4 - 6 , then 14 - 6 = 10 + (-2) = 8
-}
+if Instr(digit, "-")
+	borrow:= true , digit := 10 + digit		;4 - 6 , then 14 - 6 = 10 + (-2) = 8
 else
 	borrow := false
 
-sum := digit . sum
+sum := digit sum
 }
 ;End of loop ;Giving Sign
 ;
@@ -335,16 +334,16 @@ Multiplies any two numbers
 SM_Multiply(number1, number2){
 ;Getting Sign
 positive := true
-if (Instr(number2, "-"))
+if Instr(number2, "-")
 	positive := false
-if (Instr(number1, "-"))
+if Instr(number1, "-")
 	positive := !positive
-StringReplace,number1,number1,-
-StringReplace,number2,number2,-
+number1 := Substr(number1, Instr(number1, "-") ? 2 : 1)
+number2 := Substr(number2, Instr(number2, "-") ? 2 : 1)
 ; Removing Dot
-dec := (InStr(number1,".")) ? (StrLen(number1) - InStr(number1, ".")) : (0)
-IfInString,number2,.
-	dec := dec + StrLen(number2) - Instr(number2, ".")
+dec := InStr(number1,".") ? StrLen(number1) - InStr(number1, ".") : 0
+If n2dotpos := Instr(number2, ".")
+	dec := dec + StrLen(number2) - n2dotpos
 StringReplace,number1,number1,.
 StringReplace,number2,number2,.
 ; Multiplying
@@ -663,8 +662,8 @@ if Instr(number, "."){
 } ; Non-decimal below
 else
 {
-	if (number != 0)
-		return (negative) ? ("-" . Ltrim(number, "0")) : (Ltrim(number, "0"))
+	if (number != "0")
+		return negative ? ("-" . Ltrim(number, "0")) : (Ltrim(number, "0"))
 	else
 		return 0
 }
@@ -692,10 +691,11 @@ dividend := Substr(dividend, Instr(dividend, "-") ? 2 : 1) , divisor := Substr(d
 if SM_Greater(dividend, divisor, true){
 	div := SM_Divide(dividend, divisor)
 	div := Instr(div, ".") ? SubStr(div, 1, Instr(div, ".") - 1) : 0
-	if div = 0
+	
+	if ( div == "0" )
 		Remainder := 0
 	else
-		Remainder := SM_Add(dividend,"-" SM_Multiply(divisor, div))
+		Remainder := SM_Add(dividend, "-" SM_Multiply(Divisor, div))
 }
 return, ( (Positive or Remainder=0) ? "" : "-" ) . Remainder
 }
@@ -790,7 +790,31 @@ if Instr(number, "-")
 		return, number
 }
 else
-	return, (Instr(number, ".")) ? Substr(number, 1, Instr(number, ".") - 1) : number
+	return, Instr(number, ".") ? Substr(number, 1, Instr(number, ".") - 1) : number
+}
+
+;##################################################################################################################################################
+
+/*
+
+SM_Ceil(number)
+
+Ceil function with extended support. Refer to Ahk documentation for Ceil()
+
+*/
+
+SM_Ceil(number){
+	
+	number := SM_Prefect(number)
+	if Instr(number, "-")
+	{
+		if Instr(number,".")
+			return, Substr(number, 1, Instr(number, ".") - 1)
+		else
+			return, number
+	}
+	else
+		return, Instr(number, ".") ? SM_Add( Substr(number, 1, Instr(number, ".") - 1), 1) : number
 }
 
 ;#################################################################################################################################################
@@ -804,7 +828,10 @@ Gives factorial of number of any size. Dont get carried away and try something l
 */
 
 SM_fact(number){
-	return (number+0<2) ? 1 : SM_Multiply(number, SM_fact(number-1))
+	toreturn := 1
+	loop,% number
+		toreturn := SM_Multiply(A_index, toreturn)
+	return toreturn
 }
 
 /*
@@ -834,6 +861,18 @@ SM_Pow(number, power){
 			multiple := SM_Multiply(multiple, number)
 		return multiple
 	}
+}
+
+/*
+
+SM_e(N)
+
+Gives the power of e to N
+
+*/
+
+SM_e(N){
+	return SM_Pow("2.71828182845905", N)
 }
 
 ;################# NON - MATH FUNCTIONS #######################################
