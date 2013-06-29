@@ -32,9 +32,13 @@ Distribution is only allowed as long as sufficient credits are provided to the o
 
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-;Get default registered icon for an extension
-;Eg - GetIconforext(".ahk")
-;Note - The icon path is not returned in pure-form but of the form     <path>, <icon index>
+/*
+
+Gets default registered icon for an extension
+	Eg - GetIconforext(".ahk")
+Note - The icon path is not returned in pure-form but of the form     <path>, <icon index>
+
+*/
 
 GetIconforext(ext){
     RegRead, ThisExtClass, HKEY_CLASSES_ROOT, %ext%
@@ -49,7 +53,7 @@ GetIconforext(ext){
 }
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-;Get path of active folder . 
+;Gets the path of active folder . 
 
 GetFolder()
 {
@@ -76,7 +80,11 @@ GetFolder()
 }
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-;Add data to a line of a file . Replaces that line
+/*
+Add data to a line of a file . Replaces that line if replace = true
+
+	FileAtline("myfile.txt", "This will be added to line 9", 9, true)
+*/
 
 Fileatline(file, what, linenum, replace=true){
 loop
@@ -88,14 +96,10 @@ loop
 	if !(A_index == linenum)
 		filedata .= readline . "`r`n"
 	else
-		if (replace)
-			filedata .= what . "`r`n"
-		else
-			filedata .= readline what "`r`n"
+		filedata .= ( replace ? "" : readline ) what "`r`n"
 
-	if (A_index >= linenum)
-		if (lineended)
-			break
+	if (A_index >= linenum) and lineended
+		break
 }
 StringTrimRight,filedata,filedata,2
 FileDelete, %file%
@@ -104,46 +108,57 @@ FileAppend, % Rtrim(filedata, "`r`n"), %file%
 
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-;Run a web-site . Eliminates issues with running the site using the traditional method.
+/*
+Super Variables processor
+	Overcomes the limitation of a single level ( return %var% ) in nesting variables
+	The function can nest as many levels as you want
+	Run the Example to get going
+
+EXAMPLE -------------------------------------------
+
+	variable := "some_value"
+	some_value := "Some_another_value"
+	some_another_value := "a_unique_value"
+	a_unique_value := "A magical value. Ha Ha Ha Ha"
+	msgbox,% ValueOf("%%%variable%%%")
+
+---------------------------------------------------
+
+*/
+
+Valueof(VarinStr){
+global
+local Midpoint, emVar
+	loop,
+	{
+		StringReplace, VarinStr, VarinStr,`%,`%, UseErrorLevel
+		Midpoint := ErrorLevel / 2
+		if Midpoint = 0
+			return emvar := %VarinStr%
+		emVar := Substr(VarinStr, Instr(VarinStr, "%", 0, 1, Midpoint)+1, Instr(VarinStr, "%", 0, 1, Midpoint+1)-Instr(VarinStr, "%", 0, 1, Midpoint)-1)
+		VarinStr := Substr(VarinStr, 1, Instr(VarinStr, "%", 0, 1, Midpoint)-1) %emVar% Substr(VarinStr, Instr(VarinStr, "%", 0, 1, Midpoint+1)+1)
+	}
+}
+
+;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+;Runs a web-site . Eliminates issues with running the site using the traditional method.
 
 BrowserRun(site){
-RegRead, OutputVar, HKCR, http\shell\open\command 
-IfNotEqual, Outputvar
-{
-	StringReplace, OutputVar, OutputVar,"
-	SplitPath, OutputVar,,OutDir,,OutNameNoExt, OutDrive
-	run,% OutDir . "\" . OutNameNoExt . ".exe" . " """ . site . """"
-}
-else
-	run,% "iexplore.exe" . " """ . site . """"	;internet explorer
-}
-;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-;Send text on the basis of characters/second
-;Eg -->
-;Clipboard := "dfhkjdfkdfjkdfjkdfjdfkjdfkdf"
-;SendperSec(Clipboard, 7, true)	;Sends 7 characters from clipboard per second
-
-Sendpersec(Data, Chs, persist=false){
-if (persist)
-	BlockInput, On
-
-sleeptime := (1000 / Chs) - 10	;-10 to be more accurate, to counter-effect the time consumed in loop
-sleeptime := 1>sleeptime ? 1 : sleeptime
-
-loop
-{
-	Send,% Substr(Data, 1, 1)
-	sleep,% sleeptime
-	StringTrimLeft,Data,Data,1
-	If Data = 
-		break
-}
-BlockInput, Off
+	RegRead, OutputVar, HKCR, http\shell\open\command 
+	IfNotEqual, Outputvar
+	{
+		StringReplace, OutputVar, OutputVar,"
+		SplitPath, OutputVar,,OutDir,,OutNameNoExt, OutDrive
+		run,% OutDir . "\" . OutNameNoExt . ".exe" . " """ . site . """"
+	}
+	else
+		run,% "iexplore.exe" . " """ . site . """"	;internet explorer
 }
 
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 /*
+
 SuperInstr()
 	Returns min/max position for a | separated values of Needle(s)
 	
@@ -151,6 +166,7 @@ SuperInstr()
 	return_min = false ; return maximum position
 
 */
+
 SuperInstr(Hay, Needles, return_min=true, Case=false, Startpoint=1, Occurrence=1){
 	
 	pos := return_min*Strlen(Hay)
@@ -172,18 +188,21 @@ SuperInstr(Hay, Needles, return_min=true, Case=false, Startpoint=1, Occurrence=1
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 ;Concatenate a string n - times without using loop
-Concatenate(string, ntimes){		
-return ntimes<1 ? "" : (ntimes<2 ? string : string Concatenate(string, ntimes-1))
+Concatenate(string, ntimes){
+	return ntimes<1 ? "" : (ntimes<2 ? string : string Concatenate(string, ntimes-1)) 
 }
+
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 ;Reverse a string
 ReverseAKAFlip(string){
-return, Strlen(string) < 2 ? Substr(string,1) : Substr(string,0) ReverseAKAFlip(Substr(string,1,-1))
+	return, Strlen(string) < 2 ? Substr(string,1) : Substr(string,0) ReverseAKAFlip(Substr(string,1,-1))
 }
+
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 ;Copy.com Direct Link Generator (Parsing)
+;Throw in the Copied link from the web browser and to gives you the direct download link
 CopydotcomParser(link){
 	return RegExReplace(link, "i)(.*)www.(.*)/s(.*)(\?download=1)+", "$1$2$3")
 }
