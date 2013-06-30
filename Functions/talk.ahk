@@ -1,6 +1,7 @@
 ﻿/*
+
 ########################
-talk v0.2			   #
+talk v0.4			   #
 by Avi Aryan		   #
 ##################################
 Thanks to Autohotkey help file   #
@@ -18,9 +19,17 @@ Points #
 * The runlabel() method waits for the label for the label to be completed in client script before returning.
 * setvar() will create the variable in the client script if it does not exist.
 
-Know That #
-* The function uses only two global varaibles , talk_recvd and talk_talk
-* Errorlevels for all methods will be added later
+*/
+
+/*
+
+Class talk
+	Methods
+		setVar(var, value)	-	Sets the var in a client script
+		getVar(var)	-	Gets the value of var in a client script
+		runlabel(label, wait)	-	runs a label in a client script. Optionally waits for the label to finish if wait = 1
+		suspend(timeinms)	-	suspends a client script for timeinms
+		terminate()	-	terminates or exits a client script
 
 */
 
@@ -49,14 +58,20 @@ class talk
 		return talk_talk
 	}
 
-	;runlabel waits for the label in the client script to complete
-	runlabel(label){
+	;runlabel runs a label in a client script
+	;wait = 1 will make it wait for the label to complete in the host script . This will help co-ordination
+	runlabel(label, wait:=true){
 		global
-		talk_send(label " \ " A_scriptname " \ " "runlabel", this.Script)
-
-		while (talk_recvd = "")
-			sleep, 50
-		talk_recvd := ""
+		StringReplace, label, label,\,\\,All
+		talk_send(label " \ " A_scriptname " \ " "runlabel" " \ " wait, this.Script)
+		if wait
+		{
+			while (talk_recvd = "")
+				sleep, 50
+			talk_recvd := ""
+		}
+		else
+			return
 		return
 	}
 	
@@ -108,9 +123,11 @@ talk_reciever(wParam, lParam){
 	}
 	else if What = runlabel
 	{
+		StringReplace, Data, Data,\\,\,All
 		if islabel(Data)
 			gosub, %Data%
-		talk_send("runlabel" " \ " A_ScriptName " \ " "talk", ScriptName)
+		if Param1
+			talk_send("runlabel" " \ " A_ScriptName " \ " "talk", ScriptName)
 		return
 	}
 	else if What = suspend
