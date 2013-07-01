@@ -108,40 +108,6 @@ FileAppend, % Rtrim(filedata, "`r`n"), %file%
 
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-/*
-Super Variables processor
-	Overcomes the limitation of a single level ( return %var% ) in nesting variables
-	The function can nest as many levels as you want
-	Run the Example to get going
-
-EXAMPLE -------------------------------------------
-
-	variable := "some_value"
-	some_value := "Some_another_value"
-	some_another_value := "a_unique_value"
-	a_unique_value := "A magical value. Ha Ha Ha Ha"
-	msgbox,% ValueOf("%%%variable%%%")
-
----------------------------------------------------
-
-*/
-
-Valueof(VarinStr){
-global
-local Midpoint, emVar
-	loop,
-	{
-		StringReplace, VarinStr, VarinStr,`%,`%, UseErrorLevel
-		Midpoint := ErrorLevel / 2
-		if Midpoint = 0
-			return emvar := %VarinStr%
-		emVar := Substr(VarinStr, Instr(VarinStr, "%", 0, 1, Midpoint)+1, Instr(VarinStr, "%", 0, 1, Midpoint+1)-Instr(VarinStr, "%", 0, 1, Midpoint)-1)
-		VarinStr := Substr(VarinStr, 1, Instr(VarinStr, "%", 0, 1, Midpoint)-1) %emVar% Substr(VarinStr, Instr(VarinStr, "%", 0, 1, Midpoint+1)+1)
-	}
-}
-
-;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
 ;Runs a web-site . Eliminates issues with running the site using the traditional method.
 
 BrowserRun(site){
@@ -174,7 +140,9 @@ SuperInstr(Hay, Needles, return_min=true, Case=false, Startpoint=1, Occurrence=1
 	{
 		loop, parse, Needles,|
 			if ( pos > (var := Instr(Hay, A_LoopField, Case, startpoint, Occurrence)) )
-				pos := ( var = 0 ? pos : var )
+				pos := var ? var : pos
+		if ( pos == Strlen(Hay) )
+			return 0
 	}
 	else
 	{
