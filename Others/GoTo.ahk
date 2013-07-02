@@ -1,12 +1,14 @@
 /*
 #####################
-GoTo v0.1
+GoTo v0.2
 Avi Aryan
 #####################
 
 Go To functions, labels, hotkeys and hotstrings in any editor.
 The only requirement is that the Editor shows file full path in Title Bar and has a Goto (Ctrl+G) option.
-Examples of such editors - Notepad++, Sublime Text
+Examples of such editors - Notepad++, Sublime Text, PSPad, ConTEXT
+
+If you find a editor in which the script doesn't work, contact me.
 
 */
 
@@ -25,7 +27,7 @@ GoTo_AutoExecute(){
 	SetTimer, filecheck, 500
 }
 
-ParseFile(File) {
+GoTo_Readfile(File) {
 	static filecount , commentneedle := A_space ";|" A_tab	";"
 	
 	if ( filecount_N := fileiscached(File) )
@@ -118,7 +120,7 @@ Check4func(readline, linenum, file){
 filecheck:
 	FileGetTime, Timeforfile,% GetActiveFile(), M
 	if ( Timeforfile != Lasttimefile ) and ( Timeforfile != "" )
-		ParseFile(GetActiveFile())
+		GoTo_Readfile(GetActiveFile())
 	Lasttimefile := Timeforfile
 	return
 
@@ -201,7 +203,10 @@ GetActiveFile(){
 	WinGetActiveTitle, Title
 	if !Instr(title, ".ahk")
 		return ""
-	return Trim( Substr(Title, 1, SuperInstr(Title, "-|*|•", 0, 0, 0)-1) , " `t*•-")
+	if ( Instr(Title, "PSPad") = 1 ) or ( Instr(Title, "ConTEXT") = 1 )
+		return Trim( Substr(Title, Instr(Title, "[")+1, -1) , "*# `t" )		;PSPad and ConTEXT
+
+	return Trim( Substr(Title, 1, SuperInstr(Title, "-|*|•", 0, 0, 0)-1) , " `t*•-")	;Scite, Sublime Text, N++
 }
 
 TypefromTab(TabCount){
