@@ -57,7 +57,7 @@ GoTo_Readfile(File) {
 
 		if ( readline_temp := Check4Hotkey(readline) )
 			CreateCache(filename, "hotkey", readline_temp, A_index)
-		else if ( Instr(readline, "::") = 1 ) and ( Instr(readline, "::", 0, 0) > 1 )
+		else if ( Instr(readline, ":") = 1 ) and ( Instr(readline, "::", 0, 0) > 1 )
 			CreateCache(filename, "hotstr", Substr(readline, 1, Instr(readline, "::", 0, 0)-1), A_index )
 		else if !SuperInstr(readline, "``|`t| |,", 0) and Substr(readline,0) == ":"
 			CreateCache(filename, "label", readline, A_index)
