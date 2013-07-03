@@ -1,6 +1,6 @@
 /*
 #####################
-GoTo v0.2
+GoTo v0.3
 Avi Aryan
 #####################
 
@@ -8,7 +8,7 @@ Go To functions, labels, hotkeys and hotstrings in any editor.
 The only requirement is that the Editor shows file full path in Title Bar and has a Goto (Ctrl+G) option.
 Examples of such editors - Notepad++, Sublime Text, PSPad, ConTEXT
 
-If you find a editor in which the script doesn't work, contact me.
+Any script which shows the full path and has a goto option is vaild
 
 */
 
@@ -203,10 +203,11 @@ GetActiveFile(){
 	WinGetActiveTitle, Title
 	if !Instr(title, ".ahk")
 		return ""
-	if ( Instr(Title, "PSPad") = 1 ) or ( Instr(Title, "ConTEXT") = 1 )
-		return Trim( Substr(Title, Instr(Title, "[")+1, -1) , "*# `t" )		;PSPad and ConTEXT
+	return Trim( Substr( Title, temp := Instr(Title, ":\")-1, Instr(Title, ".ahk", 0, 0)-temp+4 ) ) 
+	;~ if ( Instr(Title, "PSPad") = 1 ) or ( Instr(Title, "ConTEXT") = 1 )
+		;~ return Trim( Substr(Title, Instr(Title, "[")+1, -1) , "*# `t" )		;PSPad and ConTEXT
 
-	return Trim( Substr(Title, 1, SuperInstr(Title, "-|*|•", 0, 0, 0)-1) , " `t*•-")	;Scite, Sublime Text, N++
+	;~ return Trim( Substr(Title, 1, SuperInstr(Title, "-|*|•", 0, 0, 0)-1) , " `t*•-")	;Scite, Sublime Text, N++
 }
 
 TypefromTab(TabCount){
