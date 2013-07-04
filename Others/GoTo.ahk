@@ -1,6 +1,6 @@
 /*
 #####################
-GoTo v0.5
+GoTo v0.6
 Avi Aryan
 #####################
 
@@ -23,6 +23,7 @@ return
 GoTo_AutoExecute(resizable=true, WorkingDir=""){
 
 	SetWorkingDir,% ( WorkingDir == "" ) ? A_scriptdir : WorkingDir
+	SetBatchLines, -1
 	FileCreateDir, gotoCache
 	FileDelete, gotoCache\*.gotolist
 	SetTimer, filecheck, 500
@@ -181,15 +182,9 @@ Goto_Main_GUI()
 		IsGuicreated := 1
 	}
 	if !WinExist("GoTo ahk_class AutoHotkeyGUI")
-	{
 		Gui, Goto:Show,, GoTo
-		Hotkey, Esc, Goto_GuiHide, On
-	}
 	else
-	{
 		Gui, Goto:Hide
-		Hotkey, Esc, Goto_GuiHide, Off
-	}
 	Activefile_old := Activefileindex
 	return
 
@@ -203,6 +198,9 @@ tabClick:
 	Update_GUI(Typefromtab(maintab), Activefileindex)
 	return
 
+GotoGUIEscape:
+	Gui, Goto:Hide
+	return
 }
 
 Update_GUI(mode, fileindex){
@@ -249,9 +247,6 @@ DragGotoGui(){		;Thanks Pulover
 	PostMessage, 0xA1, 2,,, A
 }
 
-Goto_GuiHide:
-	Gui, Goto:Hide
-	return
 ;Helper Function(s) --------------------------------------------------------------------------------------
 /*
 SuperInstr()
