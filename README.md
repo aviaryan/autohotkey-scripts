@@ -1,8 +1,8 @@
 Avi's Autohotkey Scripts and Functions Repository
 ==========================
-[See My AHK Website](http://avi-aryan.github.io/Avis-Autohotkey-Repo/)  
+#### [See My script listing](http://avi-aryan.github.io/Autohotkey.html)   
   
-[Blog](http://www.avi-win-tips.blogspot.com)  
+[Blog](http://www.avi-win-tips.blogspot.com) 
 [Blog Index](http://avi-win-tips.blogspot.com/p/my-autohotkey.html)  
 [E-Mail](mailto:avi.aryan123@gmail.com)  
 

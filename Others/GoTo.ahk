@@ -1,30 +1,33 @@
 /*
 #####################
-GoTo v0.3
+GoTo v0.5
 Avi Aryan
 #####################
 
 Go To functions, labels, hotkeys and hotstrings in any editor.
 The only requirement is that the Editor shows file full path in Title Bar and has a Goto (Ctrl+G) option.
-Examples of such editors - Notepad++, Sublime Text, PSPad, ConTEXT
+Examples of such editors - Notepad++, Sublime Text, PSPad, ConTEXT, Emacs
 
 Any script which shows the full path and has a goto option is vaild
 
 */
 
-GoTo_AutoExecute()
 ;------- CONFIGURE -------------------
+GoTo_AutoExecute(1, A_temp)		;1 = Gui is resizble, A_temp = Working Directory
+
 F7::Goto_Main_Gui()
 ;-------------------------------------
 
 return
 
-GoTo_AutoExecute(){
-	#Persistent
-	SetWorkingDir,% A_scriptdir
+GoTo_AutoExecute(resizable=true, WorkingDir=""){
+
+	SetWorkingDir,% ( WorkingDir == "" ) ? A_scriptdir : WorkingDir
 	FileCreateDir, gotoCache
 	FileDelete, gotoCache\*.gotolist
 	SetTimer, filecheck, 500
+	if resizable
+		OnMessage(0x201, "DragGotoGui") ; WM_LBUTTONDOWN
 }
 
 GoTo_Readfile(File) {
@@ -67,6 +70,11 @@ GoTo_Readfile(File) {
 }
 
 CreateCache(hostfile, type, data, linenum){
+	if type = func
+		if ( Substr( data, 1, SuperInstr(data, " |`t|,|(", 1)-1 ) == "while" )
+			return
+	;Exceptions are listed above
+
 	FileAppend,% data ">" linenum "`n",% "Gotocache\" hostfile "-" type ".gotolist"
 }
 
@@ -192,9 +200,9 @@ GoToMacro(Fileindex, type, linenum){
 	Gui, Main:Hide
 	Filereadline, cl, gotocache\%Fileindex%%type%.gotolist, %linenum%
 	runline := Substr(cl, Instr(cl, ">", 0, 0)+1)
-	Send, ^g
+	SendInput, ^g
 	sleep, 100
-	Send,% runline "{Enter}"
+	SendInput,% runline "{Enter}"
 	BlockInput, Off
 }
 ;---------------------------------------------------------------------------------------------------------
@@ -204,9 +212,6 @@ GetActiveFile(){
 	if !Instr(title, ".ahk")
 		return ""
 	return Trim( Substr( Title, temp := Instr(Title, ":\")-1, Instr(Title, ".ahk", 0, 0)-temp+4 ) ) 
-	;~ if ( Instr(Title, "PSPad") = 1 ) or ( Instr(Title, "ConTEXT") = 1 )
-		;~ return Trim( Substr(Title, Instr(Title, "[")+1, -1) , "*# `t" )		;PSPad and ConTEXT
-
 	;~ return Trim( Substr(Title, 1, SuperInstr(Title, "-|*|•", 0, 0, 0)-1) , " `t*•-")	;Scite, Sublime Text, N++
 }
 
@@ -221,6 +226,11 @@ TypefromTab(TabCount){
 	else
 		return "-hotstr"
 }
+
+DragGotoGui(){		;Thanks Pulover
+	PostMessage, 0xA1, 2,,, A
+}
+
 ;Helper Function(s) --------------------------------------------------------------------------------------
 /*
 SuperInstr()
