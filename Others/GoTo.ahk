@@ -149,14 +149,14 @@ Goto_Main_GUI()
 	
 	if ( Activefile_old != Activefileindex )
 	{
-		Guicontrol, Main:, Mainlist,% "|"
-		Guicontrol, Main:Choose, maintab, 1
+		Guicontrol, Goto:, Mainlist,% "|"
+		Guicontrol, Goto:Choose, maintab, 1
 		Update_GUI("-label", activefileindex)
 	}
 	
 	if !IsGuicreated
 	{
-		Gui, Main:New
+		Gui, Goto:New
 		Gui, +AlwaysOnTop -Caption +ToolWindow
 		Gui, Margin, 3, 3
 		Gui, Font, s11, Consolas
@@ -168,20 +168,25 @@ Goto_Main_GUI()
 		IsGuicreated := 1
 	}
 	if !WinExist("GoTo ahk_class AutoHotkeyGUI")
-		Gui, Main:Show,, GoTo
+	{
+		Gui, Goto:Show,, GoTo
+		Hotkey, Esc, Goto_GuiHide, On
+	}
 	else
-		Gui, Main:Hide
-
+	{
+		Gui, Goto:Hide
+		Hotkey, Esc, Goto_GuiHide, Off
+	}
 	Activefile_old := Activefileindex
 	return
 
 DDLclick:
-	Gui, Main:submit, nohide
+	Gui, Goto:submit, nohide
 	GoToMacro(ActivefileIndex, Typefromtab(Maintab), Mainlist)
 	return
 
 tabClick:
-	Gui, Main:submit, nohide
+	Gui, Goto:submit, nohide
 	Update_GUI(Typefromtab(maintab), Activefileindex)
 	return
 
@@ -192,12 +197,12 @@ Update_GUI(mode, fileindex){
 		return
 	loop, read, gotoCache\%fileIndex%%Mode%.gotolist
 		MainList .= "|" Substr(A_loopreadline, 1, Instr(A_loopreadline, ">", 0, 0)-1)
-	Guicontrol, Main:,Mainlist,% !MainList ? "|" : Mainlist
+	Guicontrol, Goto:,Mainlist,% !MainList ? "|" : Mainlist
 }
 
 GoToMacro(Fileindex, type, linenum){
 	BlockInput, On
-	Gui, Main:Hide
+	Gui, Goto:Hide
 	Filereadline, cl, gotocache\%Fileindex%%type%.gotolist, %linenum%
 	runline := Substr(cl, Instr(cl, ">", 0, 0)+1)
 	SendInput, ^g
@@ -231,6 +236,9 @@ DragGotoGui(){		;Thanks Pulover
 	PostMessage, 0xA1, 2,,, A
 }
 
+Goto_GuiHide:
+	Gui, Goto:Hide
+	return
 ;Helper Function(s) --------------------------------------------------------------------------------------
 /*
 SuperInstr()
