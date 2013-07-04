@@ -6,14 +6,14 @@ Avi Aryan
 
 Go To functions, labels, hotkeys and hotstrings in any editor.
 The only requirement is that the Editor shows file full path in Title Bar and has a Goto (Ctrl+G) option.
-Examples of such editors - Notepad++, Sublime Text, PSPad, ConTEXT, Emacs
+Examples of such editors - Notepad++, Sublime Text, PSPad, ConTEXT
 
 Any script which shows the full path and has a goto option is vaild
 
 */
 
 ;------- CONFIGURE -------------------
-GoTo_AutoExecute(1, A_temp)		;1 = Gui is resizble, A_temp = Working Directory
+GoTo_AutoExecute(1, A_temp)		;1 = Gui is movable, A_temp = Working Directory
 
 F7::Goto_Main_Gui()
 ;-------------------------------------
