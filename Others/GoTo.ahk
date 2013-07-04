@@ -47,14 +47,20 @@ GoTo_Readfile(File) {
 		readline := Trim( A_LoopReadLine )
 		if block_comments
 			if Instr(readline, "*/") = 1
-				block_comments := 0 , continue
+			{
+				block_comments := 0
+				continue
+			}
 			else continue
 
 		if Instr(readline, ";") = 1
 			continue
 
 		if Instr(readline, "/*") = 1
-			block_comments := 1 , continue
+		{
+			block_comments := 1
+			continue
+		}
 		
 		readline := Trim( Substr(readline, 1, SuperInstr(readline, commentneedle, 1) ? SuperInstr(readline, commentneedle, 1)-1 : Strlen(readline)) )
 
@@ -116,10 +122,17 @@ Check4func(readline, linenum, file){
 
 		if block_comments
 			if Instr(readline, "*/") = 1
-				block_comments := 0 , continue
+			{
+				block_comments := 0
+				continue
+			}
 			else continue
+		
 		if Instr(readline, "/*") = 1
-			block_comments := 1 , continue
+		{
+			block_comments := 1
+			continue
+		}
 
 		return Instr(cl, "{") = 1 ? 1 : 0
 	}
