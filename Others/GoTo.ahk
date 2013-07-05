@@ -1,6 +1,6 @@
 /*
 #####################
-GoTo v0.6
+GoTo v0.9
 Avi Aryan
 #####################
 
@@ -15,23 +15,28 @@ Any script which shows the full path and has a goto option is vaild
 ;------- CONFIGURE -------------------
 GoTo_AutoExecute(1, A_temp)		;1 = Gui is movable, A_temp = Working Directory
 
-F7::Goto_Main_Gui()
+#if GetActiveFile()		;If ahk window is active
+	F7::Goto_Main_Gui()
+#if
 ;-------------------------------------
-
 return
 
 GoTo_AutoExecute(resizable=true, WorkingDir=""){
+global
 
 	SetWorkingDir,% ( WorkingDir == "" ) ? A_scriptdir : WorkingDir
 	SetBatchLines, -1
 	FileCreateDir, gotoCache
 	FileDelete, gotoCache\*.gotolist
-	SetTimer, filecheck, 500
+	SetTimer, filecheck, 200
+	goto_cache := {}
 	if resizable
 		OnMessage(0x201, "DragGotoGui") ; WM_LBUTTONDOWN
 }
 
 GoTo_Readfile(File) {
+	Critical, On
+
 	static filecount , commentneedle := A_space ";|" A_tab	";"
 	
 	if ( filecount_N := fileiscached(File) )
@@ -74,6 +79,7 @@ GoTo_Readfile(File) {
 		else if Check4func(readline, A_index, file)
 			CreateCache(filename, "func", Substr(readline, 1, Instr(readline, "(")) ")", A_index)
 	}
+	SortCache(filename)
 }
 
 CreateCache(hostfile, type, data, linenum){
@@ -89,7 +95,7 @@ Check4Hotkey(line) {
 ;The function assumes line is trimmed using Trim() and then checked for ; comment
 
 	if ( Instr(line, "::") = 1 ) and ( Instr(line, ":", false, 0) = 3 )		;hotstring
-		return ":"
+		return ""
 	hK := Substr( line, 1, ( Instr(line, ":::") ? Instr(line, ":::")+2 : ( Instr(line, "::") ? Instr(line, "::")+1 : Strlen(line)+2 ) ) - Strlen(line) - 2)
 	if hK = 
 		return
@@ -140,10 +146,9 @@ Check4func(readline, linenum, file){
 }
 
 filecheck:
-	FileGetTime, Timeforfile,% GetActiveFile(), M
-	if ( Timeforfile != Lasttimefile ) and ( Timeforfile != "" )
-		GoTo_Readfile(GetActiveFile())
-	Lasttimefile := Timeforfile
+	FileGetTime, Timeforfile,% goto_tempfile := GetActiveFile(), M
+	if ( goto_cache[goto_tempfile] != Timeforfile )
+		goto_cache[goto_tempfile] := Timeforfile , Goto_Readfile(goto_tempfile)
 	return
 
 fileiscached(file){
@@ -177,7 +182,7 @@ Goto_Main_GUI()
 		Gui, Add, Tab2,% "w" 310 " h30 vmaintab gtabclick AltSubmit", Labels|Functions|Hotkeys|Hotstrings
 		Gui, Tab
 		Gui, Font, s10, Courier New
-		Gui, Add, Dropdownlist,% "xs y+10 h30 r20 vMainList gDDLclick Altsubmit w" 300
+		Gui, Add, DropDownList,% "xs y+10 h30 r20 vMainList gDDLclick Altsubmit w" 300
 		Update_GUI("-label", activefileindex)
 		IsGuicreated := 1
 	}
@@ -225,10 +230,9 @@ GoToMacro(Fileindex, type, linenum){
 
 GetActiveFile(){
 	WinGetActiveTitle, Title
-	if !Instr(title, ".ahk")
+	if !( Instr(title, ".ahk") and Instr(title, ":\") )
 		return ""
 	return Trim( Substr( Title, temp := Instr(Title, ":\")-1, Instr(Title, ".ahk", 0, 0)-temp+4 ) ) 
-	;~ return Trim( Substr(Title, 1, SuperInstr(Title, "-|*|•", 0, 0, 0)-1) , " `t*•-")	;Scite, Sublime Text, N++
 }
 
 TypefromTab(TabCount){
@@ -241,6 +245,18 @@ TypefromTab(TabCount){
 		return "-hotkey"
 	else
 		return "-hotstr"
+}
+
+SortCache(file){
+
+	static type := "label,func,hotkey,hotstr"
+	loop, parse, type,`,
+	{
+		FileRead, ovar,% "gotocache\" file "-" A_LoopField ".gotolist"
+		Sort, ovar
+		FileDelete,% "gotocache\" file "-" A_LoopField ".gotolist"
+		FileAppend,% ovar,% "gotocache\" file "-" A_LoopField ".gotolist"
+	}
 }
 
 DragGotoGui(){		;Thanks Pulover
