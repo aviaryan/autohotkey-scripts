@@ -1,5 +1,10 @@
 ﻿/*
-_Ini Library v0.2 beta
+
+#########################
+USE AhkIni().ahk
+#########################
+
+_Ini Library v0.2 beta ( Dis-continued )
 by Avi Aryan
 Licensed under Apache License v2.0 (See Readme.md)
 ###############################################################
