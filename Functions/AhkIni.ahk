@@ -1,5 +1,5 @@
 /*
-AhkIni v0.1
+AhkIni v0.2
 	by Avi Aryan
 Licensed under Apache License v2.0 (See Readme.md)
 
@@ -11,30 +11,27 @@ METHODS ############
 
 	.Read(Section, Key, Byref Key_com="", ByRef Sec_com="")
 	.Write(Section, Key, Value, Key_com="", Sec_com="")
-	.Delete(Section, Key="")
+	.Delete(Section="", Key="")
 	.Save()
 
-POINTS #############
-
-*	Run .Save() after making changes to save them in the ini
-*	If in .Write() , space is specified in Key_com and Sec_com params , the comments will get deleted.
-		Specifying the 2 params as empty wont change the comments.
-	eg > Ini.write(Section, Key, value, A_space, " ")
+See documenation at 
+		avi-aryan.github.com/ahk/functions/ahkini.html
 
 */
 
-;~ SetWorkingDir,% A_scriptdir
+/*SetWorkingDir,% A_scriptdir
 
-;~ Ini := new AhkIni("black2.ini")
-;~ ini.write("section1", "key1", "hithere", "keycomment`nline2`nline3")
-;~ ini.write("section1", "key2", "hithere", "keycomment", "section1 comment")
-;~ ini.write("section2", "key1", "hithere2", "keycomment2", "section2 comment")
+Ini := new AhkIni("black2.ini")		;create new ini if nothing exists
+ini.write("section1", "key1", "hithere", "keycomment`nline2`nline3")
+ini.write("section1", "key2", "hithere", "keycomment2", "section1 comment")
+ini.write("section2", "key1", "hithere2", "keycomment2", "section2 comment")
 
-;~ msgbox,% ini.read("section1", "key1", key, sec) "`n`n" key "`n`n" sec
+msgbox,% ini.read("section1", "key1", key, sec) "`n`n" key "`n`n" sec
+ini.delete("section1", "key1")		;delete the above read key
 
-;~ ini.Save()
+ini.Save()
 
-;~ return
+return*/
 
 class AhkIni
 {
@@ -136,15 +133,21 @@ class AhkIni
 		return
 	}
 	
-	Delete(Section, Key="")
+	Delete(Section="", Key="")
 	{
 		Section := "[" Section "]"
-		if Key = 
+
+		If Section = []
+		{
+			FileDelete,% this.Inifile
+			FileAppend,% emtpyvar,% this.Inifile
+		}
+		else if Key = 
 		{
 			for keyC, valueC in this.listing
 				if Instr(valueC, Section) = 1
 					R := this.file.Remove(valueC) , R := this.listing.Remove(keyC)
-		}
+		} 
 		else
 			R := this.file.Remove(Section "_" Key) , R := this.file.Remove(Section "_" Key "_=com")
 	}
