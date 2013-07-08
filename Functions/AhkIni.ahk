@@ -19,7 +19,8 @@ See documenation at
 
 */
 
-/*SetWorkingDir,% A_scriptdir
+/*
+SetWorkingDir,% A_scriptdir
 
 Ini := new AhkIni("black2.ini")		;create new ini if nothing exists
 ini.write("section1", "key1", "hithere", "keycomment`nline2`nline3")
@@ -31,7 +32,8 @@ ini.delete("section1", "key1")		;delete the above read key
 
 ini.Save()
 
-return*/
+return
+*/
 
 class AhkIni
 {
