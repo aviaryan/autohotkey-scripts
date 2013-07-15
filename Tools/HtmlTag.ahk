@@ -1,5 +1,5 @@
 /*
-HTML Tagger v0.1
+HTML Tagger v0.2
 	by Avi Aryan
 
 Licensed under Apache License v2.0
@@ -22,10 +22,11 @@ HtmlTag_AutoExec()
 TagObjIndex := 1
 
 ;---- CONFIGURE -----------------------------------------------------
-Hotkey, ^h, Tag_Cycle, On 		;Main hotkey
-#h::Tag_AddGui()			;Hotkey to show Tag Adding GUI
-;--------------------------------------------------------------------
 
+Hotkey, ^h, Tag_Cycle, On 		;Main hotkey (DONT CHANGE)
+#h::Tag_AddGui()			;Hotkey to show Tag Adding GUI (CHANGEABLE)
+
+;--------------------------------------------------------------------
 return
 
 HtmlTag_AutoExec(){
@@ -55,7 +56,7 @@ HtmlTag_AutoExec(){
 }
 
 Tag_Cycle:
-	ToolText := "`n`nNEXT" , MaxNum := TagObj.MaxIndex()
+	ToolText := "`n`nNEXT to come --" , MaxNum := TagObj.MaxIndex()
 	SetTimer, Tag_Lwinup, 60
 	Hotkey, ^x, Tag_Cancel, On
 	Hotkey, ^d, Tag_Cancel, On
@@ -63,8 +64,7 @@ Tag_Cycle:
 	loop 5
 		ToolText .= "`n`t" TagObj[ (TagObjIndex+A_index) > MaxNum ? TagObjIndex+A_Index-MaxNum : TagObjIndex+A_index]
 
-
-	Tooltip,% "  " TagObj[TagObjIndex] ToolText
+	Tooltip,% " " TagObj[TagObjIndex] ToolText
 	TagObjIndex+=1
 	if ( TagObjIndex > MaxNum )
 		TagObjIndex := 1
@@ -93,10 +93,8 @@ Tag_Cancel:
 	else
 	{
 		Tooltip, Item Deleted !
-		Ini.Delete("Main", TagObjIndex=1 ? TagObj[TagObj.MaxIndex()] : TagObj[TagObjIndex-1])
-		Ini.Save()
-		sleep 700
-		Reload
+		Ini.Delete("Main", TagObjIndex=1 ? TagObj[Temp := TagObj.MaxIndex()] : TagObj[Temp := TagObjIndex-1]) , Ini.Save()
+		TagObj.Remove(Temp)
 	}
 
 	SetTimer, Tag_Lwinup, Off
@@ -109,7 +107,7 @@ Tag_Cancel:
 	return
 
 ;++++++++++++++++++++++
-;HTMLTag() function  +
+;HTMLTag() function   +
 ;++++++++++++++++++++++
 
 HtmlTag(Mask, DelimChar="|", Textpoint=1, Caret_withText=0){
@@ -120,7 +118,7 @@ HtmlTag(Mask, DelimChar="|", Textpoint=1, Caret_withText=0){
 	oldclip := ClipboardAll , T := clipjumpcall ? Cj.(0) : ""
 
 	Clipboard := emptyvar
-	Send, ^c{BackSpace}
+	Send, ^c
 	sleep 100		;If the script fails to perform, increase this number
 
 	if Clipboard =
@@ -141,9 +139,14 @@ HtmlTag(Mask, DelimChar="|", Textpoint=1, Caret_withText=0){
 			ToSend .= Clipboard , startcount := -Caret_withText+2
 	}
 
-	Clipboard := ToSend
-	ClipWait
-	Send, ^V
+	if Strlen(ToSend) > 100
+	{
+		Clipboard := ToSend 	;Clipboard may not work at all times, as a result it is used only when needed
+		ClipWait
+		Send, ^v
+	}
+	Else SendPlay % ToSend
+
 	Clipboard := oldclip
 
 	if Caret_withText
@@ -202,9 +205,11 @@ HtmlTagButtonCancel:
 
 }
 
-#Include S:\Portables\AutoHotkey\My Scripts\Libraries\AhkIni.ahk   ;http://www.autohotkey.com/board/topic/95162-
-#Include S:\Portables\AutoHotkey\My Scripts\ClipStep\ClipjumpCommunicator.ahk 		;https://github.com/avi-aryan/Clipjump/blob/master/ClipjumpCommunicator.ahk
+;--------------- FUNCTIONS -----------------------------------------------------
 
+#Include S:\Portables\AutoHotkey\My Scripts\Libraries\AhkIni.ahk   ;http://www.autohotkey.com/board/topic/95162-
+#Include S:\Portables\AutoHotkey\My Scripts\ClipStep\ClipjumpCommunicator.ahk 	;(OPTIONAL)
+;https://github.com/avi-aryan/Clipjump/blob/master/ClipjumpCommunicator.ahk
 
 ;------------ TEMP -------------------------
 
