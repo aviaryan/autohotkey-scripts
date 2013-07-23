@@ -6,6 +6,9 @@ Thanks to hd0202, Uberi and sinkfaze
 v 2.7
 ------------------------------------------------------------------------------
 
+DOCUMENTATION - http://avi-aryan.github.io/ahk/functions/smaths.html
+Math-Functions.ahk - https://github.com/avi-aryan/Avis-Autohotkey-Repo/blob/master/Functions/Math-Functions.ahk
+
 ##############################################################################
 FUNCTIONS
 ##############################################################################
