@@ -3,7 +3,7 @@
 Scientific MATHS LIBRARY ( Filename = Maths.ahk )
 by Avi Aryan
 Thanks to hd0202, Uberi and sinkfaze
-v 2.5
+v 2.7
 ------------------------------------------------------------------------------
 
 ##############################################################################
@@ -25,8 +25,8 @@ FUNCTIONS
 * SM_Round(number, decimals) --- Round() . Large numbers
 * SM_Floor(number) --- Floor() . large numbers
 * SM_Ceil(number)  --- Ceil() . large number
-* SM_e(N) --- returns e to the power N
-* SM_UniquePmt(pattern, ID)	;gives the unique permutation possible .
+* SM_e(N, auto=1) --- returns e to the power N . Recommend auto=1 for speed
+* SM_UniquePmt(pattern, ID, Delimite=",")	;gives the unique permutation possible .
 
 
 ################################################################################
@@ -38,33 +38,28 @@ READ
 
 */
 
-;~ msgbox,% SM_Mod( SM_Pow(3,77), 79)
-;~ msgbox,% SM_Round("124389438943894389430909430438098232323.427239238023823923984",4)
-;~ msgbox,% SM_Divide("3426326","30")
-;~ msgbox,% SM_Exp("328923823982398239283923.238239238923", 3)
-;~ msgbox,% SM_Divide("43.034934034904334", "89.3467436743", 10)
-;~ msgbox,% SM_UniquePmt("abcdefghijklmnopqrstuvwxyz0123456789",12367679898956098)
-;~ msgbox,% SM_Mod("-22","-7")
-;~ msgbox,% SM_Divide("232323","23")
-;~ msgbox,% SM_Divide("22","7", 1)
-;~ msgbox,% SM_Divide("48.45","19.45",2)
-;~ msgbox,% SM_Divide("1200000","3")
-;~ msgbox,% SM_fact("38")
-;~ msgbox,% SM_UniquePmt("avi,annat,koiaur,aurkoi")
-;~ msgbox,% SM_Solve("[28*45] - [45*28]")
-;~ msgbox,% SM_Add("1280", "-1280")
-;~ MsgBox,% SM_Solve("23898239238923.2382398923 + 2378237238.238239 - [989939.9939 * 892398293823]")
-;~ msgbox,% SM_Exp("0.1004354545")
-;~ var = sqrt(4) - [892839.2382389 - 89238239.923]
-;~ msgbox,% SM_Solve(var)
-;~ msgbox,% SM_Solve("Sqrt(4) * 2 * log(100) * SM_Pow(45,8) - 32")
-;~ msgbox,% SM_UniquePmt("abcdefghijklmnopqrstuvwxyz123456789", 25653464543)	;<----- That's called huge numbers
-;~ Msgbox,% SM_Greater(18.789, 187)
-;~ msgbox,% SM_Divide("434343455677690909087534208967834434444.5656", "8989998989898909090909009909090909090908656454520", 100)
-;~ MsgBox,% SM_Multiply("111111111111111111111111111111111111111111.111","55555555555555555555555555555555555555555555.555")
-;~ MsgBox,% SM_Prefect("00.002000")
-;~ Msgbox,% SM_Add("8","-" "98.007")
-;~ return
+;msgbox % SM_e(20)
+;msgbox % Sm_fact(40) ;<--try puttin one more zero here : You will have to wait
+;msgbox,% SM_Mod( SM_Pow(3,77), 79)
+;msgbox,% SM_Round("124389438943894389430909430438098232323.427239238023823923984",4)
+;msgbox,% SM_Exp("328923823982398239283923.238239238923", 3)
+;msgbox,% SM_Divide("43.034934034904334", "89.3467436743", 10)
+;msgbox,% SM_UniquePmt("abcdefghijklmnopqrstuvwxyz0123456789",12367679898956098)
+;msgbox,% SM_Mod("-22","-7")
+;msgbox,% SM_Divide("48.45","19.45",2)
+;msgbox,% SM_UniquePmt("avi,annat,koiaur,aurkoi")
+;msgbox,% SM_Solve("[28*45] - [45*28]")
+;msgbox,% SM_Add("1280232382372012010120325634", "-12803491201290121201212.98")
+;MsgBox,% SM_Solve("23898239238923.2382398923 + 2378237238.238239 - [989939.9939 * 892398293823]")
+;msgbox,% SM_Exp("0.1004354545")
+;var = sqrt(4) - [892839.2382389 - 89238239.923]
+;msgbox,% SM_Solve(var)
+;msgbox,% SM_Solve("Sqrt(4) * 2 * log(100) * SM_Pow(45,8) - 32")
+;Msgbox,% SM_Greater(18.789, 187)
+;msgbox,% SM_Divide("434343455677690909087534208967834434444.5656", "8989998989898909090909009909090909090908656454520", 100)
+;MsgBox,% SM_Multiply("111111111111111111111111111111111111111111.111","55555555555555555555555555555555555555555555.555")
+;MsgBox,% SM_Prefect("00.002000")
+;return
 
 ;###################################################################################################################################################################
 
@@ -87,7 +82,7 @@ SM_Solve(expression, ahk=false){
 StringReplace,expression,expression,%A_space%,,All	;The tricky part :-D
 StringReplace,expression,expression,%A_tab%,,All
 ; More Reps
-expression := Fixexpression(expression)
+expression := SM_Fixexpression(expression)
 ; Solving Brackets first
 posofb := 0
 loop,
@@ -99,7 +94,7 @@ loop,
 		if (posofb)
 		{
 			get := SM_Solve( Substr(expression, posofb + 1, Instr(expression, "]", false, posofb, 1) - posofb - 1) , ahk )	;solve the bracket
-			expression := Fixexpression( Substr(expression, 1, posofb - 1) . get . Substr(expression, Instr(expression, "]", false, posofb, 1) + 1) )
+			expression := SM_Fixexpression( Substr(expression, 1, posofb - 1) . get . Substr(expression, Instr(expression, "]", false, posofb, 1) + 1) )
 		}
 		else
 			break
@@ -250,25 +245,25 @@ if count not in 1,3		;Add
 {
 loop,
 {
-digit := SubStr(number1,1 - A_Index, 1) + SubStr(number2, 1 - A_index, 1) + (carry ? 1 : 0)
-
-if (A_index == n){
+	digit := SubStr(number1,1 - A_Index, 1) + SubStr(number2, 1 - A_index, 1) + (carry ? 1 : 0)
+	
+	if (A_index == n){
+		sum := digit . sum
+		break
+	}
+	
+	if (digit > 9){
+		carry := true
+		digit := SubStr(digit, 0, 1)
+	}
+	else
+		carry := false
+	
 	sum := digit . sum
-	break
-}
-
-if (digit > 9){
-	carry := true
-	digit := SubStr(digit, 0, 1)
-}
-else
-	carry := false
-
-sum := digit . sum
-}
-;Giving sign
-if (Instr(n2,"-") and Instr(n1, "-"))
-	sum := "-" . sum
+	}
+	;Giving sign
+	if (Instr(n2,"-") and Instr(n1, "-"))
+		sum := "-" . sum
 }
 ;SUBTRACT ******************
 elsE
@@ -282,32 +277,32 @@ if !(numbercompare){
 }
 loop,
 {
-digit := SubStr(number1,1 - A_Index, 1) - SubStr(number2, 1 - A_index, 1) + (borrow ? -1 : 0)
-
-if (A_index == n){
-	StringReplace,digit,digit,-
-	sum := digit . sum
-	break
-}
-
-if Instr(digit, "-")
-	borrow:= true , digit := 10 + digit		;4 - 6 , then 14 - 6 = 10 + (-2) = 8
-else
-	borrow := false
-
-sum := digit sum
-}
-;End of loop ;Giving Sign
-;
-If InStr(n2,"--"){
-	if (numbercompare)
-		sum := "-" . sum
-}else If InStr(n2,"-"){
-	if !(numbercompare)
-		sum := "-" . sum
-}else IfInString,n1,-
-	if (numbercompare)
-		sum := "-" . sum
+	digit := SubStr(number1,1 - A_Index, 1) - SubStr(number2, 1 - A_index, 1) + (borrow ? -1 : 0)
+	
+	if (A_index == n){
+		StringReplace,digit,digit,-
+		sum := digit . sum
+		break
+	}
+	
+	if Instr(digit, "-")
+		borrow:= true , digit := 10 + digit		;4 - 6 , then 14 - 6 = 10 + (-2) = 8
+	else
+		borrow := false
+	
+	sum := digit sum
+	}
+	;End of loop ;Giving Sign
+	;
+	If InStr(n2,"--"){
+		if (numbercompare)
+			sum := "-" . sum
+	}else If InStr(n2,"-"){
+		if !(numbercompare)
+			sum := "-" . sum
+	}else IfInString,n1,-
+		if (numbercompare)
+			sum := "-" . sum
 }
 ;End of Subtract - Sum
 ;End
@@ -781,16 +776,15 @@ Floor function with extended support. Refer to Ahk documentation for Floor()
 */
 
 SM_Floor(number){
-number := SM_Prefect(number)
-if Instr(number, "-")
-{
-	if Instr(number,".")
-		return, SM_Add(Substr(number, 1, Instr(number, ".") - 1), -1)
+	number := SM_Prefect(number)
+
+	if Instr(number, "-")
+		if Instr(number,".")
+			return, SM_Add(Substr(number, 1, Instr(number, ".") - 1), -1)
+		else
+			return, number
 	else
-		return, number
-}
-else
-	return, Instr(number, ".") ? Substr(number, 1, Instr(number, ".") - 1) : number
+		return, Instr(number, ".") ? Substr(number, 1, Instr(number, ".") - 1) : number
 }
 
 ;##################################################################################################################################################
@@ -823,14 +817,25 @@ SM_Ceil(number){
 
 SM_fact(number)
 
-Gives factorial of number of any size. Dont get carried away and try something like 198 . Your computer will freeze
+Gives factorial of number of any size. Try SM_fact(200) 	:-;
 
 */
 
 SM_fact(number){
-	toreturn := 1
-	loop,% number
-		toreturn := SM_Multiply(A_index, toreturn)
+	toreturn := tn := 1 , loopindex := 0
+	while ( number > loopindex )
+	{
+		while SM_checkformat(tn)
+		{
+			t_tn := tn , loopindex+=1 , tn := tn * loopindex
+			if ( loopindex == number )
+			{
+				t_tn := tn , theend := 1
+				break
+			}
+		}
+		toreturn := SM_Multiply(toreturn, t_tn) , tn := 1 , loopindex := theend ? loopindex+1 : loopindex-1
+	}
 	return toreturn
 }
 
@@ -856,29 +861,58 @@ SM_Pow(number, power){
 	}
 	else
 	{
-		multiple := 1
-		loop % power
-			multiple := SM_Multiply(multiple, number)
-		return multiple
+		if power > 6
+		{
+			x_7 := SM_Iterate(number, 7) , pow7 := Round(power/7)
+			x_7_pow7 := SM_iterate(x_7, pow7)
+		}
+		else x_7_pow7 := 1
+
+		a := 1
+		loop % Mod(power, 7)
+			a := SM_Multiply(number, a)
+
+		return SM_Multiply(x_7_pow7, a)
 	}
 }
 
 /*
 
-SM_e(N)
+SM_e(N, auto=1)
 
-Gives the power of e to N
+	Gives the power of e to N
+	auto = 1 enables smart rounding for faster results
+	Call auto as false (0) for totally accurate results. (may be slow)
 
 */
 
-SM_e(N){
-	return SM_Pow("2.71828182845905", N)
+SM_e(N, auto=1){
+	static e := 2.71828182845905 , d := 14 		;rendering precise results with speed .
+
+	if (N > 5) and auto
+		e := SM_Round("2.71828182845905", (F := d-N+5)>2 ? F : 2)
+	return SM_Pow(e, N)
 }
 
 ;################# NON - MATH FUNCTIONS #######################################
 ;################# RESERVED ###################################################
 
-FixExpression(expression){
+SM_Checkformat(n){
+	static ahk_ct := 9223372036854775807
+	if n < 0
+		return 0
+	if ( ahk_ct > n+0 )
+		return 1
+}
+
+SM_Iterate(number, times){
+	x := 1
+	loop % times
+		x := SM_Multiply(x, number)
+	return x
+}
+
+SM_FixExpression(expression){
 StringReplace,expression,expression,--,+,All
 StringReplace,expression,expression,-+,-,All
 StringReplace,expression,expression,+-,-,All
