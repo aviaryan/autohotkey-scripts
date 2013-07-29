@@ -28,6 +28,25 @@ GetIconforext(ext){
 	}
     Return DefaultIcon
 }
+
+;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+;Base to Number and Number to Base conversion
+;Base = 16 for HexaDecimal , 2 for Binary, 8 for Octal and 10 for our own number system
+
+Number2Base(N, base=16){
+	loop % baseLen:=base<10?Ceil((10/base)*Strlen(N)):Strlen(N)
+		D:=Floor(N/(T:=base**(baseLen-A_index))),H.=!D?0:(D>9?Chr(D+87):D),N:=N-D*T
+	return Ltrim(H,"0")
+}
+
+Base2Number(H, base=16){
+	S:=Strlen(H),N:=0
+	loop,parse,H
+		N+=((A_LoopField*1="")?Asc(A_LoopField)-87:A_LoopField)*base**(S-A_index)
+	return N
+}
+
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 ;Gets the path of active folder . 
