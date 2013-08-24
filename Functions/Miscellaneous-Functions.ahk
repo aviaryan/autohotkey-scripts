@@ -2,7 +2,7 @@
 ################################################################
 MY MISCELLANEOUS FUNCTIONS LIBRARY          
 	Avi Aryan
-	avi-aryan.github.io/Autohotkey.html                 
+	avi-aryan.github.io/Autohotkey.html              
 	Licensed under Apache License v2.0         
 ################################################################
 */
@@ -45,6 +45,36 @@ Base2Number(H, base=16){
 	loop,parse,H
 		N+=((A_LoopField*1="")?Asc(A_LoopField)-87:A_LoopField)*base**(S-A_index)
 	return N
+}
+
+;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+;getParams()
+;	Extract individual params from a single number
+;
+;	Params are sum of 2 powers . Each power of 2 will denote a unique option . So params can be 2,4,8,16,32....
+;	Users will add them to get their preferred option and getParams() will extract what their options are.
+;----------------------------------------------------------------------------------------------------------
+
+/*
+v := 2 + 16 + 128 + 1024
+msgbox % v
+msgbox % getParams(v)
+*/
+
+getParams(sum){
+	static a := 1
+	while sum>0
+		loop
+		{
+			a*=2
+			if (a>sum)
+			{
+				a/=2,p.=Round(a)" ",sum-=a,a:=1
+				break
+			}
+		}
+	return Substr(p,1,-1)
 }
 
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
