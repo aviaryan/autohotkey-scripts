@@ -1,0 +1,83 @@
+Maths() CHANGELOG***********************************************************
+Avi Aryan                                                                  *
+****************************************************************************
+
+16 / 10 / 13
+v2.8
+* Fixed a bug in SM_Pow
+
+23 / 07 / 13
+v2.7
+* Performance Improvements - SM_ Pow() , fact() and e() functions are now much faster
+* SM_e(N, auto=true) now has an auto param. Use it as true for better speed.
+
+29 / 06 / 13
+v2.5
+* Added SM_ceil()
+* Added SM_e()
+* Fixed bugs
+
+20 / 06 / 13
+v2.4
+* Lib converterd to Standard Lib form (SM_)
+* Added new SM_Exp()
+* Enhancements in SM_UniquePMT()
+* Some Functions also renamed (Evaluate = SM_Add), (ModG = SM_Mod), (FloorG = SM_Floor) & (RoundG = SM_Round)
+* Irrelative functions removed (Antilog, nthRoot, Roots..) and are now located at
+                https://github.com/Avi-Aryan/Avis-Autohotkey-Repo/blob/master/Functions/Math-functions.ahk
+
+29 / 05 / 13
+v2.2
+* Added SmartRound in Divide(). Now length parameter works perfectly
+* Divide() minor bugs fixed.
+* Added new func RoundG(number, decimals)
+
+25 / 05 / 13
+v2.0
+* Divide() is bug free. at last
+* ModG() and UniquePMT() [dependent on Divide()] are bug free.
+
+24 / 05 / 13
+v1.8
+* Changes in Divide() . Becomes more reliable.
+* ModG() and UniquePMT() also becomes more reliable.
+
+23 / 05 / 13
+v1.7
+* Divide() is now totally precise.
+* Added new param to Divide(number1, number2, length) where length = decimals
+* Added Fact(), ModG(), Pow() and FloorG() which are for factorial, Mod, Power and Floor of super large numbers.
+* Made UniquePMT() compatitiable with large series's
+
+21 / 05 / 13
+v1.3
+* Improved Solve()
+* Added new function Roots()
+* Added new function UniquePMT()
+
+19 / 05 / 13
+v1.0
+* Added new function Solve()
+* Improvements in Greater()
+* Enhacements in Antilog() . It now becomes Antilog(number, whichbase)
+
+18 / 05 / 13
+v0.7
+* More Bugs in Divide() Fixed.
+
+18 / 05 / 13
+v0.6 b
+* Crucial changes in Divide() . Almost accurate now.
+* Enhancements in Greater() . Added trueifequal parameter.
+* Enhancements in logB, Antilog .
+
+18 / 05 / 13
+v0.4 b
+* Mega Major Update
+* Bug Fixes in Multiply(), Divide() and Evaluate()
+* Enhancements in antilog(), nthroot(), Multiply(), Divide() and Evaluate()
+* Add new function Prefect()
+
+17 / 05 / 13
+v0.1 b
+* Maths() Released

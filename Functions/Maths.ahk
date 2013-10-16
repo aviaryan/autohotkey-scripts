@@ -3,7 +3,7 @@
 Scientific MATHS LIBRARY ( Filename = Maths.ahk )
 by Avi Aryan
 Thanks to hd0202, Uberi and sinkfaze
-v 2.7
+v 2.8
 ------------------------------------------------------------------------------
 
 DOCUMENTATION - http://avi-aryan.github.io/ahk/functions/smaths.html
@@ -866,8 +866,10 @@ SM_Pow(number, power){
 	{
 		if power > 6
 		{
-			x_7 := SM_Iterate(number, 7) , pow7 := Round(power/7)
-			x_7_pow7 := SM_iterate(x_7, pow7)
+			x_7 := SM_Iterate(number, 7) , loop7 := Floor(power/7)
+			x_7_loop := SM_iterate(x_7, loop7) , remPow := power - (7*loop7)
+			x_remPow := SM_iterate(number, remPow)
+			return SM_Multiply(x_7_loop, x_remPow)
 		}
 		else x_7_pow7 := 1
 
