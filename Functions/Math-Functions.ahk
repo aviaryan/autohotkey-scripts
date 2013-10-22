@@ -1,8 +1,8 @@
 ﻿/*
 ++++++++++++++++++++++
-Math_Functions v0.1  +
-----------------------
-by Avi Aryan         +
+Math_Functions v0.12  +
+-----------------------
+by Avi Aryan          +
 ++++++++++++++++++++++
 
 Math_Functions is a collection of useful mathematical functions for general usage.
@@ -105,8 +105,10 @@ Notes >
 
 Roots(expression){		;Enter a, b, c for quad. eqn ------  a, b, c, d for cubic eqn. and so on
 
-    StringReplace,expression,expression,%A_space%,,All
-    StringReplace,expression,expression,%A_tab%,,All
+   static sm_solve := "SM_Solve"             ; var to hold the foreign function
+
+   StringReplace,expression,expression,%A_space%,,All
+   StringReplace,expression,expression,%A_tab%,,All
 	;eqn, limit
 	limit := 0
 	loop, parse, expression,`,	;get individual coffs
@@ -131,18 +133,18 @@ Roots(expression){		;Enter a, b, c for quad. eqn ------  a, b, c, d for cubic eq
 
 	positive := true
 	StringReplace,expression,term,x,%plot%,All	;getting starting value
-	if Instr(Solve(expression), "-")
+	if Instr(%sm_solve%(expression), "-")
 		positive := false
 
 	while (plot >= -limit)	;My theorem - Safe Range
 	{
 		StringReplace,expression,term,x,%plot%,All
-		fx := Solve(expression, true)	;Over here ... Uses the AHK processes for faster results
+		fx := %sm_solve%(expression, true)	;Over here ... Uses the AHK processes for faster results
 	
 		if (speed == defaultspeed){
 			if (fx == "0"){
 				roots .= Prefect(plot) . ","
-				positive := Toggle(positive) , plot-=speed
+				positive := !positive , plot-=speed
 				if (Instr(roots, ",", false, 1, nofterms - 1))	;if all roots have already been found, go out
 					break
 				continue
@@ -154,7 +156,7 @@ Roots(expression){		;Enter a, b, c for quad. eqn ------  a, b, c, d for cubic eq
 			if ((Instr(compare,incomfac) == 1) or compare+0 < lessfac+0)
 				{
 				roots .= Prefect(plot) . ","
-				speed := defaultspeed , positive := Toggle(positive) , plot-=speed
+				speed := defaultspeed , positive := !positive , plot-=speed
 				if (Instr(roots, ",", false, 1, nofterms - 1))
 					break
 				continue
@@ -163,12 +165,12 @@ Roots(expression){		;Enter a, b, c for quad. eqn ------  a, b, c, d for cubic eq
 
 		if (positive){
 			if (Instr(fx,"-")){
-				plot+=defaultspeed , positive := Toggle(positive) , speed := 0.01	;Lower the value, more the time and accurateness
+				plot+=defaultspeed , positive := !positive , speed := 0.01	;Lower the value, more the time and accurateness
 				continue
 			}
 		}else{
 			if !(Instr(fx, "-")){
-				plot+=defaultspeed , positive := Toggle(positive) , speed := 0.01
+				plot+=defaultspeed , positive := !positive , speed := 0.01
 				continue
 			}
 		}
@@ -286,6 +288,34 @@ Prefect(number){
          number := Substr(number, 1, -1)
       return neg number
    }
+}
+
+;##################################################
+
+/*
+dec2frac(number)
+   Converts decimal to fraction
+
+Returns >
+   space separated
+*/
+
+dec2frac(number){
+   if !( dec_pos := Instr(number, ".") )
+      return number
+
+   n_dec_digits := Strlen(number) - dec_pos , dec_num := Substr(number, dec_pos+1)
+   , base_num := Substr(number, 1, dec_pos-1)
+
+   t := 1
+   loop % n_dec_digits   
+      t .= "0"
+
+   numerator := base_num*t + dec_num , denominator := t
+   HCF := GCD(numerator, denominator)
+   numerator /= HCF , denominator /= HCF
+
+   return Round(numerator) " " Round(denominator)
 }
 
 ;##################################################
@@ -481,4 +511,4 @@ fcmp(x,y,tol) {
    Return DllCall(&f, "double",x, "double",y, "Int",tol, "CDECL Int")
 }
 
-#Include, Maths.ahk
+
