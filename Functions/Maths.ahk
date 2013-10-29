@@ -3,7 +3,7 @@
 Scientific MATHS LIBRARY ( Filename = Maths.ahk )
 by Avi Aryan
 Thanks to hd0202, Uberi and sinkfaze
-v 2.8
+v 2.81
 ------------------------------------------------------------------------------
 
 DOCUMENTATION - http://avi-aryan.github.io/ahk/functions/smaths.html
@@ -82,10 +82,16 @@ Example
 */
 
 SM_Solve(expression, ahk=false){
-StringReplace,expression,expression,%A_space%,,All	;The tricky part :-D
+
+;Fix Expression
+StringReplace,expression,expression,%A_space%,,All
 StringReplace,expression,expression,%A_tab%,,All
-; More Reps
 expression := SM_Fixexpression(expression)
+
+;Reject invalid
+if expression=
+	return
+
 ; Solving Brackets first
 posofb := 0
 loop,
@@ -142,11 +148,11 @@ if firstch is not Integer
 	fname := Substr(A_LoopField, 1, Instr(A_loopfield,"(") - 1)	;extract func
 	ffeed := Substr(A_loopfield, Instr(A_loopfield, "(") + 1, Instr(A_loopfield, ")") - Instr(A_loopfield, "(") - 1)	;extract func feed
 	loop, parse, ffeed,`,
-		{
+	{
 		StringReplace,feed,A_loopfield,",,All
 		feed%A_index% := feed
 		totalfeeds := A_index
-		}
+	}
 	if totalfeeds = 1
 		number := %fname%(feed1)
 	else if totalfeeds = 2
@@ -647,6 +653,11 @@ Converts any number to Perfect form i.e removes extra zeroes and adds reqd. ones
 
 SM_Prefect(number){
 number .= ""	;convert to string if needed
+
+number := RTrim(number, "+-")
+if number=
+	return 0
+
 if Instr(number, "-")
 	number := Substr(number, 2) , negative := true
 
@@ -831,8 +842,9 @@ SM_fact(number){
 		while SM_checkformat(tn)
 		{
 			t_tn := tn , loopindex+=1 , tn := tn * loopindex
-			if ( loopindex == number )
-			{
+			if !SM_checkformat(tn) 			;check if tn has increased above AHK limit
+				break 						;break and leave the old value of t_tn
+			if ( loopindex == number ) {
 				t_tn := tn , theend := 1
 				break
 			}
@@ -902,6 +914,7 @@ SM_e(N, auto=1){
 ;################# NON - MATH FUNCTIONS #######################################
 ;################# RESERVED ###################################################
 
+; Checks if n is within AHK range
 SM_Checkformat(n){
 	static ahk_ct := 9223372036854775807
 	if n < 0
@@ -918,12 +931,18 @@ SM_Iterate(number, times){
 }
 
 SM_FixExpression(expression){
+expression := Rtrim(expression, "+-=*/\^")
+
 StringReplace,expression,expression,--,+,All
 StringReplace,expression,expression,-+,-,All
 StringReplace,expression,expression,+-,-,All
 StringReplace,expression,expression,++,+,All
 
-if (Substr(expression, 1, 1) != "+" or Substr(expression, 1, 1) != "-")
+;Reject invalid
+if expression=
+	return
+
+if (Substr(expression, 1, 1) != "+") or (Substr(expression, 1, 1) != "-")
 	expression := "+" expression
 loop,
 {
