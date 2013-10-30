@@ -3,7 +3,7 @@
 Scientific MATHS LIBRARY ( Filename = Maths.ahk )
 by Avi Aryan
 Thanks to hd0202, Uberi and sinkfaze
-v 2.81
+v 3.0
 ------------------------------------------------------------------------------
 
 DOCUMENTATION - http://avi-aryan.github.io/ahk/functions/smaths.html
@@ -22,7 +22,8 @@ FUNCTIONS
 * SM_Greater(number1, number2, trueforequal=false) --- compare two massive numbers 
 * SM_Prefect(number) --- convert a number to most suitable form. like ( 002 to 2 ) and ( 000.5600 to 0.56 )
 * SM_fact(number) --- factorial of a number . supports large numbers 
-* SM_Exp(number, decimals) --- Converts a number to Scientific notation format
+* SM_toExp(number, decimals) --- Converts a number to Scientific notation format
+* SM_FromExp(sci_num) --- Converts a scientific type formatted number to a real number
 * SM_Pow(number, power) --- power of a number . supports large numbers and powers
 * SM_Mod(Dividend, Divisor) --- Mod() . Supports large numbers
 * SM_Round(number, decimals) --- Round() . Large numbers
@@ -41,23 +42,24 @@ READ
 
 */
 
-;msgbox % SM_e(20)
+;msgbox % SM_Solve("4 + ( 2*( 3+(4-2)*round(2.5) ) )")
+;msgbox % "The gravity on earth is: " SM_Solve("(6.67e-11 * 5.978e24) / 6.378e6^2")
 ;msgbox % Sm_fact(40) ;<--try puttin one more zero here : You will have to wait
 ;msgbox,% SM_Mod( SM_Pow(3,77), 79)
 ;msgbox,% SM_Round("124389438943894389430909430438098232323.427239238023823923984",4)
-;msgbox,% SM_Exp("328923823982398239283923.238239238923", 3)
+;msgbox,% SM_ToExp("328923823982398239283923.238239238923", 3)
 ;msgbox,% SM_Divide("43.034934034904334", "89.3467436743", 10)
 ;msgbox,% SM_UniquePmt("abcdefghijklmnopqrstuvwxyz0123456789",12367679898956098)
 ;msgbox,% SM_Mod("-22","-7")
+;msgbox % SM_fromexp("6.45423e10")
 ;msgbox,% SM_Divide("48.45","19.45",2)
 ;msgbox,% SM_UniquePmt("avi,annat,koiaur,aurkoi")
-;msgbox,% SM_Solve("[28*45] - [45*28]")
+;msgbox,% SM_Solve("(28*45) - (45*28)")
 ;msgbox,% SM_Add("1280232382372012010120325634", "-12803491201290121201212.98")
-;MsgBox,% SM_Solve("23898239238923.2382398923 + 2378237238.238239 - [989939.9939 * 892398293823]")
-;msgbox,% SM_Exp("0.1004354545")
-;var = sqrt(4) - [892839.2382389 - 89238239.923]
+;MsgBox,% SM_Solve("23898239238923.2382398923 + 2378237238.238239 - (989939.9939 * 892398293823)")
+;msgbox,% SM_ToExp("0.1004354545")
+;var = sqrt(10!) - ( 2^5 + 5*8 )
 ;msgbox,% SM_Solve(var)
-;msgbox,% SM_Solve("Sqrt(4) * 2 * log(100) * SM_Pow(45,8) - 32")
 ;Msgbox,% SM_Greater(18.789, 187)
 ;msgbox,% SM_Divide("434343455677690909087534208967834434444.5656", "8989998989898909090909009909090909090908656454520", 100)
 ;MsgBox,% SM_Multiply("111111111111111111111111111111111111111111.111","55555555555555555555555555555555555555555555.555")
@@ -73,15 +75,23 @@ SM_Solve(expression, ahk=false)
 Solves the expression in string. SM_Solve() uses the powerful functions present in the library for processing
 ahk = true will make SM_Solve() use Ahk's +-/* for processing. Will be faster
 
-* To nest expressions with brackets , use [ ] and not the conventional ( ) 
-* Use SM_Pow(number, n) function [provided below] in place of ** in SM_Solve() 
+* To nest expressions with brackets , you can use the obvious ( ) brackets
+* You can use numbers in sci notation directly in this function ("6.67e-11 * 4.23223e24")
+* You can use ! to calulate factorial ( 48! )
+* You can use ^ to calculate power ( 2.2321^12 )
 
 Example
-	msgbox,% SM_Solve("Sqrt(4) * 2 * log(100) * SM_Pow(45,8) - 32")
+	msgbox,% SM_Solve("Sqrt(4) * 4! * log(100) * ( 3.43e3 - 2^5 )")
 
 */
 
 SM_Solve(expression, ahk=false){
+
+static fchars := "e- e+ + - * / \" , rchars := "em ep в д е ж ж"
+
+;Check Expression for invalid
+if expression is alpha
+	return
 
 ;Fix Expression
 StringReplace,expression,expression,%A_space%,,All
@@ -93,45 +103,32 @@ if expression=
 	return
 
 ; Solving Brackets first
-posofb := 0
-loop,
+while b_pos := RegexMatch(expression, "i)[\+\-\*\\\/\^]\(")
 {
-loop,
-{
-	posofb := Instr(expression, "[",false,1,A_index)
-	if !(Instr(expression, "[",false,1,A_index + 1)){
-		if (posofb)
+	b_count := {"(": 1, ")": 0}
+	b_temp := Substr(expression, b_pos+2)
+	loop, parse, b_temp
+	{
+		b_count[A_LoopField] += 1
+		if b_count["("] = b_count[")"]
 		{
-			get := SM_Solve( Substr(expression, posofb + 1, Instr(expression, "]", false, posofb, 1) - posofb - 1) , ahk )	;solve the bracket
-			expression := SM_Fixexpression( Substr(expression, 1, posofb - 1) . get . Substr(expression, Instr(expression, "]", false, posofb, 1) + 1) )
-		}
-		else
+			end_pos := A_index
 			break
+		}
 	}
+	expression := Substr(expression, 1, b_pos) SM_Solve( Substr(expression, b_pos+2, end_pos-1) ) Substr(expression, end_pos+b_pos+2)
 }
-;Primary Loop
-if !(Instr(expression, "["))
-	break
-}
-;Changing +,-... in expressions to something different    вдеж    =    +-*/
+;Changing +,-,e-,e+ and all signs to different things
 
 loop,
 {
 	if !(Instr(expression, "(")){
-	StringReplace,expression,expression,+,в,All
-	StringReplace,expression,expression,-,д,All
-	StringReplace,expression,expression,*,е,All
-	StringReplace,expression,expression,/,ж,All
-	StringReplace,expression,expression,\,ж,All
-	reserve .= expression
-	break
+		expression := SM_PowerReplace(expression, fchars, rchars, "All")
+		reserve .= expression
+		break
 	}
 	temp := Substr(expression, 1, Instr(expression, "(")) ;till  4+2 + sin(
-	StringReplace,temp,temp,+,в,All
-	StringReplace,temp,temp,-,д,All
-	StringReplace,temp,temp,*,е,All
-	StringReplace,temp,temp,/,ж,All
-	StringReplace,temp,temp,\,ж,All
+		temp := SM_PowerReplace(temp, fchars, rchars, "All")
 	temp2 := SubStr(expression, Instr(expression, "(") + 1, Instr(expression, ")") - Instr(expression, "("))
 	reserve .= temp . temp2
 	expression := Substr(expression,Instr(expression, ")")+ 1)
@@ -150,7 +147,7 @@ if firstch is not Integer
 	loop, parse, ffeed,`,
 	{
 		StringReplace,feed,A_loopfield,",,All
-		feed%A_index% := feed
+		feed%A_index% := SM_Solve(feed)
 		totalfeeds := A_index
 	}
 	if totalfeeds = 1
@@ -164,8 +161,17 @@ if firstch is not Integer
 	}
 	else
 		number := A_LoopField
+
 ;Perform the previous assignment routine
 if (char != ""){
+
+	if Instr(number, "^")
+		number := SM_Pow( SM_FromExp( SubStr(number, 1, posofpow := Instr(number, "^")-1 ) )   ,   SM_Fromexp( Substr(number, posofpow+2) ) )
+	if Instr(number, "!")
+		number := SM_fact( SM_FromExp( Substr(number, 1, -1) ) )
+	if Instr(number, "e") 			; managing e
+		number := SM_fromExp( SM_PowerReplace(number, "em ep", "e- e+", "All") )
+
 	if (Ahk){
 	if char = в
 		solved := solved + (number)
@@ -176,6 +182,7 @@ if (char != ""){
 	else if char = е
 		solved := solved * (number)
 	}else{
+
 	if char = в
 		solved := SM_Add(solved, number)
 	else if char = д
@@ -712,14 +719,20 @@ return, ( (Positive or Remainder=0) ? "" : "-" ) . Remainder
 ;############################################################################################################################################
 /*
 
-SM_Exp(number, decimals="")
+SM_ToExp(number, decimals="") // SM_Exp
 
 Gives exponential form of representing a number.
 If decimals param is omitted , it is automatically detected.
 
+? SM_Exp was the function's name in old versions and so a dummy function has been created
+
 */
 
 SM_Exp(number, decimals=""){
+	return SM_ToExp(number, decimals)
+}
+
+SM_ToExp(number, decimals=""){
 
 	if (dec_pos := Instr(number, "."))
 	{
@@ -742,6 +755,19 @@ SM_Exp(number, decimals=""){
 		number := SM_Prefect(number) , decimals := ( decimals="" or decimals>Strlen(Substr(number,2)) ) ? Strlen(Substr(number,2)) : decimals
 		return SM_Round( Substr(number, 1, 1) "." Substr(number, 2), decimals ) "e" Strlen(number)-1
 	}
+}
+
+/*
+SM_FromExp(expnum)
+
+Converts exponential form to number
+*/
+
+SM_FromExp(expnum){
+	if !Instr(expnum, "e")
+		return expnum
+	n1 := Substr(expnum, 1, t := Instr(expnum, "e")-1) , n2 := Substr(expnum, t+2)
+	return SM_ShiftDecimal(n1, n2)
 }
 
 ;#######################################################################################################################################
@@ -923,11 +949,42 @@ SM_Checkformat(n){
 		return 1
 }
 
+;Shifts the decimal point
+;specify -<dec_shift> to shift in left direction
+
+SM_ShiftDecimal(number, dec_shift=0){
+
+	if Instr(number, "-")
+		number := Substr(number,2) , minus := 1
+	dec_pos := Instr(number, ".") , numlen := StrLen(number)
+
+	loop % Abs(dec_shift)    ;create zeroes
+		zeroes .= "0"
+	if !dec_pos 				;add decimal to integers
+		number .= ".0"
+	number := dec_shift>0 ? number zeroes : zeroes number 			;append zeroes
+
+	dec_pos := Instr(number, ".") 		;get dec_pos in the new number
+	StringReplace, number, number, % "."
+
+	number := Substr(number, 1, dec_pos+dec_shift-1) "." Substr(number, dec_pos+dec_shift)
+	return ( minus ? "-" : "" ) SM_Prefect(number)
+}
+
+; powers a number n times
 SM_Iterate(number, times){
 	x := 1
 	loop % times
 		x := SM_Multiply(x, number)
 	return x
+}
+
+; fast string replace
+SM_PowerReplace(input, find, replace, options="All"){
+	StringSplit, rep, replace, % A_space
+	loop, parse, find, % A_Space
+		StringReplace, input, input, % A_LoopField, % rep%A_index%, % options
+	return Input
 }
 
 SM_FixExpression(expression){

@@ -2,6 +2,17 @@ Maths() CHANGELOG***********************************************************
 Avi Aryan                                                                  *
 ****************************************************************************
 
+30 / 10 /13
+v3.0
+* Added SM_FromExp(exponential_number)
+* Made SM_Solve() enhancements - 
+	- Supports Nesting via   (    brackets now (instead of [])
+ 	- accept factorial (45! * 23!)
+	- accept power sign (4^3)
+	- accept scientific notation ( 2.323e10 * 2312.e-12 )
+	- accept expressions in functions ( sin(4!+2+3!) )
+* Renamed SM_Exp() to SM_ToExp() though SM_Exp() is still valid.
+
 29 / 10 / 13
 v2.81
 * Fixed a bug in SM_fact
