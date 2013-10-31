@@ -30,7 +30,7 @@ FUNCTIONS
 * SM_Floor(number) --- Floor() . large numbers
 * SM_Ceil(number)  --- Ceil() . large number
 * SM_e(N, auto=1) --- returns e to the power N . Recommend auto=1 for speed
-* SM_UniquePmt(pattern, ID, Delimite=",")	;gives the unique permutation possible .
+* SM_UniquePmt(pattern, ID, Delimiter=",")	;gives the unique permutation possible .
 
 
 ################################################################################
@@ -58,8 +58,10 @@ READ
 ;msgbox,% SM_Add("1280232382372012010120325634", "-12803491201290121201212.98")
 ;MsgBox,% SM_Solve("23898239238923.2382398923 + 2378237238.238239 - (989939.9939 * 892398293823)")
 ;msgbox,% SM_ToExp("0.1004354545")
+;
 ;var = sqrt(10!) - ( 2^5 + 5*8 )
 ;msgbox,% SM_Solve(var)
+;
 ;Msgbox,% SM_Greater(18.789, 187)
 ;msgbox,% SM_Divide("434343455677690909087534208967834434444.5656", "8989998989898909090909009909090909090908656454520", 100)
 ;MsgBox,% SM_Multiply("111111111111111111111111111111111111111111.111","55555555555555555555555555555555555555555555.555")
@@ -88,7 +90,6 @@ Example
 */
 
 SM_Solve(expression, ahk=false){
-;make sure e is replaced after e+ and e-
 static fchars := "e- e+ + - * / \" , rchars := "#< #> ¢ ¤ ¥ ¦ ¦"
 
 ;Check Expression for invalid
@@ -687,7 +688,7 @@ if Instr(number, "."){
 } ; Non-decimal below
 else
 {
-	if (number != "0")
+	if Trim(number, "0")
 		return negative ? ("-" . Ltrim(number, "0")) : (Ltrim(number, "0"))
 	else
 		return 0
