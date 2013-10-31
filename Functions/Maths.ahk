@@ -921,10 +921,11 @@ SM_Pow(number, power){
 	{
 		if power > 6
 		{
-			x_7 := SM_Iterate(number, 7) , loop7 := Floor(power/7)
-			x_7_loop := SM_iterate(x_7, loop7) , remPow := power - (7*loop7)
+			sqrt_c := Floor(Sqrt(power))
+			x_c := SM_Iterate(number, sqrt_c) , loopc := Floor(power/sqrt_c)
+			x_c_loop := SM_iterate(x_c, loopc) , remPow := power - (sqrt_c*loopc)
 			x_remPow := SM_iterate(number, remPow)
-			return SM_Multiply(x_7_loop, x_remPow)
+			return SM_Multiply(x_c_loop, x_remPow)
 		}
 		else x_7_pow7 := 1
 
