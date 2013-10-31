@@ -2,7 +2,12 @@ Maths() CHANGELOG***********************************************************
 Avi Aryan                                                                  *
 ****************************************************************************
 
-30 / 10 /13
+31 / 10 / 13
+v3.1
+* Added global vars support in SM_Solve
+* Fixed bug with SM_Multiply() and SM_Prefect()
+
+30 / 10 / 13
 v3.0
 * Added SM_FromExp(exponential_number)
 * Made SM_Solve() enhancements - 
