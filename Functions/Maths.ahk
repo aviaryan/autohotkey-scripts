@@ -3,7 +3,7 @@
 Scientific MATHS LIBRARY ( Filename = Maths.ahk )
 by Avi Aryan
 Thanks to hd0202, Uberi and sinkfaze
-v 3.1
+v 3.15
 ------------------------------------------------------------------------------
 
 DOCUMENTATION - http://avi-aryan.github.io/ahk/functions/smaths.html
@@ -42,7 +42,7 @@ READ
 
 */
 
-;msgbox % SM_Solve("4 + ( 2*( 3+(4-2)*round(2.5) ) )")
+;msgbox % SM_Solve("4 + ( 2*( 3+(4-2)*round(2.5) ) ) + (5c2)^(4c3)")
 ;msgbox % "The gravity on earth is: " SM_Solve("(6.67e-11 * 5.978e24) / 6.378e6^2")
 ;msgbox % Sm_fact(40) ;<--try puttin one more zero here : You will have to wait
 ;msgbox,% SM_Mod( SM_Pow(3,77), 79)
@@ -58,10 +58,10 @@ READ
 ;msgbox,% SM_Add("1280232382372012010120325634", "-12803491201290121201212.98")
 ;MsgBox,% SM_Solve("23898239238923.2382398923 + 2378237238.238239 - (989939.9939 * 892398293823)")
 ;msgbox,% SM_ToExp("0.1004354545")
-;
+
 ;var = sqrt(10!) - ( 2^5 + 5*8 )
 ;msgbox,% SM_Solve(var)
-;
+
 ;Msgbox,% SM_Greater(18.789, 187)
 ;msgbox,% SM_Divide("434343455677690909087534208967834434444.5656", "8989998989898909090909009909090909090908656454520", 100)
 ;MsgBox,% SM_Multiply("111111111111111111111111111111111111111111.111","55555555555555555555555555555555555555555555.555")
@@ -82,6 +82,7 @@ ahk = true will make SM_Solve() use Ahk's +-/* for processing. Will be faster
 * You can use numbers in sci notation directly in this function . ("6.67e-11 * 4.23223e24")
 * You can use ! to calulate factorial ( 48! )
 * You can use ^ to calculate power ( 2.2321^12 )
+* You can use p or c for permutation or combination
 
 Example
 	global someglobalvar := 26
@@ -169,12 +170,17 @@ loop, parse, expression,вдеж
 ;Perform the previous assignment routine
 if (char != ""){
 	;The order is important here
-	while match_pos := RegExMatch(number, "iU)%.*%", output_var)			;people should use e+ instead of e
+	while match_pos := RegExMatch(number, "iU)%.*%", output_var)
 		output_var := Substr(output_var, 2 , -1)
 		, number := Substr(number, 1, match_pos-1) SM_Solve(%output_var%) Substr(number, match_pos+Strlen(output_var)+2)
 
 	if Instr(number, "#")
 		number := SM_PowerReplace(number, "#< #>", "e- e", "All") 	;replace # back to e
+
+	if ( p := Instr(number, "c") ) or ( p := p + Instr(number, "p") ) 		;permutation or combination
+		term_n := Substr(number, 1, p-1) , term_r := Substr(number,p+1)
+		, number := SM_Solve( term_n "!/" term_r "!" ( Instr(number, "c") ? "/(" term_n "-" term_r ")!" : "" ) )
+
 	if Instr(number, "^")
 		number := SM_Pow( SM_FromExp( SubStr(number, 1, posofpow := Instr(number, "^")-1 ) )   ,   SM_Fromexp( Substr(number, posofpow+2) ) )
 	if Instr(number, "!")
@@ -208,6 +214,7 @@ if solved =
 
 char := Substr(expression, Strlen(A_loopfield) + 1,1)
 expression := Substr(expression, Strlen(A_LoopField) + 2)	;Everything except number and char
+
 }
 return, SM_Prefect(solved)
 }
@@ -380,7 +387,7 @@ row := "0"
 zeros := ""
 if (A_loopfield)
 	loop,% (A_loopfield)
-		row := SM_Add(row, number1)
+		row := SM_Add(row, number1, 0)
 else
 	loop,% (Strlen(number1) - 1)	;one zero is already 5 lines above
 		row .= "0"

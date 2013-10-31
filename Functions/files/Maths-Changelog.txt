@@ -3,8 +3,9 @@ Avi Aryan                                                                  *
 ****************************************************************************
 
 31 / 10 / 13
-v3.1
-* Added global vars support in SM_Solve
+v3.15
+* Added global vars support in SM_Solve()
+* Added permutation and combination support in SM_Solve()
 * Fixed bug with SM_Multiply() and SM_Prefect()
 
 30 / 10 / 13
