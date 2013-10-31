@@ -3,7 +3,7 @@
 Scientific MATHS LIBRARY ( Filename = Maths.ahk )
 by Avi Aryan
 Thanks to hd0202, Uberi and sinkfaze
-v 3.0
+v 3.1
 ------------------------------------------------------------------------------
 
 DOCUMENTATION - http://avi-aryan.github.io/ahk/functions/smaths.html
@@ -15,7 +15,7 @@ FUNCTIONS
 
 * NOTES ARE PROVIDED WITH EACH FUNCTION IN THE FORM OF COMMENTS. EXPLORE
 
-* SM_Solve(Expression, AHK=false) --- Solves a Mathematical expression.
+* SM_Solve(Expression, AHK=false) --- Solves a Mathematical expression. (with extreme capabilites)
 * SM_Add(number1, number2) --- +/- massive numbers . Supports Real Nos (Everything)
 * SM_Multiply(number1, number2) --- multiply two massive numbers . Supports everything
 * SM_Divide(Dividend, Divisor, length) --- Divide two massive numbers . Supports everything . length is number of decimals smartly rounded.
@@ -75,24 +75,28 @@ SM_Solve(expression, ahk=false)
 Solves the expression in string. SM_Solve() uses the powerful functions present in the library for processing
 ahk = true will make SM_Solve() use Ahk's +-/* for processing. Will be faster
 
+* You can use global variables in expressions . To make SM_Solve see them as global vars, surround them by %..%
 * To nest expressions with brackets , you can use the obvious ( ) brackets
-* You can use numbers in sci notation directly in this function ("6.67e-11 * 4.23223e24")
+* You can use numbers in sci notation directly in this function . ("6.67e-11 * 4.23223e24")
 * You can use ! to calulate factorial ( 48! )
 * You can use ^ to calculate power ( 2.2321^12 )
 
 Example
-	msgbox,% SM_Solve("Sqrt(4) * 4! * log(100) * ( 3.43e3 - 2^5 )")
+	global someglobalvar := 26
+	msgbox,% SM_Solve("Sqrt(%someglobalvar%) * 4! * log(100) * ( 3.43e3 - 2^5 )")
 
 */
 
 SM_Solve(expression, ahk=false){
-
-static fchars := "e- e+ + - * / \" , rchars := "em ep в д е ж ж"
+;make sure e is replaced after e+ and e-
+static fchars := "e- e+ + - * / \" , rchars := "#< #> в д е ж ж"
 
 ;Check Expression for invalid
 if expression is alpha
-	return
-
+{
+	temp2 := %expression%
+	return %temp2% 			;return value of expression if it is a global variable or nothing
+}
 ;Fix Expression
 StringReplace,expression,expression,%A_space%,,All
 StringReplace,expression,expression,%A_tab%,,All
@@ -123,12 +127,12 @@ while b_pos := RegexMatch(expression, "i)[\+\-\*\\\/\^]\(")
 loop,
 {
 	if !(Instr(expression, "(")){
-		expression := SM_PowerReplace(expression, fchars, rchars, "All")
+		expression := SM_PowerReplace(expression, fchars, rchars, "All") 			;power replaces replaces those characters
 		reserve .= expression
 		break
 	}
-	temp := Substr(expression, 1, Instr(expression, "(")) ;till  4+2 + sin(
-		temp := SM_PowerReplace(temp, fchars, rchars, "All")
+	temp := Substr(expression, 1, Instr(expression, "(")) 			;till  4+2 + sin(
+		temp := SM_PowerReplace(temp, fchars, rchars, "All") 		;we dont want to replace +- inside functions
 	temp2 := SubStr(expression, Instr(expression, "(") + 1, Instr(expression, ")") - Instr(expression, "("))
 	reserve .= temp . temp2
 	expression := Substr(expression,Instr(expression, ")")+ 1)
@@ -139,38 +143,43 @@ expression := reserve
 loop, parse, expression,вдеж
 {
 ;Check for functions -- 
-firstch := Substr(A_loopfield, 1, 1)
-if firstch is not Integer
+	if Instr(A_LoopField, "(")
 	{
-	fname := Substr(A_LoopField, 1, Instr(A_loopfield,"(") - 1)	;extract func
-	ffeed := Substr(A_loopfield, Instr(A_loopfield, "(") + 1, Instr(A_loopfield, ")") - Instr(A_loopfield, "(") - 1)	;extract func feed
-	loop, parse, ffeed,`,
-	{
-		StringReplace,feed,A_loopfield,",,All
-		feed%A_index% := SM_Solve(feed)
-		totalfeeds := A_index
-	}
-	if totalfeeds = 1
-		number := %fname%(feed1)
-	else if totalfeeds = 2
-		number := %fname%(feed1, feed2)
-	else if totalfeeds = 3
-		number := %fname%(feed1, feed2, feed3)
-	else if totalfeeds = 4
-		number := %fname%(feed1, feed2, feed3, feed4)	;Add more like this if needed
+		fname := Substr(A_LoopField, 1, Instr(A_loopfield,"(") - 1)	;extract func
+		ffeed := Substr(A_loopfield, Instr(A_loopfield, "(") + 1, Instr(A_loopfield, ")") - Instr(A_loopfield, "(") - 1)	;extract func feed
+		loop, parse, ffeed,`,
+		{
+			StringReplace,feed,A_loopfield,",,All
+			feed%A_index% := SM_Solve(feed)
+			totalfeeds := A_index
+		}
+		if totalfeeds = 1
+			number := %fname%(feed1)
+		else if totalfeeds = 2
+			number := %fname%(feed1, feed2)
+		else if totalfeeds = 3
+			number := %fname%(feed1, feed2, feed3)
+		else if totalfeeds = 4
+			number := %fname%(feed1, feed2, feed3, feed4)	;Add more like this if needed
 	}
 	else
 		number := A_LoopField
 
 ;Perform the previous assignment routine
 if (char != ""){
+	;The order is important here
+	while match_pos := RegExMatch(number, "iU)%.*%", output_var)			;people should use e+ instead of e
+		output_var := Substr(output_var, 2 , -1)
+		, number := Substr(number, 1, match_pos-1) SM_Solve(%output_var%) Substr(number, match_pos+Strlen(output_var)+2)
 
+	if Instr(number, "#")
+		number := SM_PowerReplace(number, "#< #>", "e- e", "All") 	;replace # back to e
 	if Instr(number, "^")
 		number := SM_Pow( SM_FromExp( SubStr(number, 1, posofpow := Instr(number, "^")-1 ) )   ,   SM_Fromexp( Substr(number, posofpow+2) ) )
 	if Instr(number, "!")
 		number := SM_fact( SM_FromExp( Substr(number, 1, -1) ) )
-	if Instr(number, "e") 			; managing e
-		number := SM_fromExp( SM_PowerReplace(number, "em ep", "e- e+", "All") )
+	if Instr(number, "e") 			; solve e
+		number := SM_fromExp( number )
 
 	if (Ahk){
 	if char = в
@@ -193,7 +202,7 @@ if (char != ""){
 		solved := SM_Multiply(solved, number)
 	}
 }
-if solved = 
+if solved =
 	solved := number
 
 char := Substr(expression, Strlen(A_loopfield) + 1,1)
@@ -322,7 +331,7 @@ loop,
 }
 ;End of Subtract - Sum
 ;End
-if ((Ltrim(sum, "0") = "") or (sum == "-"))
+if ((sum == "-"))      ;Ltrim(sum, "0") == ""
 	sum := 0
 ;Including Decimal
 If (dec)
