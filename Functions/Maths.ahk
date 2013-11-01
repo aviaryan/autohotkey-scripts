@@ -3,7 +3,7 @@
 Scientific MATHS LIBRARY ( Filename = Maths.ahk )
 by Avi Aryan
 Thanks to hd0202, Uberi and sinkfaze
-v 3.25
+v 3.3
 ------------------------------------------------------------------------------
 
 DOCUMENTATION - http://avi-aryan.github.io/ahk/functions/smaths.html
@@ -30,6 +30,8 @@ FUNCTIONS
 * SM_Floor(number) --- Floor() . large numbers
 * SM_Ceil(number)  --- Ceil() . large number
 * SM_e(N, auto=1) --- returns e to the power N . Recommend auto=1 for speed
+* SM_Number2base(N, base) --- Converts N to base 'base'
+* SM_Base2Number(H, base) --- Converts H in base 'base' to a real number
 * SM_UniquePmt(pattern, ID, Delimiter=",")	;gives the unique permutation possible .
 
 
@@ -67,6 +69,9 @@ READ
 ;msgbox,% SM_Divide("434343455677690909087534208967834434444.5656", "8989998989898909090909009909090909090908656454520", 100)
 ;MsgBox,% SM_Multiply("111111111111111111111111111111111111111111.111","55555555555555555555555555555555555555555555.555")
 ;MsgBox,% SM_Prefect("00.002000")
+;msgbox % t:=SM_Number2Base("10485761048", 2)  ;base 2
+;msgbox % f:=SM_Number2base("10485761048", 32) ;base 32
+;msgbox % SM_Base2Number(t, 2) "`n" SM_Base2Number(f, 32)
 ;return
 
 ;###################################################################################################################################################################
@@ -970,6 +975,37 @@ SM_e(N, auto=1){
 		e := SM_Round("2.71828182845905", (F := d-N+5)>2 ? F : 2)
 	return SM_Pow(e, N)
 }
+
+/*
+SM_ base Conversion functions
+
+via Base to Number and Number to Base conversion
+Base = 16 for HexaDecimal , 2 for Binary, 8 for Octal and 10 for our own number system
+
+*/
+
+SM_Number2Base(N, base=16){
+
+	baseLen:=base<10 ? SM_Ceil((10/base)*Strlen(N)) : Strlen(N)
+
+	if SM_checkformat(N) && SM_Checkformat(base**(baseLen-1)) 				;check if N and base**base (used below) is compatitible
+		loop % baseLen
+			D:=Floor(N/(T:=base**(baseLen-A_index))),H.=!D?0:(D>9?Chr(D+87):D),N:=N-D*T
+	else
+		loop % baseLen
+			D:=SM_Floor( SM_Divide(N , T:= SM_Pow(base, baselen-A_index)) ) , H.=!D?0:(D>9?Chr(D+87):D) , N:=SM_Add( N, "-" SM_Multiply(D,T) )
+
+	return Ltrim(H,"0")
+}
+
+SM_Base2Number(H, base=16){
+	StringLower, H, H 			;convert to lowercase for Asc to work
+	S:=Strlen(H),N:=0
+	loop,parse,H
+		N := SM_Add(  N, SM_Multiply( (A_LoopField*1="")?Asc(A_LoopField)-87:A_LoopField , SM_Pow(base, S-A_index) )  )
+	return N
+}
+
 
 ;################# NON - MATH FUNCTIONS #######################################
 ;################# RESERVED ###################################################

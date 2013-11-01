@@ -3,6 +3,10 @@ Avi Aryan                                                                  *
 ****************************************************************************
 
 1 / 11 / 13
+v3.3
+* Added SM_Number2Base() and SM_Base2Number() for number base conversions
+
+1 / 11 / 13
 v3.25
 * Solve() - Added support for functions with e, c or p (See Documentation)
 * Solve() - Added native support for functions with ! or ^
