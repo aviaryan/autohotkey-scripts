@@ -2,6 +2,12 @@ Maths() CHANGELOG***********************************************************
 Avi Aryan                                                                  *
 ****************************************************************************
 
+1 / 11 / 13
+v3.25
+* Solve() - Added support for functions with e, c or p (See Documentation)
+* Solve() - Added native support for functions with ! or ^
+* Fixed bug with - power in SM_Pow()
+
 31 / 10 / 13
 v3.15
 * Added global vars support in SM_Solve()
