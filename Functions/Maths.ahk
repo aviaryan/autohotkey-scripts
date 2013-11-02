@@ -3,7 +3,7 @@
 Scientific MATHS LIBRARY ( Filename = Maths.ahk )
 by Avi Aryan
 Thanks to hd0202, Uberi and sinkfaze
-v 3.3
+v 3.35
 ------------------------------------------------------------------------------
 
 DOCUMENTATION - http://avi-aryan.github.io/ahk/functions/smaths.html
@@ -45,7 +45,7 @@ READ
 */
 
 ;msgbox % SM_Solve("%sin(1.59)% e %log(1000)%")  ;is equal to  sin(1.59) * 10^log(1000)
-;msgbox % SM_Solve("4 + ( 2*( 3+(4-2)*round(2.5) ) ) + (5c2)^(4c3)")
+;msgbox % SM_Solve("4 + ( 2*( 3+(4-2)*round(2.5) ) ) + (5c2)**(4c3)")
 ;msgbox % "The gravity on earth is: " SM_Solve("(6.67e-11 * 5.978e24) / 6.378e6^2")
 ;msgbox % Sm_fact(40) ;<--try puttin one more zero here : You will have to wait
 ;msgbox,% SM_Mod( SM_Pow(3,77), 79)
@@ -62,7 +62,7 @@ READ
 ;MsgBox,% SM_Solve("23898239238923.2382398923 + 2378237238.238239 - (989939.9939 * 892398293823)")
 ;msgbox,% SM_ToExp("0.1004354545")
 
-;var = sqrt(10!) - ( 2^5 + 5*8 )
+;var = sqrt(10!) - ( 2**5 + 5*8 )
 ;msgbox,% SM_Solve(var)
 
 ;Msgbox,% SM_Greater(18.789, 187)
@@ -87,10 +87,10 @@ ahk = true will make SM_Solve() use Ahk's +-/* for processing. Will be faster
 * To nest expressions with brackets , you can use the obvious ( ) brackets
 * You can use numbers in sci notation directly in this function . ("6.67e-11 * 4.23223e24")
 * You can use ! to calulate factorial ( 48! ) ( log(1000)! )
-* You can use ^ to calculate power ( 2.2321^12 )
+* You can use ^ or ** to calculate power ( 2.2321^12 ) ( 4**14 )
 * You can use p or c for permutation or combination
 
-* Use %...% to use functions with e, c, p . ("4^sin(3.14) + 5c%log(100)% + %sin(1.59)%e%log(1000)% + log(1000)!")
+* Use %...% to use functions with e, c, p . ("4**sin(3.14) + 5c%log(100)% + %sin(1.59)%e%log(1000)% + log(1000)!")
 
 Example
 	global someglobalvar := 26
@@ -99,7 +99,7 @@ Example
 */
 
 SM_Solve(expression, ahk=false){
-static fchars := "e- e+ ^- ^+ + - * / \" , rchars := "#< #> ^< ^> в д е ж ж"
+static fchars := "e- e+ **- ** **+ ^- ^+ + - * / \" , rchars := "#< #> ^< ^> ^> ^< ^> в д е ж ж"
 
 ;Check Expression for invalid
 if expression is alpha
@@ -107,9 +107,12 @@ if expression is alpha
 	temp2 := %expression%
 	return %temp2% 			;return value of expression if it is a global variable or nothing
 }
-if expression is number
+else if expression is number
+{
 	if !Instr(expression, "e")
 		return expression
+}
+
 
 ;Fix Expression
 StringReplace,expression,expression,%A_space%,,All
@@ -154,10 +157,12 @@ loop,
 ;
 expression := reserve
 
+; The final solving will be done now
 loop, parse, expression,вдеж
 {
+
 ;Check for functions --
-	if RegExMatch(A_LoopField, "iU)^[a-z%]+\(.*\)$") 				;Ungreedy ensures throwing cases like sin(45)^sin(95)
+	if RegExMatch(A_LoopField, "iU)^[a-z0-9_]+\(.*\)$") 				;Ungreedy ensures throwing cases like sin(45)^sin(95)
 	{
 		fname := Substr(A_LoopField, 1, Instr(A_loopfield,"(") - 1)	;extract func
 		ffeed := Substr(A_loopfield, Instr(A_loopfield, "(") + 1, Instr(A_loopfield, ")") - Instr(A_loopfield, "(") - 1)	;extract func feed
@@ -167,7 +172,12 @@ loop, parse, expression,вдеж
 			feed%A_index% := SM_Solve(feed)
 			totalfeeds := A_index
 		}
-		if totalfeeds = 1
+
+		if fname = SM_toExp
+			outExp := 1 				; now output will be in Exp , set feed1 as the number
+			, number := feed1
+
+		else if totalfeeds = 1
 			number := %fname%(feed1)
 		else if totalfeeds = 2
 			number := %fname%(feed1, feed2)
@@ -175,17 +185,21 @@ loop, parse, expression,вдеж
 			number := %fname%(feed1, feed2, feed3)
 		else if totalfeeds = 4
 			number := %fname%(feed1, feed2, feed3, feed4)	;Add more like this if needed
+
+		function := 1
 	}
 	else
-		number := A_LoopField
+		number := A_LoopField , function := 0
 
 ;Perform the previous assignment routine
-if (char != ""){
+if (char != "") {
 	;The order is important here
+	if (!function) {
+
 	while match_pos := RegExMatch(number, "iU)%.*%", output_var)
 		output_var := Substr(output_var, 2 , -1)
 		, number := Substr(number, 1, match_pos-1)   SM_Solve(Instr(output_var, "(") ? output_var : %output_var%)   Substr(number, match_pos+Strlen(output_var)+2)
-	;msgbox % number
+
 	if Instr(number, "#") or Instr(number, "^")
 		number := SM_PowerReplace(number, "#< #> ^> ^<", "e- e ^ ^-", "All") 	;replace #,^ back to e and ^
 
@@ -199,8 +213,9 @@ if (char != ""){
 		number := SM_Pow( SM_Solve( SubStr(number, 1, posofpow := Instr(number, "^")-1 ) )   ,   SM_Solve( Substr(number, posofpow+2) ) )
 	else if Instr(number, "!")
 		number := SM_fact( SM_Solve( Substr(number, 1, -1) ) )
-	else if Instr(number, "e") 			; solve e
+	else if Instr(number, "e") 				; solve e
 		number := SM_fromExp( number )
+	}
 
 	if (Ahk){
 	if char = в
@@ -230,7 +245,7 @@ char := Substr(expression, Strlen(A_loopfield) + 1,1)
 expression := Substr(expression, Strlen(A_LoopField) + 2)	;Everything except number and char
 
 }
-return, SM_Prefect(solved)
+return, outExp ? SM_ToExp( solved ) : SM_Prefect( solved )
 }
 
 ;###############################################################################################################################
@@ -1057,9 +1072,9 @@ SM_PowerReplace(input, find, replace, options="All"){
 	return Input
 }
 
+
 SM_FixExpression(expression){
 expression := Rtrim(expression, "+-=*/\^")
-
 StringReplace,expression,expression,--,+,All
 StringReplace,expression,expression,-+,-,All
 StringReplace,expression,expression,+-,-,All
@@ -1116,6 +1131,7 @@ StringReplace,expression,expression,--,+,All
 StringReplace,expression,expression,-+,-,All
 StringReplace,expression,expression,+-,-,All
 StringReplace,expression,expression,++,+,All
+
 return, expression
 }
 

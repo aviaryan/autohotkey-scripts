@@ -2,6 +2,11 @@ Maths() CHANGELOG***********************************************************
 Avi Aryan                                                                  *
 ****************************************************************************
 
+2 / 11 / 13
+v3.35
+* Made SM_Solve() support ** as power-identifier
+* Fixed a bug with SM_ToExp() in SM_Solve()
+
 1 / 11 / 13
 v3.3
 * Added SM_Number2Base() and SM_Base2Number() for number base conversions
