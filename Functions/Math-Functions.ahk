@@ -1,6 +1,6 @@
 ﻿/*
 ++++++++++++++++++++++
-Math_Functions v0.12  +
+Math_Functions v0.13  +
 -----------------------
 by Avi Aryan          +
 ++++++++++++++++++++++
@@ -293,11 +293,11 @@ Prefect(number){
 ;##################################################
 
 /*
-dec2frac(number)
+dec2frac(number)                    by Avi Aryan
    Converts decimal to fraction
 
 Returns >
-   space separated
+   space separated values of numerator and denominator
 */
 
 dec2frac(number){
@@ -384,6 +384,45 @@ Antilog(number, basetouse=10){
    SetFormat, floatfast, %oldformat%
    return, toreturn
 }
+
+;#################################################
+
+/*
+IsPrime(N)        By Avi
+
+   Returns 1 if the number is prime 
+*/
+
+IsPrime(N){
+   static 1 := 37 
+   , 2 := 237
+   , 3 := 37 
+   , 4 := 237
+   , 5 := 357
+   , 6 := 237
+   , 7 := 37
+   , 8 := 237
+   , 9 := 37
+   , P := {1: 0, 2: 1, 3: 1, 4: 0, 5: 1, 6: 0, 7: 1, 8: 0, 9: 0}
+
+   if P[N] != ""
+      return P[N]
+
+   if !Mod(N, 2)
+      return 0
+
+   srt := Floor(Sqrt(N)) , Lst := Substr(N,0) , Frt := Floor(srt/10) , var := %Lst%
+
+   loop, parse, var
+   {
+      j := A_LoopField
+      loop % Frt+1
+         if !Mod(N, (A_index-1)*10+j)
+            return 0
+   }
+   return 1
+}
+
 
 ;##################################################
 
