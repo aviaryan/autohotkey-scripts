@@ -21,6 +21,24 @@ Scientific Maths (Maths.ahk) - https://github.com/Avi-Aryan/Avis-Autohotkey-Repo
 
 */
 
+;SetBatchLines, -1
+
+#NoEnv
+SetBatchLines, -1
+
+a := A_TickCount
+Loop, 10000 {
+    if (IsPrime(A_Index))
+        Primes .= A_Index ","
+}
+msgbox % A_tickcount-a
+
+b := A_TickCount
+t := ISprime(6746328388801)
+msgbox % A_TickCount - b
+
+msgbox % "Primes from 1 to 10000`n" Primes
+
 ;##################################################
 
 /*
@@ -394,31 +412,22 @@ IsPrime(N)        By Avi
 */
 
 IsPrime(N){
-   static 1 := 37 
-   , 2 := 237
-   , 3 := 37 
-   , 4 := 237
-   , 5 := 357
-   , 6 := 237
-   , 7 := 37
-   , 8 := 237
-   , 9 := 37
-   , P := {1: 0, 2: 1, 3: 1, 4: 0, 5: 1, 6: 0, 7: 1, 8: 0, 9: 0}
-
-   if P[N] != ""
-      return P[N]
-
-   if !Mod(N, 2)
+   if N in 2,3,5,7
+      return 1
+   else if !Mod(Lst := Substr(N, 0), 2) or (Lst = 5) or !Mod(N,3) or ( Mod(N-1, 6) && Mod(N+1, 6) )
       return 0
 
-   srt := Floor(Sqrt(N)) , Lst := Substr(N,0) , Frt := Floor(srt/10) , var := %Lst%
+   Frt := Floor( Floor(Sqrt(N)) / 10 )
 
-   loop, parse, var
+   loop % Frt+1
    {
-      j := A_LoopField
-      loop % Frt+1
-         if !Mod(N, (A_index-1)*10+j)
-            return 0
+      if !Mod(N, A_index*10-7)  ;-10+3
+         return 0
+      if !Mod(N, A_index*10-3)  ;-10+7
+         return 0
+      if !Mod(N, A_index*10-9)   ;-10+1
+        if A_index >1
+          return 0
    }
    return 1
 }

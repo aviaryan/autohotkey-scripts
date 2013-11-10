@@ -2,8 +2,10 @@
 
 Scientific MATHS LIBRARY ( Filename = Maths.ahk )
 by Avi Aryan
-Thanks to hd0202, Uberi and sinkfaze
-v 3.35
+v3.4
+
+Thanks to hd0202, smorgasbord, Uberi and sinkfaze
+Special thanks to smorgasbord for the factorial function
 ------------------------------------------------------------------------------
 
 DOCUMENTATION - http://avi-aryan.github.io/ahk/functions/smaths.html
@@ -47,7 +49,7 @@ READ
 ;msgbox % SM_Solve("%sin(1.59)% e %log(1000)%")  ;is equal to  sin(1.59) * 10^log(1000)
 ;msgbox % SM_Solve("4 + ( 2*( 3+(4-2)*round(2.5) ) ) + (5c2)**(4c3)")
 ;msgbox % "The gravity on earth is: " SM_Solve("(6.67e-11 * 5.978e24) / 6.378e6^2")
-;msgbox % Sm_fact(40) ;<--try puttin one more zero here : You will have to wait
+;msgbox % Sm_fact(40) ;<--try puttin one more zero here
 ;msgbox,% SM_Mod( SM_Pow(3,77), 79)
 ;msgbox,% SM_Round("124389438943894389430909430438098232323.427239238023823923984",4)
 ;msgbox,% SM_ToExp("328923823982398239283923.238239238923", 3)
@@ -905,25 +907,50 @@ SM_fact(number)
 
 Gives factorial of number of any size. Try SM_fact(200) 	:-;
 
+;--- Edit
+
+Now SM_Fact() uses smorgasboard method for faster results
+	http://ahkscript.org/boards/viewtopic.php?f=22&t=176&p=4786#p4781
+
 */
 
-SM_fact(number){
-	toreturn := tn := 1 , loopindex := 0
-	while ( number > loopindex )
+SM_fact(N){
+	local res := 1 , k := 1 , carry := 0
+
+	N -= 1
+	loop % N
 	{
-		while SM_checkformat(tn)
+		StringSplit, l_times, res
+		index := l_times0
+		k := A_index + 1
+
+		Loop %index%
 		{
-			t_tn := tn , loopindex+=1 , tn := tn * loopindex
-			if !SM_checkformat(tn) 			;check if tn has increased above AHK limit
-				break 						;break and leave the old value of t_tn
-			if ( loopindex == number ) {
-				t_tn := tn , theend := 1
-				break
+			digit := k * l_times%index% + carry
+			if ( digit > 9 )
+			{
+			    carry := RegExReplace(digit, "(.*)(\d)", "$1")
+			    digit := RegExReplace(digit, "(.*)(\d)", "$2")
 			}
+			else
+			    carry := 0
+			r := digit r
+			index --
 		}
-		toreturn := SM_Multiply(toreturn, t_tn) , tn := 1 , loopindex := theend ? loopindex+1 : loopindex-1
+
+		if ( carry != 0 )
+			final := carry r
+		else
+		    final := r
+
+		res := final
+
+		digit := index := final := r =
+		r := ""
+		carry := 0
 	}
-	return toreturn
+
+	return final ? final : 1
 }
 
 /*

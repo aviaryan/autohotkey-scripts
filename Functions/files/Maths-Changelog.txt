@@ -2,6 +2,10 @@ Maths() CHANGELOG***********************************************************
 Avi Aryan                                                                  *
 ****************************************************************************
 
+10 / 11 / 13
+v3.4
+* Fixed a bug with SM_Fact() and made it extremely faster (thanks to smorgasbord)
+
 2 / 11 / 13
 v3.35
 * Made SM_Solve() support ** as power-identifier
