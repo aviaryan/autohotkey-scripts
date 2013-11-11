@@ -2,7 +2,7 @@
 
 Scientific MATHS LIBRARY ( Filename = Maths.ahk )
 by Avi Aryan
-v3.4
+v3.41
 
 Thanks to hd0202, smorgasbord, Uberi and sinkfaze
 Special thanks to smorgasbord for the factorial function
@@ -460,6 +460,9 @@ StringReplace,number1,number1,-
 StringReplace,number2,number2,-
 ;Perfect them
 number1 := SM_Prefect(number1) , number2 := SM_Prefect(number2)
+if !number2 			; return blank if denom is 0
+	return
+
 ;Remove Decimals
 dec := 0
 if Instr(number1, ".")
