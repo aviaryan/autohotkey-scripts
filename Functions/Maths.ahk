@@ -225,7 +225,11 @@ if (char != "") {
 	else if char = ¤
 		solved := solved - (number)
 	else if char = ¦
+	{
+		if !number
+			return
 		solved := solved / (number)
+	}
 	else if char = ¥
 		solved := solved * (number)
 	}else{
@@ -235,7 +239,11 @@ if (char != "") {
 	else if char = ¤
 		solved := SM_Add(solved,"-" . number)
 	else if char = ¦
+	{
+		if !number
+			return
 		solved := SM_Divide(solved, number)
+	}
 	else if char = ¥
 		solved := SM_Multiply(solved, number)
 	}
@@ -460,6 +468,10 @@ StringReplace,number1,number1,-
 StringReplace,number2,number2,-
 ;Perfect them
 number1 := SM_Prefect(number1) , number2 := SM_Prefect(number2)
+
+;Cases
+;if !number1 && !number2
+;	return 1
 if !number2 			; return blank if denom is 0
 	return
 
