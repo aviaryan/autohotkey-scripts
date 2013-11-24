@@ -2,7 +2,7 @@
 
 Scientific MATHS LIBRARY ( Filename = Maths.ahk )
 by Avi Aryan
-v3.41
+v3.43
 
 Thanks to hd0202, smorgasbord, Uberi and sinkfaze
 Special thanks to smorgasbord for the factorial function
@@ -46,7 +46,7 @@ READ
 
 */
 
-;msgbox % SM_Solve("%sin(1.59)% e %log(1000)%")  ;is equal to  sin(1.59) * 10^log(1000)
+;msgbox % SM_Solve("%sin(1.59)% e %log(1000)%")  ;is equal to  sin(1.59) e log(1000)  = 999.816
 ;msgbox % SM_Solve("4 + ( 2*( 3+(4-2)*round(2.5) ) ) + (5c2)**(4c3)")
 ;msgbox % "The gravity on earth is: " SM_Solve("(6.67e-11 * 5.978e24) / 6.378e6^2")
 ;msgbox % Sm_fact(40) ;<--try puttin one more zero here
@@ -142,6 +142,7 @@ while b_pos := RegexMatch(expression, "i)[\+\-\*\\\/\^]\(")
 	expression := Substr(expression, 1, b_pos) SM_Solve( Substr(expression, b_pos+2, end_pos-1) ) Substr(expression, end_pos+b_pos+2)
 }
 ;Changing +,-,e-,e+ and all signs to different things
+expression := SM_FixExpression(expression) 		;FIX again after solving brackets
 
 loop,
 {
@@ -158,7 +159,6 @@ loop,
 }
 ;
 expression := reserve
-
 ; The final solving will be done now
 loop, parse, expression,вдеж
 {
@@ -197,14 +197,12 @@ loop, parse, expression,вдеж
 if (char != "") {
 	;The order is important here
 	if (!function) {
-
 	while match_pos := RegExMatch(number, "iU)%.*%", output_var)
 		output_var := Substr(output_var, 2 , -1)
 		, number := Substr(number, 1, match_pos-1)   SM_Solve(Instr(output_var, "(") ? output_var : %output_var%)   Substr(number, match_pos+Strlen(output_var)+2)
 
 	if Instr(number, "#") or Instr(number, "^")
 		number := SM_PowerReplace(number, "#< #> ^> ^<", "e- e ^ ^-", "All") 	;replace #,^ back to e and ^
-
 	;Symbols
 	;As all use SM_Solve() , else-if is OK
 	if ( p := Instr(number, "c") ) or ( p := p + Instr(number, "p") ) 		;permutation or combination
@@ -930,7 +928,7 @@ Now SM_Fact() uses smorgasboard method for faster results
 */
 
 SM_fact(N){
-	local res := 1 , k := 1 , carry := 0
+	res := 1 , k := 1 , carry := 0
 
 	N -= 1
 	loop % N
@@ -1126,8 +1124,11 @@ StringReplace,expression,expression,++,+,All
 if expression=
 	return
 
-if (Substr(expression, 1, 1) != "+") or (Substr(expression, 1, 1) != "-")
-	expression := "+" expression
+;if (Substr(expression, 1, 1) != "+") or (Substr(expression, 1, 1) != "-")
+if Substr(expression, 1, 1) == "-"
+	 expression := "0" expression 			;make it 0 - 10
+else expression := "+" expression
+
 loop,
 {
 if Instr(expression, "*-"){
