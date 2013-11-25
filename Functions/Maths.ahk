@@ -78,6 +78,8 @@ READ
 
 ;###################################################################################################################################################################
 
+;#Include, Maths.ahk
+
 /*
 
 SM_Solve(expression, ahk=false)
@@ -102,6 +104,9 @@ Example
 
 SM_Solve(expression, ahk=false){
 static fchars := "e- e+ **- ** **+ ^- ^+ + - * / \" , rchars := "#< #> ^< ^> ^> ^< ^> ¢ ¤ ¥ ¦ ¦"
+;Reject invalid
+if expression=
+	return
 
 ;Check Expression for invalid
 if expression is alpha
@@ -120,10 +125,6 @@ else if expression is number
 StringReplace,expression,expression,%A_space%,,All
 StringReplace,expression,expression,%A_tab%,,All
 expression := SM_Fixexpression(expression)
-
-;Reject invalid
-if expression=
-	return
 
 ; Solving Brackets first
 while b_pos := RegexMatch(expression, "i)[\+\-\*\\\/\^]\(")
