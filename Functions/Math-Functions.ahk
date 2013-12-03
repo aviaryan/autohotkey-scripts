@@ -21,24 +21,7 @@ Scientific Maths (Maths.ahk) - https://github.com/Avi-Aryan/Avis-Autohotkey-Repo
 
 */
 
-;SetBatchLines, -1
-
-#NoEnv
-SetBatchLines, -1
-
-a := A_TickCount
-Loop, 10000 {
-    if (IsPrime(A_Index))
-        Primes .= A_Index ","
-}
-msgbox % A_tickcount-a
-
-b := A_TickCount
-t := ISprime(6746328388801)
-msgbox % A_TickCount - b
-
-msgbox % "Primes from 1 to 10000`n" Primes
-
+;#include %A_ScriptDir%/maths.ahk
 ;##################################################
 
 /*
@@ -139,8 +122,8 @@ Roots(expression){		;Enter a, b, c for quad. eqn ------  a, b, c, d for cubic eq
 		limit := limit + Abs(A_loopfield) , nofterms := A_index
 	}
 
-	loop,% (nofterms - 1)	;not including contsant
-		term .= Substr(coff%A_index%, 1, 1) "[" Substr(coff%A_index%,2) . " * Pow(x, " . (nofterms - A_index) . ")" "]"
+	loop % (nofterms - 1)	;not including contsant
+		term .= Substr(coff%A_index%, 1, 1) "(" Substr(coff%A_index%,2) . " * SM_Pow(x, " . (nofterms - A_index) . ")" ")"
 	
 	term .= coff%nofterms% , plot := limit
 	
@@ -151,7 +134,8 @@ Roots(expression){		;Enter a, b, c for quad. eqn ------  a, b, c, d for cubic eq
 
 	positive := true
 	StringReplace,expression,term,x,%plot%,All	;getting starting value
-	if Instr(%sm_solve%(expression), "-")
+
+	if Instr(%sm_solve%(expression, 1), "-")
 		positive := false
 
 	while (plot >= -limit)	;My theorem - Safe Range
@@ -166,7 +150,6 @@ Roots(expression){		;Enter a, b, c for quad. eqn ------  a, b, c, d for cubic eq
 				if (Instr(roots, ",", false, 1, nofterms - 1))	;if all roots have already been found, go out
 					break
 				continue
-				msgbox,% plot
 			}
 		}
 		else{
@@ -411,26 +394,51 @@ IsPrime(N)        By Avi
    Returns 1 if the number is prime 
 */
 
-IsPrime(N){
-   if N in 2,3,5,7
-      return 1
-   else if !Mod(Lst := Substr(N, 0), 2) or (Lst = 5) or !Mod(N,3) or ( Mod(N-1, 6) && Mod(N+1, 6) )
-      return 0
-
-   Frt := Floor( Floor(Sqrt(N)) / 10 )
-
-   loop % Frt+1
-   {
-      if !Mod(N, A_index*10-7)  ;-10+3
-         return 0
-      if !Mod(N, A_index*10-3)  ;-10+7
-         return 0
-      if !Mod(N, A_index*10-9)   ;-10+1
-        if A_index >1
-          return 0
-   }
-   return 1
+IsPrime(n) {         ;by kon
+    if (n < 2)
+        return, 0
+    else if (n < 4)
+        return, 1
+    else if (!Mod(n, 2))
+        return, 0
+    else if (n < 9)
+        return 1
+    else if (!Mod(n, 3))
+        return, 0
+    else {
+        r := Floor(Sqrt(n))
+        f := 5
+        while (f <= r) {
+            if (!Mod(n, f))
+                return, 0
+            if (!Mod(n, (f + 2)))
+                return, 0
+            f += 6
+        }
+        return, 1
+    }
 }
+
+;IsPrime(N){
+;   if N in 2,3,5,7
+;      return 1
+;   else if !Mod(Lst := Substr(N, 0), 2) or (Lst = 5) or !Mod(N,3) or ( Mod(N-1, 6) && Mod(N+1, 6) )
+;      return 0
+
+;   Frt := Floor( Floor(Sqrt(N)) / 10 )
+
+;   loop % Frt+1
+;   {
+;      if !Mod(N, A_index*10-7)  ;-10+3
+;         return 0
+;      if !Mod(N, A_index*10-3)  ;-10+7
+;         return 0
+;      if !Mod(N, A_index*10-9)   ;-10+1
+;        if A_index >1
+;          return 0
+;   }
+;   return 1
+;}
 
 
 ;##################################################
