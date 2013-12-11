@@ -114,8 +114,8 @@ return
 listfunc(file){
 	fileread, z, % file
 	StringReplace, z, z, `r, , All			; important
-	z := RegExReplace(z, "iU)/\*.*\*/", "") ; block comments
 	z := RegExReplace(z, "mU)""[^`n]*""", "") ; strings
+	z := RegExReplace(z, "iU)/\*.*\*/", "") ; block comments
 	z := RegExReplace(z, "m);[^`n]*", "")  ; single line comments
 	p:=1
 	while q:=RegExMatch(z, "iU)`n[^ `t`n,;``\(\):=\?]+\(.*\)[ `t`n]*{", o, p)
