@@ -180,6 +180,9 @@ Roots(expression){		;Enter a, b, c for quad. eqn ------  a, b, c, d for cubic eq
 	return, Rtrim(roots, ",")
 }
 
+
+;SM_Solve4Roots()
+
 ;##################################################
 
 /*

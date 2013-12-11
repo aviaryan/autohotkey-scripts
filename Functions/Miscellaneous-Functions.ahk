@@ -2,7 +2,7 @@
 ################################################################
 MY MISCELLANEOUS FUNCTIONS LIBRARY          
 	Avi Aryan
-	avi-aryan.github.io/Autohotkey.html              
+	avi.uco.im/ahk             
 	Licensed under Apache License v2.0         
 ################################################################
 */
@@ -104,6 +104,28 @@ GetFolder()
 	return v
 	}
 }
+
+return
+;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+; Lists User made functions in a file
+; msgbox % listfunc(A_scriptfullpath)
+
+listfunc(file){
+	fileread, z, % file
+	StringReplace, z, z, `r, , All			; important
+	z := RegExReplace(z, "iU)/\*.*\*/", "") ; block comments
+	z := RegExReplace(z, "mU)""[^`n]*""", "") ; strings
+	z := RegExReplace(z, "m);[^`n]*", "")  ; single line comments
+	p:=1
+	while q:=RegExMatch(z, "iU)`n[^ `t`n,;``\(\):=\?]+\(.*\)[ `t`n]*{", o, p)
+		lst .= Substr( RegExReplace(o, "\(.*", ""), 2) "`n"
+		, p := q+Strlen(o)-1
+
+	Sort, lst
+	return lst
+}
+
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 /*
@@ -172,6 +194,8 @@ SuperInstr(Hay, Needles, return_min=true, Case=false, Startpoint=1, Occurrence=1
 	}
 	else
 	{
+		if Needles=
+			return Strlen(Hay)
 		loop, parse, Needles,|
 			if ( (var := Instr(Hay, A_LoopField, Case, startpoint, Occurrence)) > pos )
 				pos := var
