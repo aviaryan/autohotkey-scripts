@@ -7,6 +7,7 @@ MY MISCELLANEOUS FUNCTIONS LIBRARY
 ################################################################
 */
 
+msgbox % listfunc(A_ScriptFullPath)
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 /*
@@ -116,8 +117,8 @@ listfunc(file){
 	z := RegExReplace(z, "mU)""[^`n]*""", "") ; strings
 	z := RegExReplace(z, "iU)/\*.*\*/", "") ; block comments
 	z := RegExReplace(z, "m);[^`n]*", "")  ; single line comments
-	p:=1
-	while q:=RegExMatch(z, "iU)`n[^ `t`n,;``\(\):=\?]+\(.*\)[ `t`n]*{", o, p)
+	p:=1 , z := "`n" z
+	while q:=RegExMatch(z, "iU)`n[^ `t`n,;``\(\):=\?]+\([^`n]*\)[ `t`n]*{", o, p)
 		lst .= Substr( RegExReplace(o, "\(.*", ""), 2) "`n"
 		, p := q+Strlen(o)-1
 
