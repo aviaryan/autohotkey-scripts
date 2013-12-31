@@ -1,12 +1,14 @@
 /*
 
-stealFunc v0.01
+stealFunc v0.1
 	by Avi Aryan (http://avi.uco.im)
+
+DOC - http://avi.uco.im/ahk/tools/stealfunc.html
 
 steals only the needed functions from a function library or script
 
 EXAMPLE USAGE-
-	Clipboard := stealFunc("Gdip_Startup`nGdip_SetBitmaptoClipboard`nGdip_CreateBitmapFromFile`nGdip_DisposeImage`nGdip_Shutdown", "<path_to_gdip_lib>")
+	Clipboard := stealFunc("Gdip_Startup`nGdip_SetBitmaptoClipboard`nGdip_CreateBitmapFromFile`nGdip_DisposeImage`nGdip_Shutdown", "<path_to_gdip_lib>", 1)
 
 */
 
@@ -15,11 +17,26 @@ stealFunc_gui()
 return
 
 
-stealFunc(funcs, file){
+stealFunc(funcs, file, islist=1){
+	; islist parameter should be 1 if funcs is a list of functions as in the above example 
+	; and should be 0 (false) if funcs is a snippet containing a working script.
+	; The snippet should be a valid script for which 'stealing' is to be done.
+
 	flist := stealFunc_listfunc(file, z)
 	included := " " , stolen := ""
-	loop, parse, funcs, `n
-		stealFunc_extractfunc(z, A_LoopField, flist, stolen, included)
+
+	if !islist
+	{ 
+		flines := " " , stealFunc_listfunc(funcs, snippet, flines) 	; get lines having function
+		loop, parse, snippet, `n
+			if !Instr(flines, " " A_index " ") 		; remove those lines
+				snippetN .= A_LoopField "`n"
+		snippet := Substr(snippetN, 1, -1)
+		stealFunc_extractUsedfunc( stealFunc_compactFile(file), snippet, flist, stolen, included )
+	}
+	else
+		loop, parse, funcs, `n
+			stealFunc_extractfunc(z, A_LoopField, flist, stolen, included)
 	return stolen
 }
 
@@ -33,7 +50,7 @@ stealFunc_IsDefault(func){ ; not using IsFunc()
 	return Instr(l, A_Space func A_Space)
 }
 
-stealFunc_listfunc(file, byref compactfile="")
+stealFunc_listfunc(file, byref compactfile="", byref function_lines="")
 {
 	z := compactfile := stealFunc_compactFile(file)
 	z := RegExReplace(z, "mU)""[^`n]*""", "") ; strings
@@ -76,6 +93,8 @@ stealFunc_listfunc(file, byref compactfile="")
 
 		lst .= "`n" Substr( RegExReplace(o, "\(.*", ""), 2) " " start_lineno " " end_lineno
 		, p := q+Strlen(o)-1
+
+		function_lines .= start_lineno " " end_lineno " " 		; lines having func decl in the compacted script file
 	}
 	return lst "`n" 		; append `n to make a systematic strcuture
 }
@@ -102,10 +121,17 @@ stealFunc_extractfunc(compactfile, fname, flist, byref stolen, byref included){
 	stolen := stolen "`n" r , included .= fname " "
 	; recursive processing
 	rs := Substr(r, Instr(r,"`n")+1)
-	rs := RegExReplace(rs, "mU)""[^`n]*""", "") ; strings
-	rs := RegExReplace(rs, "m);[^`n]*", "")  ; single line comments  -- block comment is already removed
+	stealFunc_extractUsedfunc(compactfile, rs, flist, stolen, included)
+}
+
+; extracts used functions from a AutoHotkey script snippet
+stealFunc_extractUsedfunc(compactfile, snippet, flist, byref stolen, byref included){
 	p := 1
-	while q:=RegExMatch(rs, "iU)[^ !`t`n,;``\(\):=\?]+\(.*\)", o, p)
+
+	snippet := RegExReplace(snippet, "mU)""[^`n]*""", "") ; strings
+	snippet := RegExReplace(snippet, "m);[^`n]*", "")  ; single line comments  -- block comment should be already removed
+
+	while q:=RegExMatch(snippet, "iU)[^ !`t`n,;``\(\):=\?]+\(.*\)", o, p)
 	{
 		fn := Trim(RegExReplace(o, "\(.*", ""))
 		p := q+Strlen(o)-1
@@ -119,19 +145,24 @@ stealFunc_extractfunc(compactfile, fname, flist, byref stolen, byref included){
 ; remove if not needed
 
 stealFunc_gui(){
-	global list, file, out
+	global gui_list, gui_file, gui_out, gui_islist
 
 	w := A_ScreenWidth / 2
 	Gui, stealFunc:new
 	Gui, font, s12 Bold
-	Gui, Add, Text, x0 y0, StealFunc
+	Gui, Add, Text, x0 y0, StealFunc v0.1
 	Gui, font, s10 Normal
-	Gui, Add, Text, y+20 x7 w150, List of functions to extract
-	Gui, Add, Edit, % "x+10 w" w-200 " vlist +multi r5", 
+	Gui, Add, Text, y+20 x7 w150, List of functions OR`nsnippet to extract for
+	Gui, Add, Checkbox, xp yp+60 vgui_islist, Input is List
+	Gui, font, s7
+	Gui, Add, Edit, % "x167 yp-60 w" w-200 " vgui_list +multi r5", 
+	Gui, font, s10
 	Gui, Add, Text, y+30 x7 w150, Input script file (Drop)
-	Gui, Add, Edit, % "x+10 w" w-200 " vfile"
+	Gui, Add, Edit, % "x+10 w" w-200 " vgui_file"
 	Gui, Add, Text, y+30 x7 w150, Output
-	Gui, Add, Edit, % "x+10 w" w-200 " vout +multi r10"
+	Gui, font, s7
+	Gui, Add, Edit, % "x+10 w" w-200 " vgui_out +multi r10"
+	Gui, font, s10
 	Gui, Add, Button, x7 y+40, Start
 	Gui, font, s9, Consolas
 	Gui, Show, w%w%, stealFunc
@@ -143,10 +174,10 @@ stealFuncGuiClose:
 
 stealFuncButtonStart:
 	Gui, stealFunc:submit, nohide
-	if FileExist(file)
+	if FileExist(gui_file)
 	{
-		out := stealFunc(list, file)
-		GuiControl, stealFunc:, out, % out
+		gui_out := stealFunc(gui_list, gui_file, gui_islist)
+		GuiControl, stealFunc:, gui_out, % gui_out
 	}
 	else Msgbox, Enter a valid script file path
 	return
@@ -157,7 +188,7 @@ stealFuncGuiDropFiles:
 		file := A_loopfield
 		break
 	}
-	GuiControl, stealFunc:, file, % file
+	GuiControl, stealFunc:, gui_file, % file
 	return
 
 
