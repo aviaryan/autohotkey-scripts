@@ -1,6 +1,6 @@
 /*
 
-stealFunc v0.1
+stealFunc v0.12
 	by Avi Aryan (http://avi.uco.im)
 
 DOC - http://avi.uco.im/ahk/tools/stealfunc.html
@@ -10,7 +10,20 @@ steals only the needed functions from a function library or script
 EXAMPLE USAGE-
 	Clipboard := stealFunc("Gdip_Startup`nGdip_SetBitmaptoClipboard`nGdip_CreateBitmapFromFile`nGdip_DisposeImage`nGdip_Shutdown", "<path_to_gdip_lib>", 1)
 
+
+
+Changelog:-
+	v0.12
+	* added `r to the output
+	* little bug fix with block comments
+	* fixed bugs with nested functions
+	v0.1
+	* added option to input script in addition to list
+	v0.01
+	* init
+
 */
+
 
 ; gui function is at the very last - remove if not needed
 stealFunc_gui()
@@ -35,8 +48,9 @@ stealFunc(funcs, file, islist=1){
 		stealFunc_extractUsedfunc( stealFunc_compactFile(file), snippet, flist, stolen, included )
 	}
 	else
-		loop, parse, funcs, `n
+		loop, parse, funcs, `n, `r
 			stealFunc_extractfunc(z, A_LoopField, flist, stolen, included)
+	StringReplace, stolen, stolen, `n, `r`n, All
 	return stolen
 }
 
@@ -106,7 +120,7 @@ stealFunc_compactFile(file){
 		FileRead, z, % file
 	else z := file
 	StringReplace, z, z, `r, , All
-	return z := RegExReplace(z, "iU)`n/\*.*`n\*/", "") ; block comments
+	return z := RegExReplace(z, "iU)`n[ `t]*?/\*.*`n[ `t]*?\*/", "") ; block comments
 }
 
 ; extracts functions from compact file
@@ -134,7 +148,7 @@ stealFunc_extractUsedfunc(compactfile, snippet, flist, byref stolen, byref inclu
 	while q:=RegExMatch(snippet, "iU)[^ !`t`n,;``\(\):=\?]+\(.*\)", o, p)
 	{
 		fn := Trim(RegExReplace(o, "\(.*", ""))
-		p := q+Strlen(o)-1
+		p := q+( Instr(o, "(") ? Instr(o, "(")+1 : Strlen(o) )-1
 		if ( fn == "" ) or stealFunc_IsDefault(fn)
 			Continue
 		stealFunc_extractfunc(compactfile, fn, flist, stolen, included)
@@ -150,7 +164,7 @@ stealFunc_gui(){
 	w := A_ScreenWidth / 2
 	Gui, stealFunc:new
 	Gui, font, s12 Bold
-	Gui, Add, Text, x0 y0, StealFunc v0.1
+	Gui, Add, Text, x0 y0, StealFunc v0.12
 	Gui, font, s10 Normal
 	Gui, Add, Text, y+20 x7 w150, List of functions OR`nsnippet to extract for
 	Gui, Add, Checkbox, xp yp+60 vgui_islist, Input is List
