@@ -1,6 +1,6 @@
 /*
 #####################
-GoTo v0.9
+GoTo v1.0
 Avi Aryan
 #####################
 
@@ -8,26 +8,28 @@ Go To functions, labels, hotkeys and hotstrings in any editor.
 The only requirement is that the Editor shows file full path in Title Bar and has a Goto (Ctrl+G) option.
 Examples of such editors - Notepad++, Sublime Text, PSPad, ConTEXT
 
-Any script which shows the full path and has a goto option is vaild
+Any script which shows the full path and has a goto option is vaild !!
 
 */
 
-;------- CONFIGURE -------------------
-GoTo_AutoExecute(1, A_temp)		;1 = Gui is movable, A_temp = Working Directory
+global GOTOS := {}
 
+;------- CONFIGURE -------------------
+GoTo_AutoExecute(1)		;1 = Gui is movable
+return
 #if GetActiveFile()		;If ahk window is active
 	F7::Goto_Main_Gui()
 #if
 ;-------------------------------------
-return
 
-GoTo_AutoExecute(resizable=true, WorkingDir=""){
+
+
+GoTo_AutoExecute(resizable=true){
 global
 
-	SetWorkingDir,% ( WorkingDir == "" ) ? A_scriptdir : WorkingDir
+	GOTOS := {}
+	GOTOS.filelist := {}
 	SetBatchLines, -1
-	FileCreateDir, gotoCache
-	FileDelete, gotoCache\*.gotolist
 	SetTimer, filecheck, 200
 	goto_cache := {}
 	if resizable
@@ -44,9 +46,9 @@ GoTo_Readfile(File) {
 	else
 	{
 		Filename := filecount := filecount ? filecount+1 : 1
-		FileAppend,% file "`n",gotoCache\filelist.gotolist
+		GOTOS.filelist.Insert(file)
 	}
-	FileDelete, gotoCache\%Filename%-*
+	GOTOS[Filename] := {}
 
 	loop, read, %file%
 	{
@@ -79,7 +81,6 @@ GoTo_Readfile(File) {
 		else if Check4func(readline, A_index, file)
 			CreateCache(filename, "func", Substr(readline, 1, Instr(readline, "(")) ")", A_index)
 	}
-	SortCache(filename)
 }
 
 CreateCache(hostfile, type, data, linenum){
@@ -87,8 +88,9 @@ CreateCache(hostfile, type, data, linenum){
 		if ( Substr( data, 1, SuperInstr(data, " |`t|,|(", 1)-1 ) == "while" )
 			return
 	;Exceptions are listed above
-
-	FileAppend,% data ">" linenum "`n",% "Gotocache\" hostfile "-" type ".gotolist"
+	if !IsObject( GOTOS[hostfile][type] )
+		GOTOS[hostfile][type] := {}
+	GOTOS[hostfile][type][linenum] := data 		; obj[53] := "mylabel_at53:"
 }
 
 Check4Hotkey(line) {
@@ -152,9 +154,9 @@ filecheck:
 	return
 
 fileiscached(file){
-	loop, read, gotoCache\filelist.gotolist
-		if ( file == A_LoopReadLine )
-			return A_index
+	for k,v in GOTOS.filelist
+		if ( file == v )
+			return k
 }
 
 ;-------------------------------------- GUI --------------------------------------------------------------
@@ -170,7 +172,9 @@ Goto_Main_GUI()
 	{
 		Guicontrol, Goto:, Mainlist,% "|"
 		Guicontrol, Goto:Choose, maintab, 1
-		Update_GUI("-label", activefileindex)
+		Guicontrol, Goto:, goTosearch
+		GuiControl, Goto:Focus, goTosearch 	; important
+		Update_GUI(blank, activefileindex)
 	}
 	
 	if !IsGuicreated
@@ -179,15 +183,19 @@ Goto_Main_GUI()
 		Gui, +AlwaysOnTop -Caption +ToolWindow
 		Gui, Margin, 3, 3
 		Gui, Font, s11, Consolas
-		Gui, Add, Tab2,% "w" 310 " h30 vmaintab gtabclick AltSubmit", Labels|Functions|Hotkeys|Hotstrings
+		Gui, Add, Tab2,% "w" 380 " h30 vmaintab gtabclick AltSubmit buttons", All|Labels|Functions|Hotkeys|Hotstrings
 		Gui, Tab
 		Gui, Font, s10, Courier New
-		Gui, Add, DropDownList,% "xs y+10 h30 r20 vMainList gDDLclick Altsubmit w" 300
-		Update_GUI("-label", activefileindex)
+		Gui, Add, Edit, % "xs y+10 vgoTosearch ggoTosearch w" 370
+		Gui, Add, ListBox, % "xs y+10 r10 vMainList gDDLclick w" 370
+		Update_GUI(blank, activefileindex)
 		IsGuicreated := 1
 	}
 	if !WinExist("GoTo ahk_class AutoHotkeyGUI")
+	{
 		Gui, Goto:Show,, GoTo
+		GuiControl, Focus, goTosearch
+	}
 	else
 		Gui, Goto:Hide
 	Activefile_old := Activefileindex
@@ -198,9 +206,10 @@ DDLclick:
 	GoToMacro(ActivefileIndex, Typefromtab(Maintab), Mainlist)
 	return
 
+goTosearch:
 tabClick:
 	Gui, Goto:submit, nohide
-	Update_GUI(Typefromtab(maintab), Activefileindex)
+	Update_GUI(Typefromtab(maintab), Activefileindex, Trim(goTosearch))
 	return
 
 GotoGUIEscape:
@@ -208,19 +217,29 @@ GotoGUIEscape:
 	return
 }
 
-Update_GUI(mode, fileindex){
+Update_GUI(mode, fileindex, find=""){
 	if !fileindex
 		return
-	loop, read, gotoCache\%fileIndex%%Mode%.gotolist
-		MainList .= "|" Substr(A_loopreadline, 1, Instr(A_loopreadline, ">", 0, 0)-1)
+	if mode=
+		loop 4
+			for k,v in GOTOS[fileindex][Typefromtab(A_Index+1)]
+				MainList .= Instr( v, find ) ? "|" v : ""
+	else
+		for k,v in GOTOS[fileIndex][mode]
+			MainList .= Instr( v, find ) ? "|" v : ""
 	Guicontrol, Goto:,Mainlist,% !MainList ? "|" : Mainlist
 }
 
-GoToMacro(Fileindex, type, linenum){
+GoToMacro(Fileindex, type, tojump){
 	BlockInput, On
 	Gui, Goto:Hide
-	Filereadline, cl, gotocache\%Fileindex%%type%.gotolist, %linenum%
-	runline := Substr(cl, Instr(cl, ">", 0, 0)+1)
+	loop 4
+		for k,v in GOTOS[fileindex][Typefromtab(A_Index+1)]
+			if ( v == tojump )
+			{
+				runline := k
+				break
+			}
 	SendInput, ^g
 	sleep, 100
 	SendInput,% runline "{Enter}"
@@ -236,27 +255,16 @@ GetActiveFile(){
 }
 
 TypefromTab(TabCount){
-
 	if Tabcount = 1
-		return "-label"
+		return ""
 	else if Tabcount = 2
-		return "-func"
+		return "label"
 	else if Tabcount = 3
-		return "-hotkey"
-	else
-		return "-hotstr"
-}
-
-SortCache(file){
-
-	static type := "label,func,hotkey,hotstr"
-	loop, parse, type,`,
-	{
-		FileRead, ovar,% "gotocache\" file "-" A_LoopField ".gotolist"
-		Sort, ovar
-		FileDelete,% "gotocache\" file "-" A_LoopField ".gotolist"
-		FileAppend,% ovar,% "gotocache\" file "-" A_LoopField ".gotolist"
-	}
+		return "func"
+	else if Tabcount = 4
+		return "hotkey"
+	else if Tabcount = 5
+		return "hotstr"
 }
 
 DragGotoGui(){		;Thanks Pulover
