@@ -18,17 +18,24 @@ DayofDate(Date){
 if Date is Not Integer
 	Date := DateParse(Date)	;parse to format
 
-Year := SubStr(Date,1,4) , Month := (Month := Substr(Date, 5, 2)) ? Month : 01 , Day := (Day := Substr(Date,7,2)) ? Day : 01
+Year := SubStr(Date,1,4) 
+Month := Substr(Date, 5, 2)
+Day := Substr(Date,7,2)
 
 if (Month = 1 or Month = 2)
 	Year-=1 , Month+=12		;a/c Zeller's
-last2ofy := Substr(Year, -1) , first2ofy := Substr(Year, 1, 2)
+last2ofy := Substr(Year, -1) 
+first2ofy := Substr(Year, 1, 2)
 
 dayindex := Mod( Day + Floor((Month+1)*2.6) + last2ofy + Floor(last2ofy/4) + Floor(first2ofy/4) - 2*first2ofy , 7 )
 
 static nameofdays := "Saturday,Sunday,Monday,Tuesday,Wednesday,Thursday,Friday"
-day := Substr( nameofdays, startpos := Instr(nameofdays, ",", false, 1, dayindex)+1 , dayindex=6 ? 999999 : Instr(nameofdays, ",", false, 1, dayindex+1)-startpos )
-return day
+Dayz:={}
+Loop, parse, nameofdays, `,
+{
+	Dayz[A_index-1]:=A_LoopField
+}
+return Dayz[dayindex]
 }
 
 
