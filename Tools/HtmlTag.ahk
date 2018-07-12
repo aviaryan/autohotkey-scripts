@@ -145,7 +145,7 @@ HtmlTag(Mask, DelimChar="|", Textpoint=1, Caret_withText=0){
 		ClipWait
 		Send, ^v
 	}
-	Else SendPlay % ToSend
+	Else SendPlay {RAW} %ToSend%
 
 	Clipboard := oldclip
 
