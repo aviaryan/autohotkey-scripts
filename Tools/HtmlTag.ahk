@@ -115,7 +115,8 @@ HtmlTag(Mask, DelimChar="|", Textpoint=1, Caret_withText=0){
 	static clipjumpcall := IsFunc("CjControl") ? 1 : 0 , cj := "CjControl"		;Clipjump mamagement . Will not affect speed if Clipjump is not running
 	;OR ClipjumpCommuniator.ahk is not included
 
-	oldclip := ClipboardAll , T := clipjumpcall ? Cj.(0) : ""
+	oldclip := ClipboardAll
+	T := clipjumpcall ? Cj.(0) : ""
 
 	Clipboard := emptyvar
 	Send, ^c
@@ -145,7 +146,7 @@ HtmlTag(Mask, DelimChar="|", Textpoint=1, Caret_withText=0){
 		ClipWait
 		Send, ^v
 	}
-	Else SendPlay {RAW} %ToSend%
+	Else SendPlay {RAW}%ToSend%
 
 	Clipboard := oldclip
 
