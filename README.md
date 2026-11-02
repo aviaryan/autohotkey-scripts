@@ -1,6 +1,6 @@
 Avi's Autohotkey Scripts and Functions Repository
 ==========================
-[See my AHK script listing](http://aviaryan.github.io/ahk/)   
+[See my AHK script listing](aviaryan.in/ahk/)   
 
     Copyright 2014 Avi Aryan  
       
